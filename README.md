@@ -1,6 +1,6 @@
-# StockFlow Pro - Modern Inventory Management System Frontend
+# StockFlow - Modern Inventory Management System Frontend
 
-StockFlow Pro is a feature-rich, intuitive, and responsive inventory management web application built with modern web technologies. Designed for small-to-medium businesses and enterprise inventory tracking, StockFlow Pro provides real-time overview analytics, product catalog management, category organization, comprehensive reporting, and customizable settings.
+StockFlow is a feature-rich, intuitive, and responsive inventory management web application built with modern web technologies. Designed for small-to-medium businesses and enterprise inventory tracking, StockFlow provides real-time overview analytics, product catalog management, category organization, comprehensive reporting, and customizable settings.
 
 ---
 

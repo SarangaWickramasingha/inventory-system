@@ -1,6 +1,6 @@
 # System Architecture Plan: Monorepo Setup with Pure PHP OOP Backend, RBAC & React Tailwind Frontend
 
-This document defines the architectural specification and implementation strategy for building **StockFlow Pro** (Inventory Management System) as a Monorepo with **Role-Based Access Control (RBAC)** for **Admin** and **Staff (User)** roles.
+This document defines the architectural specification and implementation strategy for building **StockFlow** (Inventory Management System) as a Monorepo with **Role-Based Access Control (RBAC)** for **Admin** and **Staff (User)** roles.
 
 ---
 
@@ -23,7 +23,7 @@ Following a deep logic audit of the backend, database, and frontend interaction 
 ## 2. Monorepo Directory Structure
 
 ```
-stockflow-pro/
+stockflow/
 ├── apps/
 │   ├── frontend/                 # React JS + Tailwind CSS (Vite)
 │   │   ├── public/

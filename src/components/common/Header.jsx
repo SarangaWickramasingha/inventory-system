@@ -207,10 +207,10 @@ export const Header = () => {
       <Modal
         isOpen={showHelpModal}
         onClose={() => setShowHelpModal(false)}
-        title="StockFlow Pro Quick Guide"
+        title="StockFlow Quick Guide"
       >
         <div className="space-y-4 text-sm text-slate-600">
-          <p>Welcome to <strong>StockFlow Pro Enterprise ERP</strong>!</p>
+          <p>Welcome to <strong>StockFlow Enterprise ERP</strong>!</p>
           <div className="space-y-2">
             <h4 className="font-bold text-slate-800">Quick Keyboard Shortcuts & Nav:</h4>
             <ul className="list-disc pl-5 space-y-1">

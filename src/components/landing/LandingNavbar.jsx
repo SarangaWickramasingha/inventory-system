@@ -11,7 +11,7 @@ export const LandingNavbar = ({ onOpenAuth }) => {
         <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-md">
           <Box className="w-5 h-5 stroke-[2.5]" />
         </div>
-        <span className="text-xl font-extrabold text-slate-900 tracking-tight">StockFlow Pro</span>
+        <span className="text-xl font-extrabold text-slate-900 tracking-tight">StockFlow</span>
       </div>
 
       <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">

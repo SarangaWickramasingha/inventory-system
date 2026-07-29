@@ -1,6 +1,6 @@
-# Team Task Allocation & Responsibilities Document: StockFlow Pro
+# Team Task Allocation & Responsibilities Document: StockFlow
 
-This document defines the complete breakdown of tasks, responsibilities, and specific files to be created and owned by each of the **7 group members** for the **StockFlow Pro** Monorepo Inventory Management System.
+This document defines the complete breakdown of tasks, responsibilities, and specific files to be created and owned by each of the **7 group members** for the **StockFlow** Monorepo Inventory Management System.
 
 ---
 

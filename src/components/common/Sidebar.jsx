@@ -22,7 +22,7 @@ export const Sidebar = () => {
             <Box className="w-6 h-6 stroke-[2.5]" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-900 leading-tight">StockFlow Pro</h1>
+            <h1 className="text-lg font-bold text-slate-900 leading-tight">StockFlow</h1>
             <p className="text-xs font-medium text-slate-400">Enterprise ERP</p>
           </div>
         </div>
