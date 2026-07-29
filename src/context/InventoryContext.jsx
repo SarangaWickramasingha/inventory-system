@@ -21,8 +21,41 @@ export const InventoryProvider = ({ children }) => {
   const [notifications, setNotifications] = useState(getStoredNotifications);
   const [profile, setProfile] = useState(getStoredProfile);
 
-  // App Navigation State: 'landing', 'dashboard', 'inventory', 'categories', 'reports', 'settings', 'add-product', 'edit-product'
-  const [currentView, setCurrentView] = useState('dashboard');
+  // URL path mapping dictionary
+  const viewToPathMap = {
+    'landing': '/',
+    'login': '/login',
+    'dashboard': '/dashboard',
+    'inventory': '/inventory',
+    'categories': '/categories',
+    'users': '/users',
+    'admin-users': '/admin/users',
+    'reports': '/reports',
+    'settings': '/settings',
+    'add-product': '/products/add',
+    'edit-product': '/products/edit',
+  };
+
+  const pathToViewMap = {
+    '/': 'landing',
+    '/login': 'login',
+    '/dashboard': 'dashboard',
+    '/inventory': 'inventory',
+    '/categories': 'categories',
+    '/users': 'users',
+    '/admin/users': 'users',
+    '/reports': 'reports',
+    '/settings': 'settings',
+    '/products/add': 'add-product',
+    '/products/edit': 'edit-product',
+  };
+
+  const getInitialViewFromUrl = () => {
+    const path = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
+    return pathToViewMap[path] || 'landing';
+  };
+
+  const [currentView, setCurrentViewState] = useState(getInitialViewFromUrl);
   const [editingProductId, setEditingProductId] = useState(null);
   const [viewingProductId, setViewingProductId] = useState(null);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All Categories');
@@ -32,6 +65,26 @@ export const InventoryProvider = ({ children }) => {
 
   // Toast Notification state
   const [toast, setToast] = useState(null);
+
+  // Sync state with browser URL path and history
+  const setCurrentView = (view) => {
+    setCurrentViewState(view);
+    const targetPath = viewToPathMap[view] || '/';
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({ view }, '', targetPath);
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
+      const targetView = pathToViewMap[path] || 'landing';
+      setCurrentViewState(targetView);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Sync state to LocalStorage
   useEffect(() => {

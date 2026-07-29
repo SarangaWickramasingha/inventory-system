@@ -7,7 +7,7 @@ export const LandingNavbar = ({ onOpenAuth }) => {
 
   return (
     <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex items-center justify-between">
-      <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentView('dashboard')}>
+      <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setCurrentView('landing')}>
         <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-md">
           <Box className="w-5 h-5 stroke-[2.5]" />
         </div>
