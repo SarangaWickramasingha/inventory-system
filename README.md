@@ -77,7 +77,7 @@ inventory-system-frontend/
    ```bash
    npm run dev
    ```
-   Open `http://localhost:5173` in your browser.
+   Open `http://localhost:PORT` in your browser.
 
 4. **Build for production**:
    ```bash
