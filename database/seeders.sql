@@ -1,0 +1,5 @@
+-- ==========================================
+-- StockFlow Inventory Management System
+-- Database Seed Data (Admin, Staff, Categories, Products)
+-- Owner: Saranga (Lead Infrastructure)
+-- ==========================================
