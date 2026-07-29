@@ -27,7 +27,7 @@ export const LandingPage = () => {
               <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-white">
                 <Box className="w-4 h-4" />
               </div>
-              <span className="font-bold text-slate-900 text-lg">StockFlow Pro</span>
+              <span className="font-bold text-slate-900 text-lg">StockFlow</span>
             </div>
             <p className="text-xs text-slate-500 max-w-sm">
               Enterprise grade inventory management platform designed for modern business operations.
@@ -66,13 +66,13 @@ export const LandingPage = () => {
         </div>
 
         <div className="max-w-6xl mx-auto border-t border-slate-100 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400">
-          <p>© 2026 StockFlow Pro. All rights reserved.</p>
+          <p>© 2026 StockFlow. All rights reserved.</p>
           <p>Designed for Enterprise ERP Performance</p>
         </div>
       </footer>
 
       {/* Interactive Demo Video Modal */}
-      <Modal isOpen={showDemoModal} onClose={() => setShowDemoModal(false)} title="StockFlow Pro Walkthrough Demo" maxWidth="max-w-3xl">
+      <Modal isOpen={showDemoModal} onClose={() => setShowDemoModal(false)} title="StockFlow Walkthrough Demo" maxWidth="max-w-3xl">
         <div className="space-y-4">
           <div className="aspect-video bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center relative">
             <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1000&q=80" alt="Demo preview" className="w-full h-full object-cover opacity-40" />

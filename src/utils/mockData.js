@@ -251,7 +251,7 @@ export const INITIAL_NOTIFICATIONS = [
   {
     id: 'notif-3',
     title: 'System Update',
-    message: 'StockFlow Pro Enterprise ERP updated to v2.4.0.',
+    message: 'StockFlow Enterprise ERP updated to v2.4.0.',
     time: '5h ago',
     type: 'info',
     read: true
