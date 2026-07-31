@@ -30,6 +30,8 @@ export const InventoryProvider = ({ children }) => {
     'categories': '/categories',
     'users': '/users',
     'admin-users': '/admin/users',
+    'staff-activity': '/staff-activity',
+    'activity': '/staff-activity',
     'reports': '/reports',
     'settings': '/settings',
     'add-product': '/products/add',
@@ -44,6 +46,8 @@ export const InventoryProvider = ({ children }) => {
     '/categories': 'categories',
     '/users': 'users',
     '/admin/users': 'users',
+    '/staff-activity': 'staff-activity',
+    '/activity': 'staff-activity',
     '/reports': 'reports',
     '/settings': 'settings',
     '/products/add': 'add-product',
@@ -230,6 +234,81 @@ export const InventoryProvider = ({ children }) => {
     showToast('Profile settings updated successfully!');
   };
 
+  const [stockLogs, setStockLogs] = useState([]);
+
+  const adjustStock = async (productId, type, qty, notes = '') => {
+    const targetProduct = products.find(p => p.id === productId);
+    if (!targetProduct) {
+      showToast('Product not found for adjustment', 'error');
+      return { success: false, message: 'Product not found' };
+    }
+
+    const prevQty = Number(targetProduct.quantity || 0);
+    const amount = Math.max(0, Number(qty) || 0);
+    let newQty = prevQty;
+
+    if (type === 'IN') {
+      newQty = prevQty + amount;
+    } else if (type === 'OUT') {
+      newQty = prevQty - amount;
+      if (newQty < 0) {
+        showToast(`Cannot deduct ${amount} items. Current stock is only ${prevQty}.`, 'error');
+        return { success: false, message: `Insufficient stock level (${prevQty} pcs).` };
+      }
+    } else if (type === 'ADJUSTMENT') {
+      newQty = amount;
+    }
+
+    const reorderPoint = Number(targetProduct.reorderPoint || 30);
+    let status = 'In Stock';
+    if (newQty === 0) status = 'Out of Stock';
+    else if (newQty <= reorderPoint) status = 'Low Stock';
+
+    // Update Product State
+    setProducts(prev => prev.map(prod => {
+      if (prod.id === productId) {
+        return { ...prod, quantity: newQty, status };
+      }
+      return prod;
+    }));
+
+    // Generate Stock Log Record
+    const qtyChangeStr = type === 'IN' ? `+${amount}` : type === 'OUT' ? `-${amount}` : `Set to ${amount}`;
+    const newLog = {
+      id: `log-${Date.now()}`,
+      productId: targetProduct.id,
+      productName: targetProduct.name,
+      sku: targetProduct.sku,
+      category: targetProduct.category,
+      type, // 'IN', 'OUT', 'ADJUSTMENT'
+      quantityChanged: qtyChangeStr,
+      previousQuantity: prevQty,
+      newQuantity: newQty,
+      notes: notes || (type === 'IN' ? 'Stock received' : type === 'OUT' ? 'Stock dispatched' : 'Stock level adjusted'),
+      user: profile.name || 'Alex Mercer',
+      userRole: profile.role || 'Staff',
+      userInitials: (profile.name || 'Alex Mercer').split(' ').map(n => n[0]).join(''),
+      userAvatar: profile.avatar,
+      time: 'Just now',
+      timestamp: new Date().toISOString()
+    };
+
+    setStockLogs(prev => [newLog, ...prev]);
+
+    // Also sync to general activity feed
+    addActivityLog(targetProduct.name, type === 'IN' ? 'Restocked' : type === 'OUT' ? 'Dispatched' : 'Adjusted');
+
+    const msg = type === 'IN'
+      ? `Stock IN logged for "${targetProduct.name}" (+${amount} pcs). New total: ${newQty}`
+      : type === 'OUT'
+      ? `Stock OUT logged for "${targetProduct.name}" (-${amount} pcs). New total: ${newQty}`
+      : `Stock level for "${targetProduct.name}" adjusted to ${newQty} pcs.`;
+
+    showToast(msg, type === 'OUT' && newQty === 0 ? 'warning' : 'success');
+
+    return { success: true, newQty };
+  };
+
   const markNotificationRead = (id) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   };
@@ -239,6 +318,7 @@ export const InventoryProvider = ({ children }) => {
       products,
       categories,
       activities,
+      stockLogs,
       notifications,
       profile,
       currentView,
@@ -256,6 +336,7 @@ export const InventoryProvider = ({ children }) => {
       addProduct,
       updateProduct,
       deleteProduct,
+      adjustStock,
       addCategory,
       bulkImportProducts,
       navigateToEdit,

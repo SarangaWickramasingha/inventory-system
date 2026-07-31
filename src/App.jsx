@@ -11,6 +11,7 @@ import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LoginPage } from './pages/LoginPage';
 import { AdminUsersPage } from './pages/AdminUsersPage';
+import { StaffActivityPage } from './pages/StaffActivityPage';
 import { Toast } from './components/common/Toast';
 
 const MainContent = () => {
@@ -30,6 +31,9 @@ const MainContent = () => {
     case 'users':
     case 'admin-users':
       return <AdminUsersPage />;
+    case 'staff-activity':
+    case 'activity':
+      return <StaffActivityPage />;
     case 'add-product':
       return <AddProductPage />;
     case 'edit-product':
