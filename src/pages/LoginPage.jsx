@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 export const LoginPage = () => {
   const { setCurrentView } = useInventory();
-  const { setUser, setToken } = useAuth();
+  const { login, register, setUser, setToken } = useAuth();
 
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +25,7 @@ export const LoginPage = () => {
     if (error) setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -42,22 +42,20 @@ export const LoginPage = () => {
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      setIsLoading(false);
-      const userPayload = {
-        name: isRegister ? formData.fullName : (formData.email.split('@')[0] || 'User'),
-        email: formData.email,
-        role: formData.role,
-      };
+    const result = isRegister
+      ? await register(formData)
+      : await login(formData.email, formData.password);
 
-      setUser(userPayload);
-      setToken('mock-hmac-sha256-token-' + Date.now());
+    setIsLoading(false);
+
+    if (result && result.success) {
       setSuccess(isRegister ? 'Account created successfully! Redirecting...' : 'Login successful! Redirecting...');
-
       setTimeout(() => {
         setCurrentView('dashboard');
-      }, 1000);
-    }, 800);
+      }, 800);
+    } else {
+      setError(result?.message || 'Authentication failed. Please check your credentials.');
+    }
   };
 
   const handleQuickDemo = (role) => {

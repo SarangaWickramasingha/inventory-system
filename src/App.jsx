@@ -13,6 +13,8 @@ import { LoginPage } from './pages/LoginPage';
 import { AdminUsersPage } from './pages/AdminUsersPage';
 import { Toast } from './components/common/Toast';
 
+import { ProtectedRoute } from './components/ProtectedRoute';
+
 const MainContent = () => {
   const { currentView } = useInventory();
 
@@ -29,7 +31,11 @@ const MainContent = () => {
       return <CategoriesPage />;
     case 'users':
     case 'admin-users':
-      return <AdminUsersPage />;
+      return (
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminUsersPage />
+        </ProtectedRoute>
+      );
     case 'add-product':
       return <AddProductPage />;
     case 'edit-product':
