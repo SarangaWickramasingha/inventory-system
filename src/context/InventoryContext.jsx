@@ -11,6 +11,7 @@ import {
   getStoredProfile,
   saveStoredProfile
 } from '../utils/storage';
+import { getProducts as fetchProductsFromAPI } from '../services/productService';
 
 const InventoryContext = createContext();
 
@@ -62,6 +63,38 @@ export const InventoryProvider = ({ children }) => {
   
   // Global Header Search Term
   const [searchTerm, setSearchTerm] = useState('');
+
+  // API Loading & Pagination State
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [paginationMeta, setPaginationMeta] = useState({
+    currentPage: 1,
+    perPage: 10,
+    totalItems: 0,
+    totalPages: 1
+  });
+
+  // Fetch products from backend API with fallback
+  const loadProducts = async (filters = {}) => {
+    setLoadingProducts(true);
+    try {
+      const response = await fetchProductsFromAPI(filters);
+      if (response && response.success && Array.isArray(response.data?.items)) {
+        setProducts(response.data.items);
+        if (response.data.pagination) {
+          setPaginationMeta({
+            currentPage: response.data.pagination.current_page || 1,
+            perPage: response.data.pagination.per_page || 10,
+            totalItems: response.data.pagination.total_items || 0,
+            totalPages: response.data.pagination.total_pages || 1
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Backend API unavailable, using local product state:', err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
 
   // Toast Notification state
   const [toast, setToast] = useState(null);
@@ -237,6 +270,9 @@ export const InventoryProvider = ({ children }) => {
   return (
     <InventoryContext.Provider value={{
       products,
+      loadingProducts,
+      paginationMeta,
+      loadProducts,
       categories,
       activities,
       notifications,
