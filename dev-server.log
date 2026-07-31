@@ -1,0 +1,28 @@
+
+> stockflow-pro@1.0.0 dev
+> vite
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m301[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m3000[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/common/Header.jsx, /src/index.css[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/landing/LandingNavbar.jsx, /src/index.css[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/context/InventoryContext.jsx[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/common/Header.jsx, /src/index.css[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/common/Sidebar.jsx, /src/index.css[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/landing/LandingNavbar.jsx, /src/index.css[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/context/InventoryContext.jsx, /src/index.css[22m
+[2m1:57:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/LandingPage.jsx, /src/index.css[22m
+[2m8:34:51 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/dashboard/CategoryChart.jsx, /src/index.css[22m
+[2m8:35:17 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/dashboard/MetricCard.jsx, /src/index.css[22m
+[2m8:35:33 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/DashboardPage.jsx, /src/index.css[22m
+[2m8:38:56 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/reports/ReportKpis.jsx, /src/index.css[22m
+[2m8:39:08 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ReportsPage.jsx, /src/index.css[22m
+[2m8:41:29 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/SettingsPage.jsx, /src/index.css[22m
+[2m8:43:09 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/common/Toast.jsx, /src/index.css[22m
