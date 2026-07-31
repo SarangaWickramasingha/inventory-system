@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Package, Shapes, BarChart3, Settings, Plus, Box } from 'lucide-react';
+import { LayoutDashboard, Package, Shapes, BarChart3, Users, Settings, Plus, Box } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
 
 export const Sidebar = () => {
@@ -9,6 +9,7 @@ export const Sidebar = () => {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'inventory', label: 'Inventory', icon: Package },
     { id: 'categories', label: 'Categories', icon: Shapes },
+    { id: 'users', label: 'Users & Roles', icon: Users },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -17,7 +18,11 @@ export const Sidebar = () => {
     <aside className="w-64 bg-white border-r border-slate-200 flex flex-col justify-between h-screen sticky top-0 z-20 select-none">
       <div>
         {/* Brand Header */}
-        <div className="p-6 flex items-center gap-3">
+        <div
+          onClick={() => setCurrentView('landing')}
+          className="p-6 flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+          title="Go to Home Landing Page"
+        >
           <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-md text-white">
             <Box className="w-6 h-6 stroke-[2.5]" />
           </div>

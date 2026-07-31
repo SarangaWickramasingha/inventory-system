@@ -1,5 +1,6 @@
 import React from 'react';
 import { InventoryProvider, useInventory } from './context/InventoryContext';
+import { AuthProvider } from './context/AuthContext';
 import { LandingPage } from './pages/LandingPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { InventoryPage } from './pages/InventoryPage';
@@ -8,6 +9,8 @@ import { AddProductPage } from './pages/AddProductPage';
 import { EditProductPage } from './pages/EditProductPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { LoginPage } from './pages/LoginPage';
+import { AdminUsersPage } from './pages/AdminUsersPage';
 import { Toast } from './components/common/Toast';
 
 const MainContent = () => {
@@ -16,12 +19,17 @@ const MainContent = () => {
   switch (currentView) {
     case 'landing':
       return <LandingPage />;
+    case 'login':
+      return <LoginPage />;
     case 'dashboard':
       return <DashboardPage />;
     case 'inventory':
       return <InventoryPage />;
     case 'categories':
       return <CategoriesPage />;
+    case 'users':
+    case 'admin-users':
+      return <AdminUsersPage />;
     case 'add-product':
       return <AddProductPage />;
     case 'edit-product':
@@ -37,9 +45,11 @@ const MainContent = () => {
 
 export default function App() {
   return (
-    <InventoryProvider>
-      <MainContent />
-      <Toast />
-    </InventoryProvider>
+    <AuthProvider>
+      <InventoryProvider>
+        <MainContent />
+        <Toast />
+      </InventoryProvider>
+    </AuthProvider>
   );
 }

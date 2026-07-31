@@ -1,0 +1,109 @@
+<?php
+
+namespace StockFlow\Backend\Controllers;
+
+use StockFlow\Backend\Services\AuthService;
+use StockFlow\Backend\Services\UserService;
+use StockFlow\Backend\Core\Middleware\AuthMiddleware;
+
+/**
+ * Auth Controller
+ * Owner: Manuja (Auth, RBAC & User Management)
+ */
+class AuthController
+{
+    private AuthService $authService;
+    private UserService $userService;
+    private AuthMiddleware $authMiddleware;
+
+    public function __construct(
+        AuthService $authService,
+        UserService $userService,
+        AuthMiddleware $authMiddleware
+    ) {
+        $this->authService = $authService;
+        $this->userService = $userService;
+        $this->authMiddleware = $authMiddleware;
+    }
+
+    public function login(): void
+    {
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $email = trim($input['email'] ?? $input['username'] ?? '');
+        $password = $input['password'] ?? '';
+
+        if (empty($email) || empty($password)) {
+            $this->jsonResponse(false, 'Email and password are required.', null, 400);
+            return;
+        }
+
+        $user = $this->authService->authenticate($email, $password);
+        if (!$user) {
+            $this->jsonResponse(false, 'Invalid login credentials or account inactive.', null, 401);
+            return;
+        }
+
+        $token = $this->authService->generateToken($user);
+
+        $this->jsonResponse(true, 'Login successful.', [
+            'token' => $token,
+            'user' => $user->toArray()
+        ], 200);
+    }
+
+    public function register(): void
+    {
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+
+        try {
+            $user = $this->userService->createUser($input);
+            $token = $this->authService->generateToken($user);
+
+            $this->jsonResponse(true, 'Registration successful.', [
+                'token' => $token,
+                'user' => $user->toArray()
+            ], 201);
+        } catch (\InvalidArgumentException $e) {
+            $this->jsonResponse(false, $e->getMessage(), null, 400);
+        } catch (\Exception $e) {
+            $this->jsonResponse(false, 'An unexpected error occurred during registration.', null, 500);
+        }
+    }
+
+    public function me(): void
+    {
+        $payload = $this->authMiddleware->handle();
+        if (!$payload) {
+            return;
+        }
+
+        $userId = $payload['sub'] ?? null;
+        if (!$userId) {
+            $this->jsonResponse(false, 'User ID missing in token payload.', null, 400);
+            return;
+        }
+
+        $user = $this->userService->getUserById($userId);
+        if (!$user) {
+            $this->jsonResponse(false, 'User not found.', null, 404);
+            return;
+        }
+
+        $this->jsonResponse(true, 'User details retrieved successfully.', [
+            'user' => $user->toArray()
+        ], 200);
+    }
+
+    private function jsonResponse(bool $success, string $message, $data = null, int $statusCode = 200): void
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => $success,
+            'message' => $message,
+            'data' => $data,
+            'status' => $statusCode
+        ]);
+        exit;
+    }
+}

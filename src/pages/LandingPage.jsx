@@ -12,7 +12,7 @@ export const LandingPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
       <div>
-        <LandingNavbar onOpenAuth={() => setCurrentView('dashboard')} />
+        <LandingNavbar onOpenAuth={(view = 'login') => setCurrentView(view)} />
         <main>
           <Hero onOpenDemo={() => setShowDemoModal(true)} />
           <FeatureSection />
