@@ -10,6 +10,8 @@ import { Plus } from 'lucide-react';
 export const InventoryPage = () => {
   const {
     products,
+    loadProducts,
+    loadingProducts,
     selectedCategoryFilter,
     setSelectedCategoryFilter,
     searchTerm,
@@ -19,6 +21,16 @@ export const InventoryPage = () => {
 
   const [sortOption, setSortOption] = useState('name-asc');
   const [viewingProductId, setViewingProductId] = useState(null);
+
+  // Trigger API fetch on component mount or search/category filter change
+  React.useEffect(() => {
+    if (loadProducts) {
+      loadProducts({
+        search: searchTerm,
+        category_id: selectedCategoryFilter !== 'All Categories' ? selectedCategoryFilter : null,
+      });
+    }
+  }, [searchTerm, selectedCategoryFilter]);
 
   // Filter products by search and category
   let filteredProducts = products.filter(p => {
