@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Package, Shapes, BarChart3, Users, Settings, Plus, Box } from 'lucide-react';
+import { LayoutDashboard, Package, Shapes, BarChart3, Users, Settings, Plus, Box, Activity } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
 
 export const Sidebar = () => {
@@ -9,6 +9,7 @@ export const Sidebar = () => {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'inventory', label: 'Inventory', icon: Package },
     { id: 'categories', label: 'Categories', icon: Shapes },
+    { id: 'staff-activity', label: 'Staff Activity', icon: Activity },
     { id: 'users', label: 'Users & Roles', icon: Users },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },

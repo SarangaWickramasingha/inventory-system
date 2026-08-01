@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Eye, Edit3, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, Edit3, Trash2, ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
 import { StatusBadge } from '../common/Badge';
+import { StockAdjustModal } from './StockAdjustModal';
 
 const getProductStatus = (prod) => {
   const qty = Number(prod.quantity ?? 0);
@@ -11,9 +12,10 @@ const getProductStatus = (prod) => {
   return prod.status || 'In Stock';
 };
 
-export const ProductTable = ({ products, onSelectView, onSelectEdit }) => {
+export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdjust }) => {
   const { deleteProduct } = useInventory();
   const [currentPage, setCurrentPage] = useState(1);
+  const [adjustingProduct, setAdjustingProduct] = useState(null);
   const itemsPerPage = 6;
 
   const totalPages = Math.ceil(products.length / itemsPerPage) || 1;
@@ -85,6 +87,13 @@ export const ProductTable = ({ products, onSelectView, onSelectEdit }) => {
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
+                        onClick={() => setAdjustingProduct(prod)}
+                        className="p-1.5 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        title="Adjust Stock Quantity"
+                      >
+                        <Sliders className="w-4 h-4" />
+                      </button>
+                      <button
                         onClick={() => onSelectEdit(prod.id)}
                         className="p-1.5 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Edit Product"
@@ -151,6 +160,13 @@ export const ProductTable = ({ products, onSelectView, onSelectEdit }) => {
           </button>
         </div>
       </div>
+
+      {/* Stock Adjustment Modal */}
+      <StockAdjustModal
+        isOpen={Boolean(adjustingProduct)}
+        onClose={() => setAdjustingProduct(null)}
+        product={adjustingProduct}
+      />
     </div>
   );
 };
