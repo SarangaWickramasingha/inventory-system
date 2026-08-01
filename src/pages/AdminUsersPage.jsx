@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '../components/common/Header';
 import { Sidebar } from '../components/common/Sidebar';
 import { MetricCard } from '../components/dashboard/MetricCard';
 import { Users, Shield, UserCheck, UserX, Search, UserPlus, Filter, MoreVertical, Edit2, Trash2, CheckCircle, XCircle, X } from 'lucide-react';
+import { fetchAPI } from '../services/api';
 
 export const AdminUsersPage = () => {
   const [users, setUsers] = useState([
@@ -92,16 +93,52 @@ export const AdminUsersPage = () => {
     status: 'active',
   });
 
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const response = await fetchAPI('/users');
+        if (response && response.success && Array.isArray(response.data)) {
+          const apiUsers = response.data.map((u) => ({
+            id: u.id,
+            name: u.full_name || u.username,
+            username: u.username,
+            email: u.email,
+            role: u.role,
+            status: u.status,
+            lastLogin: u.last_login || 'Never',
+            avatarColor: u.role === 'admin' ? 'bg-blue-600' : 'bg-emerald-600',
+          }));
+          setUsers(apiUsers);
+        }
+      } catch (err) {
+        console.warn('API unavailable, keeping mock user data for UI demo.', err);
+      }
+    };
+    loadUsers();
+  }, []);
+
   const showNotification = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 3000);
   };
 
-  const handleToggleStatus = (id) => {
+  const handleToggleStatus = async (id) => {
+    const targetUser = users.find((u) => u.id === id);
+    if (!targetUser) return;
+    const newStatus = targetUser.status === 'active' ? 'inactive' : 'active';
+
+    try {
+      await fetchAPI(`/users/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } catch (err) {
+      console.warn('API error during status update, updating locally.', err);
+    }
+
     setUsers((prev) =>
       prev.map((u) => {
         if (u.id === id) {
-          const newStatus = u.status === 'active' ? 'inactive' : 'active';
           showNotification(`User status for ${u.name} changed to ${newStatus.toUpperCase()}`);
           return { ...u, status: newStatus };
         }
@@ -123,19 +160,46 @@ export const AdminUsersPage = () => {
     );
   };
 
-  const handleDeleteUser = (id, name) => {
+  const handleDeleteUser = async (id, name) => {
     if (window.confirm(`Are you sure you want to remove user "${name}"?`)) {
+      try {
+        await fetchAPI(`/users/${id}`, {
+          method: 'DELETE',
+        });
+      } catch (err) {
+        console.warn('API error during user deletion, updating locally.', err);
+      }
       setUsers((prev) => prev.filter((u) => u.id !== id));
       showNotification(`User "${name}" deleted successfully.`);
     }
   };
 
-  const handleCreateUser = (e) => {
+  const handleCreateUser = async (e) => {
     e.preventDefault();
     if (!newUser.name || !newUser.email || !newUser.username) return;
 
+    let createdId = Date.now();
+    try {
+      const response = await fetchAPI('/users', {
+        method: 'POST',
+        body: JSON.stringify({
+          full_name: newUser.name,
+          username: newUser.username,
+          email: newUser.email,
+          role: newUser.role,
+          status: newUser.status,
+          password: 'Password123!',
+        }),
+      });
+      if (response && response.success && response.data?.id) {
+        createdId = response.data.id;
+      }
+    } catch (err) {
+      console.warn('API error during user creation, adding locally.', err);
+    }
+
     const created = {
-      id: Date.now(),
+      id: createdId,
       ...newUser,
       lastLogin: 'Never',
       avatarColor: newUser.role === 'admin' ? 'bg-blue-600' : 'bg-emerald-600',
