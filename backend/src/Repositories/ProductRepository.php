@@ -61,8 +61,13 @@ class ProductRepository implements ProductRepositoryInterface
         }
 
         if (!empty($filters['category_id'])) {
-            $whereConditions[] = "p.category_id = :category_id";
-            $params['category_id'] = (int)$filters['category_id'];
+            if (is_numeric($filters['category_id'])) {
+                $whereConditions[] = "p.category_id = :category_id";
+                $params['category_id'] = (int)$filters['category_id'];
+            } else {
+                $whereConditions[] = "c.name = :category_name";
+                $params['category_name'] = $filters['category_id'];
+            }
         }
 
         if (!empty($filters['status'])) {
@@ -107,8 +112,13 @@ class ProductRepository implements ProductRepositoryInterface
         }
 
         if (!empty($filters['category_id'])) {
-            $whereConditions[] = "p.category_id = :category_id";
-            $params['category_id'] = (int)$filters['category_id'];
+            if (is_numeric($filters['category_id'])) {
+                $whereConditions[] = "p.category_id = :category_id";
+                $params['category_id'] = (int)$filters['category_id'];
+            } else {
+                $whereConditions[] = "c.name = :category_name";
+                $params['category_name'] = $filters['category_id'];
+            }
         }
 
         if (!empty($filters['status'])) {
@@ -118,7 +128,12 @@ class ProductRepository implements ProductRepositoryInterface
 
         $whereClause = implode(' AND ', $whereConditions);
 
-        $sql = "SELECT COUNT(*) FROM products p WHERE {$whereClause}";
+        $sql = "
+            SELECT COUNT(*) 
+            FROM products p 
+            LEFT JOIN categories c ON p.category_id = c.id 
+            WHERE {$whereClause}
+        ";
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 

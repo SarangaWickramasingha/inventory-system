@@ -11,7 +11,7 @@ export const StockAdjustModal = ({
   const { products, adjustStock, profile } = useInventory();
 
   const [selectedProductId, setSelectedProductId] = useState(initialProduct?.id || (products[0]?.id || ''));
-  const [movementType, setMovementType] = useState(initialType); // 'IN', 'OUT', 'ADJUSTMENT'
+  const [movementType, setMovementType] = useState(initialType === 'OUT' ? 'OUT' : 'IN'); // 'IN', 'OUT'
   const [quantity, setQuantity] = useState(10);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +25,7 @@ export const StockAdjustModal = ({
       } else if (products.length > 0 && !selectedProductId) {
         setSelectedProductId(products[0].id);
       }
-      setMovementType(initialType);
+      setMovementType(initialType === 'OUT' ? 'OUT' : 'IN');
       setQuantity(10);
       setNotes('');
       setErrorMsg('');
@@ -45,12 +45,10 @@ export const StockAdjustModal = ({
     projectedQty = currentQty + numQty;
   } else if (movementType === 'OUT') {
     projectedQty = currentQty - numQty;
-  } else if (movementType === 'ADJUSTMENT') {
-    projectedQty = numQty;
   }
 
   // Calculate projected status
-  const reorderPoint = currentProduct?.reorderPoint || 30;
+  const reorderPoint = Number(currentProduct?.reorderPoint ?? currentProduct?.min_stock_alert ?? 5);
   let projectedStatus = 'In Stock';
   let projectedBadgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-200';
 
@@ -66,18 +64,13 @@ export const StockAdjustModal = ({
 
   const handleQuickPreset = (delta) => {
     setErrorMsg('');
-    if (movementType === 'ADJUSTMENT') {
-      setQuantity(prev => Math.max(0, (Number(prev) || 0) + delta));
-    } else {
-      setQuantity(prev => Math.max(1, (Number(prev) || 0) + delta));
-    }
+    setQuantity(prev => Math.max(1, (Number(prev) || 0) + delta));
   };
 
   const presetReasons = [
     { label: '📦 Stock Receiving', type: 'IN', text: 'Received shipment from supplier' },
     { label: '🛒 Customer Order Dispatch', type: 'OUT', text: 'Dispatched for customer order fulfillment' },
     { label: '⚠️ Damaged / Defective', type: 'OUT', text: 'Damaged item written off after inspection' },
-    { label: '📋 Inventory Audit', type: 'ADJUSTMENT', text: 'Stock level updated following physical inventory audit' },
     { label: '🔄 Customer Return', type: 'IN', text: 'Item returned by customer in original condition' }
   ];
 
@@ -199,7 +192,7 @@ export const StockAdjustModal = ({
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Transaction Type <span className="text-rose-500">*</span>
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => { setMovementType('IN'); setErrorMsg(''); }}
@@ -231,22 +224,6 @@ export const StockAdjustModal = ({
                 </div>
                 <span className="text-[10px] opacity-80 font-normal">(Dispatch / Deduct)</span>
               </button>
-
-              <button
-                type="button"
-                onClick={() => { setMovementType('ADJUSTMENT'); setErrorMsg(''); }}
-                className={`py-3 px-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all ${
-                  movementType === 'ADJUSTMENT'
-                    ? 'bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/20 ring-2 ring-amber-600/30'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-700'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <Sliders className="w-4 h-4" />
-                  <span>ADJUSTMENT</span>
-                </div>
-                <span className="text-[10px] opacity-80 font-normal">(Set Exact Level)</span>
-              </button>
             </div>
           </div>
 
@@ -254,7 +231,7 @@ export const StockAdjustModal = ({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                {movementType === 'ADJUSTMENT' ? 'New Target Stock Quantity' : 'Quantity Count'}
+                Quantity Count
               </label>
               <span className="text-xs text-slate-500 font-medium">Quick Modifiers:</span>
             </div>
@@ -400,9 +377,7 @@ export const StockAdjustModal = ({
                   ? 'bg-slate-400 cursor-not-allowed opacity-60'
                   : movementType === 'IN'
                   ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
-                  : movementType === 'OUT'
-                  ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'
-                  : 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20'
+                  : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'
               }`}
             >
               {isSubmitting ? (

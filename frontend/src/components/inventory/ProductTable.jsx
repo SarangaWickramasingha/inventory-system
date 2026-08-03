@@ -6,10 +6,10 @@ import { StockAdjustModal } from './StockAdjustModal';
 
 const getProductStatus = (prod) => {
   const qty = Number(prod.quantity ?? 0);
-  const reorder = Number(prod.reorderPoint ?? 30);
+  const reorder = Number(prod.reorderPoint ?? prod.min_stock_alert ?? 5);
   if (qty === 0) return 'Out of Stock';
   if (qty <= reorder) return 'Low Stock';
-  return prod.status || 'In Stock';
+  return 'In Stock';
 };
 
 export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdjust }) => {
