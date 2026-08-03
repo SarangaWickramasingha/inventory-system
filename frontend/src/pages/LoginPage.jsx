@@ -5,15 +5,13 @@ import { useAuth } from '../context/AuthContext';
 
 export const LoginPage = () => {
   const { setCurrentView } = useInventory();
-  const { login, register, setUser, setToken } = useAuth();
+  const { login, setUser, setToken } = useAuth();
 
-  const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
     email: '',
     password: '',
-    role: 'staff',
+    role: 'admin', // Default role selection on Sign In page
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -31,25 +29,25 @@ export const LoginPage = () => {
     setSuccess('');
 
     if (!formData.email || !formData.password) {
-      setError('Please fill in all required fields.');
-      return;
-    }
-
-    if (isRegister && !formData.fullName) {
-      setError('Please provide your full name for registration.');
+      setError('Please fill in both email and password.');
       return;
     }
 
     setIsLoading(true);
 
-    const result = isRegister
-      ? await register(formData)
-      : await login(formData.email, formData.password);
+    const result = await login(formData.email, formData.password, formData.role);
 
     setIsLoading(false);
 
     if (result && result.success) {
-      setSuccess(isRegister ? 'Account created successfully! Redirecting...' : 'Login successful! Redirecting...');
+      // Ensure user object preserves selected role for RBAC
+      const authenticatedUser = {
+        ...(result.user || {}),
+        role: formData.role
+      };
+      setUser(authenticatedUser);
+
+      setSuccess(`Sign in successful as ${formData.role === 'admin' ? 'Administrator' : 'Staff'}! Redirecting...`);
       setTimeout(() => {
         setCurrentView('dashboard');
       }, 800);
@@ -89,8 +87,8 @@ export const LoginPage = () => {
           </div>
           <span className="text-3xl font-extrabold text-white tracking-tight">StockFlow</span>
         </div>
-        <h2 className="text-xl font-bold text-slate-200 tracking-tight">
-          {isRegister ? 'Create a New Account' : 'Sign in to StockFlow Portal'}
+        <h2 className="text-2xl font-bold text-slate-100 tracking-tight">
+          Sign in to StockFlow Portal
         </h2>
         <p className="mt-1 text-sm text-slate-400">
           Monorepo Inventory Management & Asset Tracking System
@@ -100,28 +98,6 @@ export const LoginPage = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4 sm:px-0">
         <div className="bg-white/95 backdrop-blur-md py-8 px-6 shadow-2xl rounded-2xl border border-slate-200 sm:px-10">
           
-          {/* Tab Switcher */}
-          <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
-            <button
-              type="button"
-              onClick={() => { setIsRegister(false); setError(''); }}
-              className={`flex-1 py-2 text-xs font-extrabold rounded-lg transition-all ${
-                !isRegister ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => { setIsRegister(true); setError(''); }}
-              className={`flex-1 py-2 text-xs font-extrabold rounded-lg transition-all ${
-                isRegister ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              Register
-            </button>
-          </div>
-
           {/* Feedback Alerts */}
           {error && (
             <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2.5 text-rose-700 text-xs font-medium">
@@ -138,26 +114,38 @@ export const LoginPage = () => {
           )}
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {isRegister && (
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <User className="h-4 h-4 text-slate-400" />
-                  </div>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Manuja Jayasinghe"
-                    className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
-                  />
-                </div>
+            {/* Role Selection Switch Toggle on Sign In */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Sign In Role
+              </label>
+              <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, role: 'admin' }))}
+                  className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                    formData.role === 'admin'
+                      ? 'bg-white text-blue-600 shadow-md ring-1 ring-slate-200/50'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <ShieldCheck className={`w-4 h-4 ${formData.role === 'admin' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <span>Admin</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, role: 'staff' }))}
+                  className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                    formData.role === 'staff'
+                      ? 'bg-white text-blue-600 shadow-md ring-1 ring-slate-200/50'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <User className={`w-4 h-4 ${formData.role === 'staff' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <span>Staff</span>
+                </button>
               </div>
-            )}
+            </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -173,6 +161,7 @@ export const LoginPage = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="name@stockflow.com"
+                  required
                   className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
                 />
               </div>
@@ -192,6 +181,7 @@ export const LoginPage = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="••••••••"
+                  required
                   className="block w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
                 />
                 <button
@@ -204,50 +194,26 @@ export const LoginPage = () => {
               </div>
             </div>
 
-            {isRegister && (
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Account Role
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <ShieldCheck className="h-4 h-4 text-slate-400" />
-                  </div>
-                  <select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleInputChange}
-                    className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
-                  >
-                    <option value="staff">Staff Member (Inventory Access)</option>
-                    <option value="admin">Administrator (Full System Access)</option>
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {!isRegister && (
-              <div className="flex items-center justify-between text-xs">
-                <label className="flex items-center text-slate-600 cursor-pointer select-none">
-                  <input type="checkbox" className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 mr-2" />
-                  Remember me
-                </label>
-                <a href="#forgot" onClick={(e) => { e.preventDefault(); alert('Password reset link has been dispatched to your registered email.'); }} className="font-bold text-blue-600 hover:underline">
-                  Forgot password?
-                </a>
-              </div>
-            )}
+            <div className="flex items-center justify-between text-xs pt-1">
+              <label className="flex items-center text-slate-600 cursor-pointer select-none">
+                <input type="checkbox" className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 mr-2" />
+                Remember me
+              </label>
+              <a href="#forgot" onClick={(e) => { e.preventDefault(); alert('Password reset link has been sent to your email.'); }} className="font-bold text-blue-600 hover:underline">
+                Forgot password?
+              </a>
+            </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group disabled:opacity-70"
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group disabled:opacity-70 mt-2"
             >
               {isLoading ? (
-                <span>Processing...</span>
+                <span>Signing In...</span>
               ) : (
                 <>
-                  <span>{isRegister ? 'Create Account' : 'Sign In'}</span>
+                  <span>Sign In</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
@@ -265,16 +231,30 @@ export const LoginPage = () => {
                 onClick={() => handleQuickDemo('admin')}
                 className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors"
               >
-                👑 Demo Admin
+                Demo Admin
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickDemo('staff')}
                 className="py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-xl border border-blue-200 transition-colors"
               >
-                👤 Demo Staff
+                Demo Staff
               </button>
             </div>
+          </div>
+
+          {/* Link to Staff Registration Page */}
+          <div className="mt-6 pt-6 border-t border-slate-100 text-center">
+            <p className="text-xs text-slate-600 font-medium">
+              New staff member?{' '}
+              <button
+                type="button"
+                onClick={() => setCurrentView('register')}
+                className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1"
+              >
+                Sign up for a Staff account
+              </button>
+            </p>
           </div>
         </div>
 
@@ -287,4 +267,3 @@ export const LoginPage = () => {
 };
 
 export default LoginPage;
-

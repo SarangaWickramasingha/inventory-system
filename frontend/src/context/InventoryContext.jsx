@@ -26,6 +26,7 @@ export const InventoryProvider = ({ children }) => {
   const viewToPathMap = {
     'landing': '/',
     'login': '/login',
+    'register': '/register',
     'dashboard': '/dashboard',
     'inventory': '/inventory',
     'categories': '/categories',
@@ -42,6 +43,7 @@ export const InventoryProvider = ({ children }) => {
   const pathToViewMap = {
     '/': 'landing',
     '/login': 'login',
+    '/register': 'register',
     '/dashboard': 'dashboard',
     '/inventory': 'inventory',
     '/categories': 'categories',
@@ -61,7 +63,13 @@ export const InventoryProvider = ({ children }) => {
   };
 
   const [currentView, setCurrentViewState] = useState(getInitialViewFromUrl);
+  const [authMode, setAuthMode] = useState('login');
   const [editingProductId, setEditingProductId] = useState(null);
+
+  const navigateToAuth = (mode = 'login') => {
+    setAuthMode(mode);
+    setCurrentView('login');
+  };
   const [viewingProductId, setViewingProductId] = useState(null);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All Categories');
   
@@ -390,6 +398,9 @@ export const InventoryProvider = ({ children }) => {
       profile,
       currentView,
       setCurrentView,
+      authMode,
+      setAuthMode,
+      navigateToAuth,
       editingProductId,
       setEditingProductId,
       viewingProductId,

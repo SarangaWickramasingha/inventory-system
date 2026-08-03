@@ -58,10 +58,12 @@ export const AddCategoryModal = ({ isOpen, onClose }) => {
               onChange={(e) => setIcon(e.target.value)}
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold"
             >
-              <option value="Laptop">Laptop / Electronics</option>
-              <option value="Armchair">Armchair / Furniture</option>
-              <option value="Shirt">Shirt / Apparel</option>
-              <option value="Home">Home & Decor</option>
+              <option value="Laptop">Computers & Laptops</option>
+              <option value="Server">Servers & Storage</option>
+              <option value="Network">Networking & Telecom</option>
+              <option value="Monitor">Monitors & Displays</option>
+              <option value="Cpu">Peripherals & Components</option>
+              <option value="Zap">Power & Infrastructure</option>
               <option value="Folder">General Folder</option>
             </select>
           </div>
