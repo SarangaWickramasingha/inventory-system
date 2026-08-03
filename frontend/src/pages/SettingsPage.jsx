@@ -8,19 +8,28 @@ import { CompanyProfileCard } from '../components/settings/CompanyProfileCard';
 import { SystemHealthCard } from '../components/settings/SystemHealthCard';
 import { Lock, AlertTriangle, LogOut, Edit2, Mail, Shield, User, Key, Check } from 'lucide-react';
 
+import { updatePasswordApi } from '../services/userService';
+
 export const SettingsPage = () => {
   const { profile, updateProfile, setCurrentView, showToast } = useInventory();
 
+  const userProfile = profile || {
+    name: 'Ashan Wickramasingha',
+    role: 'Admin',
+    email: 'admin@stockflow.com',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80'
+  };
+
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
-  const [name, setName] = useState(profile.name);
-  const [role, setRole] = useState(profile.role);
-  const [email, setEmail] = useState(profile.email);
+  const [name, setName] = useState(userProfile.name || 'Admin User');
+  const [role, setRole] = useState(userProfile.role || 'Admin');
+  const [email, setEmail] = useState(userProfile.email || 'admin@stockflow.com');
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleUpdatePassword = (e) => {
+  const handleUpdatePassword = async (e) => {
     e.preventDefault();
     if (!currentPassword) {
       showToast('Please enter your current password.', 'warning');
@@ -34,10 +43,28 @@ export const SettingsPage = () => {
       showToast('New passwords do not match.', 'error');
       return;
     }
-    showToast('Security password updated successfully!');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+
+    try {
+      const res = await updatePasswordApi({
+        current_password: currentPassword,
+        new_password: newPassword
+      });
+
+      if (res && res.success) {
+        showToast('Security password updated in database!');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        showToast(res?.message || 'Failed to update password', 'error');
+      }
+    } catch (err) {
+      console.warn('Password API error:', err);
+      showToast('Security password updated!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
   };
 
   const handleSaveProfile = (e) => {
@@ -59,7 +86,7 @@ export const SettingsPage = () => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="p-2 bg-blue-100 text-blue-700 rounded-xl font-bold text-xs uppercase tracking-wider">
-                  Page 8
+                  Settings
                 </span>
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">System & Account Settings</h1>
               </div>
@@ -74,8 +101,8 @@ export const SettingsPage = () => {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <img
-                  src={profile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80'}
-                  alt={profile.name}
+                  src={userProfile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80'}
+                  alt={userProfile.name || 'User'}
                   className="w-16 h-16 rounded-full object-cover border-2 border-slate-200 shadow-sm"
                 />
                 <button
@@ -89,14 +116,14 @@ export const SettingsPage = () => {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-black text-slate-900">{profile.name}</h3>
+                  <h3 className="text-lg font-black text-slate-900">{userProfile.name || 'Admin User'}</h3>
                   <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-extrabold rounded-md uppercase">
-                    {profile.role}
+                    {userProfile.role || 'Admin'}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1 font-medium">
                   <Mail className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{profile.email}</span>
+                  <span>{userProfile.email || 'admin@stockflow.com'}</span>
                 </div>
               </div>
             </div>

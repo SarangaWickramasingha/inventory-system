@@ -9,6 +9,8 @@ return [
     // Auth Routes (Manuja)
     'POST /api/auth/login' => 'AuthController@login',
     'GET /api/auth/me' => 'AuthController@me',
+    'PUT /api/auth/profile' => 'AuthController@updateProfile',
+    'PUT /api/auth/password' => 'AuthController@updatePassword',
 
     // User Management Routes (Manuja)
     'GET /api/users' => 'UserController@index',

@@ -100,4 +100,52 @@ class UserService
 
         return $this->userRepo->delete($id);
     }
+
+    public function updateUserProfile(int $id, array $data): User
+    {
+        $user = $this->userRepo->findById($id);
+        if (!$user) {
+            throw new InvalidArgumentException("User not found.");
+        }
+
+        $fullName = trim($data['name'] ?? $data['full_name'] ?? $data['fullName'] ?? $user->getFullName());
+        $email = trim($data['email'] ?? $user->getEmail());
+        $role = strtolower(trim($data['role'] ?? $user->getRole()));
+
+        if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException("Invalid email format.");
+        }
+
+        $updated = new User(
+            $user->getId(),
+            $user->getUsername(),
+            $email,
+            $user->getPasswordHash(),
+            $fullName,
+            $role,
+            $user->getStatus()
+        );
+
+        $this->userRepo->save($updated);
+        return $this->userRepo->findById($id);
+    }
+
+    public function updateUserPassword(int $id, string $currentPassword, string $newPassword): bool
+    {
+        $user = $this->userRepo->findById($id);
+        if (!$user) {
+            throw new InvalidArgumentException("User not found.");
+        }
+
+        if (!password_verify($currentPassword, $user->getPasswordHash())) {
+            throw new InvalidArgumentException("Current password is incorrect.");
+        }
+
+        if (strlen($newPassword) < 6) {
+            throw new InvalidArgumentException("New password must be at least 6 characters.");
+        }
+
+        $user->setPasswordHash(password_hash($newPassword, PASSWORD_BCRYPT));
+        return $this->userRepo->save($user);
+    }
 }
