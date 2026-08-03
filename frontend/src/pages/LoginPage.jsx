@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Lock, Mail, User, ShieldCheck, Eye, EyeOff, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useInventory } from '../context/InventoryContext';
 import { useAuth } from '../context/AuthContext';
 
 export const LoginPage = () => {
-  const { setCurrentView } = useInventory();
+  const { setCurrentView, authMode } = useInventory();
   const { login, register, setUser, setToken } = useAuth();
 
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(authMode === 'register');
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    setIsRegister(authMode === 'register');
+  }, [authMode]);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',

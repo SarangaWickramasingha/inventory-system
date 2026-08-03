@@ -6,13 +6,13 @@ import { useInventory } from '../context/InventoryContext';
 import { Box, Check } from 'lucide-react';
 
 export const LandingPage = () => {
-  const { setCurrentView } = useInventory();
+  const { navigateToAuth } = useInventory();
   const [showDemoModal, setShowDemoModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
       <div>
-        <LandingNavbar onOpenAuth={(view = 'login') => setCurrentView(view)} />
+        <LandingNavbar onOpenAuth={(mode = 'login') => navigateToAuth(mode)} />
         <main>
           <Hero onOpenDemo={() => setShowDemoModal(true)} />
           <FeatureSection />
@@ -88,7 +88,7 @@ export const LandingPage = () => {
             <button
               onClick={() => {
                 setShowDemoModal(false);
-                setCurrentView('login');
+                navigateToAuth('register');
               }}
               className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl"
             >
