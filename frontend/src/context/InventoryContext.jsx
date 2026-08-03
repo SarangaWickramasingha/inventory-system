@@ -12,6 +12,7 @@ import {
   saveStoredProfile
 } from '../utils/storage';
 import { getProducts as fetchProductsFromAPI } from '../services/productService';
+import { getCategories as fetchCategoriesFromAPI } from '../services/categoryService';
 
 const InventoryContext = createContext();
 
@@ -151,6 +152,18 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
+  // Fetch categories dynamically from backend MySQL database
+  const loadCategories = async () => {
+    try {
+      const response = await fetchCategoriesFromAPI();
+      if (response && response.success && Array.isArray(response.data?.items)) {
+        setCategories(response.data.items);
+      }
+    } catch (err) {
+      console.warn('Backend categories API unavailable:', err);
+    }
+  };
+
   useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
@@ -160,6 +173,7 @@ export const InventoryProvider = ({ children }) => {
 
     window.addEventListener('popstate', handlePopState);
     loadProducts();
+    loadCategories();
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
