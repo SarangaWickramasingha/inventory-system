@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Lock, Mail, User, ArrowRight, CheckCircle2, AlertCircle, Shield } from 'lucide-react';
+import { Box, Lock, Mail, User, ArrowRight, CheckCircle2, AlertCircle, Shield, Eye, EyeOff } from 'lucide-react';
 import { useInventory } from '../context/InventoryContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -8,10 +8,12 @@ export const RegisterPage = () => {
   const { register } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     role: 'staff', // Registration is strictly for staff members
   });
   const [error, setError] = useState('');
@@ -29,7 +31,7 @@ export const RegisterPage = () => {
     setError('');
     setSuccess('');
 
-    if (!formData.fullName || !formData.email || !formData.password) {
+    if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
       setError('Please fill in all required fields to register as staff.');
       return;
     }
@@ -39,10 +41,17 @@ export const RegisterPage = () => {
       return;
     }
 
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match. Please re-enter your password.');
+      return;
+    }
+
     setIsLoading(true);
 
     const result = await register({
-      ...formData,
+      fullName: formData.fullName,
+      email: formData.email,
+      password: formData.password,
       role: 'staff' // Ensure role is always staff
     });
 
@@ -170,6 +179,40 @@ export const RegisterPage = () => {
                   required
                   className="block w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Re-enter Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Lock className="h-4 h-4 text-slate-400" />
+                </div>
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  placeholder="••••••••"
+                  required
+                  className="block w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
