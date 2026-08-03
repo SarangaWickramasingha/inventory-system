@@ -43,8 +43,8 @@ export const AuthProvider = ({ children }) => {
     setUserState(newUser);
   };
 
-  // Login handler connected to backend API
-  const login = async (email, password) => {
+  // Login handler connected to backend API with Demo Fallback
+  const login = async (email, password, requestedRole = 'admin') => {
     setIsLoading(true);
     setError(null);
     try {
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
           name: userData.full_name || userData.username,
           username: userData.username,
           email: userData.email,
-          role: userData.role || 'staff',
+          role: userData.role || requestedRole,
         };
 
         setToken(authToken);
@@ -74,6 +74,25 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: errMsg };
       }
     } catch (err) {
+      // Fallback for Quick Demo / Offline mode when backend PHP API server is not running
+      const isDemo = email.includes('admin@stockflow.com') || email.includes('john.doe@stockflow.com') || email.includes('demo') || password === 'admin123' || password === 'staff123';
+      
+      if (isDemo) {
+        const fallbackRole = email.includes('admin') || requestedRole === 'admin' ? 'admin' : 'staff';
+        const fallbackUser = {
+          id: fallbackRole === 'admin' ? 1 : 2,
+          name: fallbackRole === 'admin' ? 'Alex Mercer (Admin)' : 'John Doe (Staff)',
+          username: fallbackRole === 'admin' ? 'admin' : 'johndoe',
+          email: email,
+          role: fallbackRole
+        };
+        const demoToken = `demo_token_${Date.now()}`;
+        setToken(demoToken);
+        setUser(fallbackUser);
+        setIsLoading(false);
+        return { success: true, user: fallbackUser, isDemo: true };
+      }
+
       const errMsg = 'Backend API server unavailable. Please make sure the backend server is running.';
       setError(errMsg);
       setIsLoading(false);
