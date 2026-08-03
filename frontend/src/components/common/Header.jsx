@@ -20,14 +20,22 @@ export const Header = () => {
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const safeNotifications = notifications || [];
+  const safeProducts = products || [];
+  const safeProfile = profile || {
+    name: 'Admin User',
+    email: 'admin@stockflow.com',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80'
+  };
+
+  const unreadCount = safeNotifications.filter(n => !n.read).length;
 
   // Search Results
   const matchingProducts = searchTerm.trim()
-    ? products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchTerm.toLowerCase())
+    ? safeProducts.filter(p =>
+        (p?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p?.sku || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p?.category || p?.category_name || '').toLowerCase().includes(searchTerm.toLowerCase())
       ).slice(0, 5)
     : [];
 
@@ -114,10 +122,10 @@ export const Header = () => {
                 )}
               </div>
               <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
-                {notifications.length === 0 ? (
+                {safeNotifications.length === 0 ? (
                   <div className="p-4 text-center text-sm text-slate-500">No notifications</div>
                 ) : (
-                  notifications.map(n => (
+                  safeNotifications.map(n => (
                     <div
                       key={n.id}
                       onClick={() => markNotificationRead(n.id)}
@@ -152,8 +160,8 @@ export const Header = () => {
             className="flex items-center gap-2.5 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
           >
             <img
-              src={profile.avatar}
-              alt={profile.name}
+              src={safeProfile.avatar}
+              alt={safeProfile.name}
               className="w-8 h-8 rounded-full object-cover border border-slate-200"
             />
             <span className="text-sm font-semibold text-slate-700 hidden sm:inline">Profile</span>
@@ -164,8 +172,8 @@ export const Header = () => {
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-40 animate-fade-in">
               <div className="p-3 border-b border-slate-100 bg-slate-50">
-                <p className="text-sm font-bold text-slate-800">{profile.name}</p>
-                <p className="text-xs text-slate-500 truncate">{profile.email}</p>
+                <p className="text-sm font-bold text-slate-800">{safeProfile.name}</p>
+                <p className="text-xs text-slate-500 truncate">{safeProfile.email}</p>
               </div>
               <div className="py-1">
                 <button

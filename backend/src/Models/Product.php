@@ -21,6 +21,7 @@ class Product implements JsonSerializable
     private int $minStockAlert;
     private string $unit;
     private ?string $description;
+    private ?string $imageUrl;
     private string $status;
     private ?string $deletedAt;
     private ?string $createdAt;
@@ -38,6 +39,7 @@ class Product implements JsonSerializable
         int $minStockAlert = 5,
         string $unit = 'pcs',
         ?string $description = null,
+        ?string $imageUrl = null,
         string $status = 'in_stock',
         ?string $deletedAt = null,
         ?string $createdAt = null,
@@ -54,6 +56,7 @@ class Product implements JsonSerializable
         $this->minStockAlert = $minStockAlert;
         $this->unit = $unit;
         $this->description = $description;
+        $this->imageUrl = $imageUrl;
         $this->status = $status;
         $this->deletedAt = $deletedAt;
         $this->createdAt = $createdAt;
@@ -74,6 +77,7 @@ class Product implements JsonSerializable
             isset($data['min_stock_alert']) ? (int)$data['min_stock_alert'] : (isset($data['minStockAlert']) ? (int)$data['minStockAlert'] : 5),
             $data['unit'] ?? 'pcs',
             $data['description'] ?? null,
+            $data['image_url'] ?? $data['imageUrl'] ?? null,
             $data['status'] ?? 'in_stock',
             $data['deleted_at'] ?? $data['deletedAt'] ?? null,
             $data['created_at'] ?? $data['createdAt'] ?? null,
@@ -276,6 +280,7 @@ class Product implements JsonSerializable
             'min_stock_alert' => $this->minStockAlert,
             'unit' => $this->unit,
             'description' => $this->description,
+            'image_url' => $this->imageUrl,
             'status' => $this->status,
             'deleted_at' => $this->deletedAt,
             'created_at' => $this->createdAt,

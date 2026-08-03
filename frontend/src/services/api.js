@@ -19,5 +19,11 @@ export const fetchAPI = async (endpoint, options = {}) => {
     headers,
   });
 
+  if (response.status === 401) {
+    // Clear invalid / expired tokens from browser storage
+    localStorage.removeItem('stockflow_token');
+    localStorage.removeItem('stockflow_user');
+  }
+
   return response.json();
 };

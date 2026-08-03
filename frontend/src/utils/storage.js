@@ -1,4 +1,7 @@
-import { INITIAL_PRODUCTS, INITIAL_CATEGORIES, INITIAL_ACTIVITIES, INITIAL_NOTIFICATIONS, USER_PROFILE } from './mockData';
+/**
+ * LocalStorage Cache Utility for StockFlow Application
+ * Handles persistent cache storage and retrieve fallbacks.
+ */
 
 const STORAGE_KEYS = {
   PRODUCTS: 'stockflow_products_v2',
@@ -11,18 +14,10 @@ const STORAGE_KEYS = {
 export const getStoredProducts = () => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-    if (!data) return INITIAL_PRODUCTS;
-    const parsed = JSON.parse(data);
-    // Auto-purge legacy non-IT products from browser cache
-    const hasLegacy = parsed.some(p => ['Furniture', 'Apparel', 'Home & Garden', 'Office Supplies', 'Electronics'].includes(p.category));
-    if (hasLegacy) {
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
-      return INITIAL_PRODUCTS;
-    }
-    return parsed;
+    return data ? JSON.parse(data) : [];
   } catch (e) {
     console.error('Failed to parse stored products', e);
-    return INITIAL_PRODUCTS;
+    return [];
   }
 };
 
@@ -37,18 +32,10 @@ export const saveStoredProducts = (products) => {
 export const getStoredCategories = () => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-    if (!data) return INITIAL_CATEGORIES;
-    const parsed = JSON.parse(data);
-    // Auto-purge legacy non-IT categories from browser cache
-    const hasLegacy = parsed.some(cat => ['Furniture', 'Apparel', 'Home & Garden', 'Office Supplies', 'Electronics'].includes(cat.name));
-    if (hasLegacy) {
-      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(INITIAL_CATEGORIES));
-      return INITIAL_CATEGORIES;
-    }
-    return parsed;
+    return data ? JSON.parse(data) : [];
   } catch (e) {
     console.error('Failed to parse stored categories', e);
-    return INITIAL_CATEGORIES;
+    return [];
   }
 };
 
@@ -63,10 +50,10 @@ export const saveStoredCategories = (categories) => {
 export const getStoredActivities = () => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.ACTIVITIES);
-    return data ? JSON.parse(data) : INITIAL_ACTIVITIES;
+    return data ? JSON.parse(data) : [];
   } catch (e) {
     console.error('Failed to parse stored activities', e);
-    return INITIAL_ACTIVITIES;
+    return [];
   }
 };
 
@@ -81,9 +68,9 @@ export const saveStoredActivities = (activities) => {
 export const getStoredNotifications = () => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
-    return data ? JSON.parse(data) : INITIAL_NOTIFICATIONS;
+    return data ? JSON.parse(data) : [];
   } catch (e) {
-    return INITIAL_NOTIFICATIONS;
+    return [];
   }
 };
 
@@ -98,9 +85,9 @@ export const saveStoredNotifications = (notifications) => {
 export const getStoredProfile = () => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.PROFILE);
-    return data ? JSON.parse(data) : USER_PROFILE;
+    return data ? JSON.parse(data) : null;
   } catch (e) {
-    return USER_PROFILE;
+    return null;
   }
 };
 
