@@ -188,18 +188,18 @@ export const ValuationTable = () => {
 
                     {/* Unit Prices */}
                     <td className="py-3.5 px-4 font-medium text-slate-600">
-                      <div>${buy.toFixed(2)} cost</div>
-                      <div className="text-[11px] text-slate-400">${sell.toFixed(2)} retail</div>
+                      <div>Rs. {buy.toFixed(2)} cost</div>
+                      <div className="text-[11px] text-slate-400">Rs. {sell.toFixed(2)} retail</div>
                     </td>
 
                     {/* Cost Valuation */}
                     <td className="py-3.5 px-4 font-black text-slate-900">
-                      ${costValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      Rs. {costValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
 
                     {/* Retail Valuation */}
                     <td className="py-3.5 px-4 font-bold text-blue-700">
-                      ${retailValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      Rs. {retailValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
 
                     {/* Margin % */}
@@ -233,13 +233,13 @@ export const ValuationTable = () => {
                   Aggregated Metrics
                 </td>
                 <td className="py-4 px-4 font-black text-emerald-400 text-sm">
-                  ${totalCostValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  Rs. {totalCostValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
                 <td className="py-4 px-4 font-extrabold text-blue-300 text-sm">
-                  ${totalRetailValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  Rs. {totalRetailValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
                 <td className="py-4 px-4 font-black text-amber-400 text-xs">
-                  +${totalGrossProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Profit
+                  +Rs. {totalGrossProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Profit
                 </td>
                 <td className="py-4 px-4 text-center">
                   <span className="text-[10px] font-mono uppercase bg-slate-800 text-slate-300 px-2 py-1 rounded">

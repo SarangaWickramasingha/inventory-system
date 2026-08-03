@@ -54,7 +54,7 @@ export const ReportKpis = () => {
         </div>
         <div className="mt-3">
           <div className="text-2.5xl font-black text-slate-900 tracking-tight">
-            ${totalCostValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            Rs. {totalCostValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="flex items-center gap-1 text-xs font-semibold text-emerald-600 mt-1">
             <TrendingUp className="w-3.5 h-3.5" />
@@ -75,7 +75,7 @@ export const ReportKpis = () => {
         </div>
         <div className="mt-3">
           <div className="text-2.5xl font-black text-slate-900 tracking-tight">
-            ${totalRetailValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            Rs. {totalRetailValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="flex items-center gap-1 text-xs font-semibold text-blue-600 mt-1">
             <TrendingUp className="w-3.5 h-3.5" />

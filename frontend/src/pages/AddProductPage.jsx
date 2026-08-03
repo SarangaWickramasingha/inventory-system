@@ -224,7 +224,7 @@ export const AddProductPage = () => {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
-                    Buying Price ($)
+                    Buying Price (LKR / Rs.)
                   </label>
                   <input
                     type="number"
@@ -238,7 +238,7 @@ export const AddProductPage = () => {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
-                    Selling Price ($)
+                    Selling Price (LKR / Rs.)
                   </label>
                   <input
                     type="number"

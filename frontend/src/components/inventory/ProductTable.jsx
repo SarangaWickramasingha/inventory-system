@@ -69,10 +69,10 @@ export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdj
                     {prod.quantity ?? 0}
                   </td>
                   <td className="py-3 px-4 text-right font-medium text-slate-600">
-                    ${Number(prod.buyingPrice ?? prod.cost_price ?? 0).toFixed(2)}
+                    Rs. {Number(prod.buyingPrice ?? prod.cost_price ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="py-3 px-4 text-right font-bold text-slate-900">
-                    ${Number(prod.sellingPrice ?? prod.price ?? 0).toFixed(2)}
+                    Rs. {Number(prod.sellingPrice ?? prod.price ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="py-3 px-4 text-center">
                     <StatusBadge status={getProductStatus(prod)} />

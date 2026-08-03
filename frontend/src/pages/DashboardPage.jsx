@@ -156,7 +156,7 @@ export const DashboardPage = () => {
               />
               <MetricCard
                 title="INVENTORY VALUATION"
-                value={`$${totalValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                value={`Rs. ${totalValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 change="Total Cost Basis"
                 changeType="positive"
                 iconType="valuation"
