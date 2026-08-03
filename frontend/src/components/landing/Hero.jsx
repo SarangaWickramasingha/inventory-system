@@ -21,10 +21,10 @@ export const Hero = ({ onOpenDemo }) => {
 
         <div className="flex flex-wrap items-center gap-4">
           <button
-            onClick={() => setCurrentView('dashboard')}
+            onClick={() => setCurrentView('login')}
             className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-base rounded-xl shadow-lg transition-all"
           >
-            Get Started
+            Sign Up as Staff
           </button>
           <button
             onClick={onOpenDemo}

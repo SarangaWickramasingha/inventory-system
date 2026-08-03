@@ -81,18 +81,18 @@ export const LandingPage = () => {
                 <Check className="w-8 h-8 text-white stroke-[3]" />
               </div>
               <h3 className="text-xl font-bold">Interactive ERP System Preview</h3>
-              <p className="text-xs text-slate-300 mt-1 max-w-md">Click "Launch ERP App" to test real-time products, categories, stock tracking, and CSV bulk import!</p>
+              <p className="text-xs text-slate-300 mt-1 max-w-md">Sign up as staff to access real-time product catalogs, category organization, stock tracking, and reporting!</p>
             </div>
           </div>
           <div className="flex justify-end pt-2">
             <button
               onClick={() => {
                 setShowDemoModal(false);
-                setCurrentView('dashboard');
+                setCurrentView('login');
               }}
               className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl"
             >
-              Launch Dashboard App
+              Sign Up as Staff
             </button>
           </div>
         </div>

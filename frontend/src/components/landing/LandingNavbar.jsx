@@ -28,10 +28,10 @@ export const LandingNavbar = ({ onOpenAuth }) => {
           Login
         </button>
         <button
-          onClick={() => setCurrentView('dashboard')}
+          onClick={() => onOpenAuth('register')}
           className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center gap-2"
         >
-          Launch ERP App <ArrowRight className="w-4 h-4" />
+          Sign Up as Staff <ArrowRight className="w-4 h-4" />
         </button>
       </div>
     </nav>
