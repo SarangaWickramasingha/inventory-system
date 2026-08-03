@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Header } from '../components/common/Header';
 import { Sidebar } from '../components/common/Sidebar';
 import { useInventory } from '../context/InventoryContext';
+import { useAuth } from '../context/AuthContext';
 import { Modal } from '../components/common/Modal';
 import { ThresholdSettingsCard } from '../components/settings/ThresholdSettingsCard';
 import { CompanyProfileCard } from '../components/settings/CompanyProfileCard';
@@ -10,6 +11,10 @@ import { Lock, AlertTriangle, LogOut, Edit2, Mail, Shield, User, Key, Check } fr
 
 export const SettingsPage = () => {
   const { profile, updateProfile, setCurrentView, showToast } = useInventory();
+  const { user } = useAuth();
+
+  const currentRole = user?.role || (profile.role?.toLowerCase().includes('admin') ? 'admin' : 'staff');
+  const isAdmin = currentRole === 'admin';
 
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [name, setName] = useState(profile.name);
@@ -115,8 +120,8 @@ export const SettingsPage = () => {
           {/* Low-Stock Threshold Settings Component */}
           <ThresholdSettingsCard />
 
-          {/* Company Profile Details Component */}
-          <CompanyProfileCard />
+          {/* Company Profile Details Component (Admin Only) */}
+          {isAdmin && <CompanyProfileCard />}
 
           {/* Security & Password Form */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
