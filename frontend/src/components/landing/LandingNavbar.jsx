@@ -22,13 +22,13 @@ export const LandingNavbar = ({ onOpenAuth }) => {
 
       <div className="flex items-center gap-3">
         <button
-          onClick={() => onOpenAuth('login')}
+          onClick={() => setCurrentView('login')}
           className="px-4 py-2 text-sm font-bold text-slate-700 hover:text-blue-600 transition-colors"
         >
           Login
         </button>
         <button
-          onClick={() => onOpenAuth('register')}
+          onClick={() => setCurrentView('register')}
           className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center gap-2"
         >
           Sign Up as Staff <ArrowRight className="w-4 h-4" />

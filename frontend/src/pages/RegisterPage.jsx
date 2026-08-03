@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import { Box, Lock, Mail, ShieldCheck, Eye, EyeOff, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Box, Lock, Mail, User, ArrowRight, CheckCircle2, AlertCircle, Shield } from 'lucide-react';
 import { useInventory } from '../context/InventoryContext';
 import { useAuth } from '../context/AuthContext';
 
-export const LoginPage = () => {
+export const RegisterPage = () => {
   const { setCurrentView } = useInventory();
-  const { login, setUser, setToken } = useAuth();
+  const { register } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
+    fullName: '',
     email: '',
     password: '',
-    role: 'admin', // Default role selection on Sign In page
+    role: 'staff', // Registration is strictly for staff members
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -28,53 +29,40 @@ export const LoginPage = () => {
     setError('');
     setSuccess('');
 
-    if (!formData.email || !formData.password) {
-      setError('Please fill in both email and password.');
+    if (!formData.fullName || !formData.email || !formData.password) {
+      setError('Please fill in all required fields to register as staff.');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long.');
       return;
     }
 
     setIsLoading(true);
 
-    const result = await login(formData.email, formData.password, formData.role);
+    const result = await register({
+      ...formData,
+      role: 'staff' // Ensure role is always staff
+    });
 
     setIsLoading(false);
 
     if (result && result.success) {
-      // Ensure user object preserves selected role for RBAC
-      const authenticatedUser = {
-        ...(result.user || {}),
-        role: formData.role
-      };
-      setUser(authenticatedUser);
-
-      setSuccess(`Sign in successful as ${formData.role === 'admin' ? 'Administrator' : 'Staff'}! Redirecting...`);
+      setSuccess('Staff account registered successfully! Redirecting to dashboard...');
       setTimeout(() => {
         setCurrentView('dashboard');
       }, 800);
     } else {
-      setError(result?.message || 'Authentication failed. Please check your credentials.');
+      setError(result?.message || 'Staff registration failed. Please try again.');
     }
-  };
-
-  const handleQuickDemo = (role) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setUser({
-        name: role === 'admin' ? 'Saranga Wickramasingha' : 'Manuja Staff',
-        email: role === 'admin' ? 'admin@stockflow.com' : 'staff@stockflow.com',
-        role: role,
-      });
-      setToken(`mock-hmac-sha256-${role}-token`);
-      setCurrentView('dashboard');
-    }, 500);
   };
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background glow graphics */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10">
         <div
@@ -88,16 +76,27 @@ export const LoginPage = () => {
           <span className="text-3xl font-extrabold text-white tracking-tight">StockFlow</span>
         </div>
         <h2 className="text-2xl font-bold text-slate-100 tracking-tight">
-          Sign in to StockFlow Portal
+          Staff Account Registration
         </h2>
         <p className="mt-1 text-sm text-slate-400">
-          Monorepo Inventory Management & Asset Tracking System
+          Register a new Staff account for inventory & asset management operations
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4 sm:px-0">
         <div className="bg-white/95 backdrop-blur-md py-8 px-6 shadow-2xl rounded-2xl border border-slate-200 sm:px-10">
           
+          {/* Account Type Banner */}
+          <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0 font-bold">
+              <Shield className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-blue-900 uppercase tracking-wider">Account Role</div>
+              <div className="text-xs font-semibold text-blue-700">Staff Member (Inventory & Stock Operations)</div>
+            </div>
+          </div>
+
           {/* Feedback Alerts */}
           {error && (
             <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2.5 text-rose-700 text-xs font-medium">
@@ -114,30 +113,29 @@ export const LoginPage = () => {
           )}
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {/* Role Selection Dropdown on Sign In */}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Sign In As (Role Selection)
+                Full Name
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <ShieldCheck className="h-4 h-4 text-slate-400" />
+                  <User className="h-4 h-4 text-slate-400" />
                 </div>
-                <select
-                  name="role"
-                  value={formData.role}
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
                   onChange={handleInputChange}
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all cursor-pointer"
-                >
-                  <option value="admin">👑 Administrator (Full System & User Management Access)</option>
-                  <option value="staff">👤 Staff Member (Inventory Operations Access)</option>
-                </select>
+                  placeholder="e.g. John Doe"
+                  required
+                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                />
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Email Address
+                Staff Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -148,7 +146,7 @@ export const LoginPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="name@stockflow.com"
+                  placeholder="staff.name@stockflow.com"
                   required
                   className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
                 />
@@ -172,86 +170,46 @@ export const LoginPage = () => {
                   required
                   className="block w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center text-slate-600 cursor-pointer select-none">
-                <input type="checkbox" className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 mr-2" />
-                Remember me
-              </label>
-              <a href="#forgot" onClick={(e) => { e.preventDefault(); alert('Password reset link has been sent to your email.'); }} className="font-bold text-blue-600 hover:underline">
-                Forgot password?
-              </a>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group disabled:opacity-70 mt-2"
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group disabled:opacity-70 mt-6"
             >
               {isLoading ? (
-                <span>Signing In...</span>
+                <span>Creating Staff Account...</span>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>Complete Registration</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </button>
           </form>
 
-          {/* Quick Demo Logins Section */}
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Quick Demo Access
-            </p>
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('admin')}
-                className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors"
-              >
-                👑 Demo Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('staff')}
-                className="py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-xl border border-blue-200 transition-colors"
-              >
-                👤 Demo Staff
-              </button>
-            </div>
-          </div>
-
-          {/* Link to Staff Registration Page */}
+          {/* Navigation Link to Login Page */}
           <div className="mt-6 pt-6 border-t border-slate-100 text-center">
             <p className="text-xs text-slate-600 font-medium">
-              New staff member?{' '}
+              Already have an account?{' '}
               <button
                 type="button"
-                onClick={() => setCurrentView('register')}
+                onClick={() => setCurrentView('login')}
                 className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1"
               >
-                Sign up for a Staff account
+                Sign In here
               </button>
             </p>
           </div>
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-500">
-          Protected by pure PHP HMAC SHA-256 token authentication & RBAC.
+          Staff member accounts are granted operational access to inventory tracking.
         </p>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

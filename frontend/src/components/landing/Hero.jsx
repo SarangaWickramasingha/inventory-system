@@ -3,7 +3,7 @@ import { Layers, BarChart2, Shapes, Bell, Play } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
 
 export const Hero = ({ onOpenDemo }) => {
-  const { navigateToAuth } = useInventory();
+  const { setCurrentView } = useInventory();
 
   return (
     <section className="relative overflow-hidden rounded-3xl mx-6 my-6 bg-slate-900 text-white min-h-[440px] flex items-center shadow-2xl">
@@ -21,7 +21,7 @@ export const Hero = ({ onOpenDemo }) => {
 
         <div className="flex flex-wrap items-center gap-4">
           <button
-            onClick={() => navigateToAuth('register')}
+            onClick={() => setCurrentView('register')}
             className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-base rounded-xl shadow-lg transition-all"
           >
             Sign Up as Staff

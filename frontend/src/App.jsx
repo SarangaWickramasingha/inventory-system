@@ -10,6 +10,7 @@ import { EditProductPage } from './pages/EditProductPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { AdminUsersPage } from './pages/AdminUsersPage';
 import { StaffActivityPage } from './pages/StaffActivityPage';
 import { Toast } from './components/common/Toast';
@@ -24,6 +25,8 @@ const MainContent = () => {
       return <LandingPage />;
     case 'login':
       return <LoginPage />;
+    case 'register':
+      return <RegisterPage />;
     case 'dashboard':
       return <DashboardPage />;
     case 'inventory':

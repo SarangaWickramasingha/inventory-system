@@ -26,6 +26,7 @@ export const InventoryProvider = ({ children }) => {
   const viewToPathMap = {
     'landing': '/',
     'login': '/login',
+    'register': '/register',
     'dashboard': '/dashboard',
     'inventory': '/inventory',
     'categories': '/categories',
@@ -42,6 +43,7 @@ export const InventoryProvider = ({ children }) => {
   const pathToViewMap = {
     '/': 'landing',
     '/login': 'login',
+    '/register': 'register',
     '/dashboard': 'dashboard',
     '/inventory': 'inventory',
     '/categories': 'categories',
