@@ -94,22 +94,22 @@ export const AddProductPage = () => {
                     reader.readAsDataURL(e.dataTransfer.files[0]);
                   }
                 }}
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
-                  isDragOver ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-blue-400 bg-slate-50/30'
+                className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer shadow-2xs ${
+                  isDragOver ? 'border-blue-600 bg-blue-50/80 ring-4 ring-blue-100' : 'border-blue-400 hover:border-blue-600 bg-slate-50/80 hover:bg-blue-50/30'
                 }`}
               >
                 {imageUrl ? (
                   <div className="flex flex-col items-center">
                     <img src={imageUrl} alt="Preview" className="w-28 h-28 object-cover rounded-xl border border-slate-200 shadow-sm mb-3" />
-                    <p className="text-xs font-semibold text-slate-600">Click or drag image to replace</p>
+                    <p className="text-xs font-bold text-slate-700">Click or drag image to replace</p>
                   </div>
                 ) : (
                   <label className="cursor-pointer flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-                      <UploadCloud className="w-6 h-6 stroke-[2]" />
+                    <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mb-3 shadow-md shadow-blue-500/20">
+                      <UploadCloud className="w-6 h-6 stroke-[2.5]" />
                     </div>
-                    <p className="text-sm font-bold text-slate-800">Click to upload or drag and drop</p>
-                    <p className="text-xs text-slate-400 mt-1">SVG, PNG, JPG or GIF (MAX. 800×400px)</p>
+                    <p className="text-sm font-extrabold text-slate-900">Click to upload or drag and drop image</p>
+                    <p className="text-xs font-semibold text-slate-600 mt-1">SVG, PNG, JPG or GIF (MAX. 800×400px)</p>
                   </label>
                 )}
                 <input
