@@ -17,4 +17,7 @@ return [
     // Product Core & Information Display Routes (Ashan)
     'GET /api/products' => 'ProductController@index',
     'GET /api/products/{id}' => 'ProductController@show',
+
+    // Category Routes
+    'GET /api/categories' => 'CategoryController@index',
 ];
