@@ -114,20 +114,12 @@ export const DashboardPage = () => {
               </button>
 
               {currentRole === 'admin' ? (
-                <>
-                  <button
-                    onClick={handleExportReport}
-                    className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center gap-2"
-                  >
-                    <Download className="w-4 h-4 text-slate-500" /> Export Valuation
-                  </button>
-                  <button
-                    onClick={() => setCurrentView('add-product')}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4 stroke-[3]" /> Add Product
-                  </button>
-                </>
+                <button
+                  onClick={handleExportReport}
+                  className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4 text-slate-500" /> Export Valuation
+                </button>
               ) : (
                 <button
                   onClick={() => setCurrentView('inventory')}
