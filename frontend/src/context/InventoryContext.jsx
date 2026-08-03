@@ -19,6 +19,7 @@ import {
 } from '../services/productService';
 import { getCategories as fetchCategoriesFromAPI } from '../services/categoryService';
 import { getMe, updateProfileApi, updatePasswordApi } from '../services/userService';
+import { getStockLogs, createStockLog } from '../services/stockService';
 
 const InventoryContext = createContext();
 
@@ -193,6 +194,18 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
+  // Fetch stock movement audit logs dynamically from backend MySQL database
+  const loadStockLogs = async () => {
+    try {
+      const res = await getStockLogs();
+      if (res && res.success && Array.isArray(res.data?.logs)) {
+        setStockLogs(res.data.logs);
+      }
+    } catch (err) {
+      console.warn('Backend stock logs API unavailable:', err);
+    }
+  };
+
   useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
@@ -204,6 +217,7 @@ export const InventoryProvider = ({ children }) => {
     loadProducts();
     loadCategories();
     loadProfile();
+    loadStockLogs();
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
@@ -418,12 +432,24 @@ export const InventoryProvider = ({ children }) => {
     newQty = Math.max(0, newQty);
 
     try {
+      try {
+        await createStockLog({
+          product_id: productId,
+          type: type,
+          quantity: amount,
+          notes: notes || `Stock ${type} adjustment for ${targetProduct.name}`
+        });
+      } catch (logErr) {
+        console.warn('Could not post stock log entry:', logErr);
+      }
+
       const res = await updateProductApi(productId, {
         quantity: newQty
       });
 
       if (res && res.success) {
         await loadProducts();
+        await loadStockLogs();
 
         const msg = type === 'IN'
           ? `Stock IN logged for "${targetProduct.name}" (+${amount} pcs). New total: ${newQty}`

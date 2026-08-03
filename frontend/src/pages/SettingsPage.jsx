@@ -5,7 +5,6 @@ import { useInventory } from '../context/InventoryContext';
 import { useAuth } from '../context/AuthContext';
 import { Modal } from '../components/common/Modal';
 import { ThresholdSettingsCard } from '../components/settings/ThresholdSettingsCard';
-import { CompanyProfileCard } from '../components/settings/CompanyProfileCard';
 import { Lock, AlertTriangle, LogOut, Edit2, Mail, Shield, User, Key, Check } from 'lucide-react';
 
 import { updatePasswordApi } from '../services/userService';
@@ -142,9 +141,6 @@ export const SettingsPage = () => {
 
           {/* Low-Stock Threshold Settings Component */}
           <ThresholdSettingsCard />
-
-          {/* Company Profile Details Component (Admin Only) */}
-          {isAdmin && <CompanyProfileCard />}
 
           {/* Security & Password Form */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">

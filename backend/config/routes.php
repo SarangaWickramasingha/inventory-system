@@ -25,4 +25,10 @@ return [
 
     // Category Routes
     'GET /api/categories' => 'CategoryController@index',
+
+    // Staff Activity & Stock Log Routes (Sashika)
+    'GET /api/stock-logs' => 'StaffActivityController@getStaffLogs',
+    'POST /api/stock-logs' => 'StaffActivityController@logMovement',
+    'GET /api/staff-activity/logs' => 'StaffActivityController@getStaffLogs',
+    'POST /api/staff-activity/adjust-stock' => 'StaffActivityController@logMovement',
 ];
