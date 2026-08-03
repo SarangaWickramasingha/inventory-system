@@ -98,6 +98,7 @@ $roleMiddleware = new RoleMiddleware();
 
 $controllers = [
     'ProductController' => new ProductController($productRepo, $authMiddleware),
+    'CategoryController' => new \StockFlow\Backend\Controllers\CategoryController($db, $authMiddleware),
     'UserController' => new UserController($userService, $authMiddleware, $roleMiddleware),
     'AuthController' => new AuthController($authService, $userService, $authMiddleware),
     'DashboardController' => new DashboardController($db, $authMiddleware),

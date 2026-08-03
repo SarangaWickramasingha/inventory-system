@@ -3,6 +3,8 @@
  * Handles persistent cache storage and retrieve fallbacks.
  */
 
+import { INITIAL_CATEGORIES } from './mockData';
+
 const STORAGE_KEYS = {
   PRODUCTS: 'stockflow_products_v2',
   CATEGORIES: 'stockflow_categories_v2',
@@ -32,10 +34,12 @@ export const saveStoredProducts = (products) => {
 export const getStoredCategories = () => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-    return data ? JSON.parse(data) : [];
+    if (!data) return INITIAL_CATEGORIES;
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_CATEGORIES;
   } catch (e) {
     console.error('Failed to parse stored categories', e);
-    return [];
+    return INITIAL_CATEGORIES;
   }
 };
 
