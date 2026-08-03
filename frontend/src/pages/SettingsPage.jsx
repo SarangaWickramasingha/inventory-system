@@ -6,7 +6,6 @@ import { useAuth } from '../context/AuthContext';
 import { Modal } from '../components/common/Modal';
 import { ThresholdSettingsCard } from '../components/settings/ThresholdSettingsCard';
 import { CompanyProfileCard } from '../components/settings/CompanyProfileCard';
-import { SystemHealthCard } from '../components/settings/SystemHealthCard';
 import { Lock, AlertTriangle, LogOut, Edit2, Mail, Shield, User, Key, Check } from 'lucide-react';
 
 export const SettingsPage = () => {
@@ -69,7 +68,7 @@ export const SettingsPage = () => {
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">System & Account Settings</h1>
               </div>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                Configure threshold alerts, company profiles, system diagnostics, and account security.
+                Configure threshold alerts, company profile, and account security.
               </p>
             </div>
           </div>
@@ -113,9 +112,6 @@ export const SettingsPage = () => {
               Edit Personal Profile
             </button>
           </div>
-
-          {/* System Health Stats Component */}
-          <SystemHealthCard />
 
           {/* Low-Stock Threshold Settings Component */}
           <ThresholdSettingsCard />
