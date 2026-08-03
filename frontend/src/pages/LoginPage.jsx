@@ -130,7 +130,7 @@ export const LoginPage = () => {
                   }`}
                 >
                   <ShieldCheck className={`w-4 h-4 ${formData.role === 'admin' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  <span>👑 Admin</span>
+                  <span>Admin</span>
                 </button>
                 <button
                   type="button"
@@ -142,7 +142,7 @@ export const LoginPage = () => {
                   }`}
                 >
                   <User className={`w-4 h-4 ${formData.role === 'staff' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  <span>👤 Staff</span>
+                  <span>Staff</span>
                 </button>
               </div>
             </div>
@@ -231,14 +231,14 @@ export const LoginPage = () => {
                 onClick={() => handleQuickDemo('admin')}
                 className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors"
               >
-                👑 Demo Admin
+                Demo Admin
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickDemo('staff')}
                 className="py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-xl border border-blue-200 transition-colors"
               >
-                👤 Demo Staff
+                Demo Staff
               </button>
             </div>
           </div>
