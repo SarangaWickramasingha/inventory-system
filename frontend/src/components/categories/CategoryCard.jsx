@@ -1,12 +1,14 @@
 import React from 'react';
-import { Laptop, Armchair, Shirt, Home, Folder, Plus } from 'lucide-react';
+import { Laptop, Server, Network, Monitor, Cpu, Zap, Folder, Plus } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
 
 const ICON_MAP = {
   Laptop: Laptop,
-  Armchair: Armchair,
-  Shirt: Shirt,
-  Home: Home,
+  Server: Server,
+  Network: Network,
+  Monitor: Monitor,
+  Cpu: Cpu,
+  Zap: Zap,
   Folder: Folder
 };
 

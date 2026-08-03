@@ -1,11 +1,11 @@
 import { INITIAL_PRODUCTS, INITIAL_CATEGORIES, INITIAL_ACTIVITIES, INITIAL_NOTIFICATIONS, USER_PROFILE } from './mockData';
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'stockflow_products_v1',
-  CATEGORIES: 'stockflow_categories_v1',
-  ACTIVITIES: 'stockflow_activities_v1',
-  NOTIFICATIONS: 'stockflow_notifications_v1',
-  PROFILE: 'stockflow_profile_v1'
+  PRODUCTS: 'stockflow_products_v2',
+  CATEGORIES: 'stockflow_categories_v2',
+  ACTIVITIES: 'stockflow_activities_v2',
+  NOTIFICATIONS: 'stockflow_notifications_v2',
+  PROFILE: 'stockflow_profile_v2'
 };
 
 export const getStoredProducts = () => {

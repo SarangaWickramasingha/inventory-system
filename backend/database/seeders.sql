@@ -1,6 +1,7 @@
 -- ==========================================
 -- StockFlow Inventory Management System
 -- Database Seed Data (Users, Categories, Products, Stock Logs)
+-- IT Industry Electronic Equipment Hardware Data
 -- Owner: Saranga (Lead Infrastructure)
 -- ==========================================
 
@@ -17,28 +18,30 @@ ON DUPLICATE KEY UPDATE
     password_hash = VALUES(password_hash),
     full_name = VALUES(full_name);
 
--- 2. Insert Initial Categories
+-- 2. Insert IT Industry Electronic Categories
 INSERT INTO categories (id, name, description) VALUES
-(1, 'Electronics', 'Consumer tech, gadgets, and accessories.'),
-(2, 'Furniture', 'Office and home furnishings.'),
-(3, 'Apparel', 'Clothing, shoes, and wearable items.'),
-(4, 'Home & Garden', 'Home decor, outdoor equipment, and kitchenware.'),
-(5, 'Office Supplies', 'Paper, stationery, desk organizers, and craft supplies.')
-ON DUPLICATE KEY UPDATE name = VALUES(name);
+(1, 'Computers & Laptops', 'Enterprise laptops, desktop workstations, developer rigs, and mini PCs.'),
+(2, 'Servers & Storage', 'Rackmount servers, NAS storage arrays, enterprise NVMe SSDs, and SAN hardware.'),
+(3, 'Networking & Telecom', 'Managed Gigabit switches, enterprise routers, Wi-Fi 6 access points, and patch panels.'),
+(4, 'Monitors & Displays', '4K UltraHD workstations, dual monitor arms, and interactive conference room displays.'),
+(5, 'Peripherals & Components', 'Mechanical keyboards, ergonomic mice, USB-C docks, webcams, and GPUs.'),
+(6, 'Power & Infrastructure', 'Smart UPS battery backups, PDU power strips, server rack enclosures, and cooling units.')
+ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description);
 
--- 3. Insert Initial Products
+-- 3. Insert IT Industry Products
 INSERT INTO products (id, sku, name, category_id, price, cost_price, quantity, min_stock_alert, unit, description, status) VALUES
-(1, 'SKU-QNC-001', 'Quantum Noise-Cancelling Headphones', 1, 199.99, 85.00, 145, 50, 'pcs', 'High-precision optical sensor with adjustable DPI. Ergonomic design reduces wrist strain during prolonged use.', 'in_stock'),
-(2, 'SKU-HSB-042', 'HydroSmart Stainless Bottle', 4, 34.99, 15.50, 12, 30, 'pcs', 'Vacuum insulated stainless steel water bottle keeps drinks cold for 24 hours or hot for 12 hours.', 'low_stock'),
-(3, 'FUR-CH-001', 'ErgoMesh Office Chair', 2, 249.00, 110.00, 0, 15, 'pcs', 'Breathable mesh back ergonomic chair with lumbar support, adjustable headrest, and 3D armrests.', 'out_of_stock'),
-(4, 'SKU-ECT-NAV-M', 'Essential Cotton T-Shirt', 3, 18.00, 4.20, 890, 100, 'pcs', '100% organic combed cotton t-shirt with premium stitching and relaxed fit.', 'in_stock'),
-(5, 'SKU-WM902', 'Ergonomic Wireless Mouse Pro', 1, 59.99, 24.50, 142, 40, 'pcs', 'High-precision optical sensor with adjustable DPI. Ergonomic design reduces wrist strain.', 'in_stock'),
-(6, 'EL-201-X', 'USB-C Hub (7-in-1)', 1, 42.50, 18.00, 5, 40, 'pcs', 'Multi-port USB-C adapter with 4K HDMI, 100W Power Delivery, SD/TF card reader, and 3x USB 3.0 ports.', 'low_stock')
-ON DUPLICATE KEY UPDATE name = VALUES(name);
+(1, 'SKU-MBP-16M3', 'MacBook Pro 16" (M3 Max, 36GB, 1TB)', 1, 3499.00, 2850.00, 45, 15, 'pcs', '16-inch Liquid Retina XDR display, M3 Max 14-core CPU, 30-core GPU, 36GB Unified Memory, 1TB SSD storage.', 'in_stock'),
+(2, 'SKU-DEL-R760', 'Dell PowerEdge R760 Rack Server', 2, 5890.00, 4200.00, 8, 10, 'pcs', '2U dual-socket rack server powered by 4th Gen Intel Xeon Scalable processors, 128GB DDR5 RAM, 4x 1.92TB NVMe SSDs.', 'low_stock'),
+(3, 'SKU-CSC-C9300', 'Cisco Catalyst 9300 48-Port Switch', 3, 3200.00, 2100.00, 0, 5, 'pcs', 'Enterprise-grade 48-port PoE+ stackable switch with 4x 10G uplink module slots and Network Advantage license.', 'out_of_stock'),
+(4, 'SKU-LG-32UN880', 'LG UltraFine 32" 4K Ergo Monitor', 4, 699.00, 480.00, 120, 25, 'pcs', '32-inch UHD 4K IPS display with Ergo Arm stand, USB-C 60W Power Delivery, DCI-P3 95% color gamut.', 'in_stock'),
+(5, 'SKU-WM902', 'Ergonomic Wireless Mouse Pro', 5, 59.99, 24.50, 142, 40, 'pcs', 'High-precision optical sensor with adjustable DPI. Ergonomic design reduces wrist strain during prolonged use.', 'in_stock'),
+(6, 'EL-201-X', 'USB-C Thunderbolt 4 Hub (7-in-1)', 5, 42.50, 18.00, 5, 40, 'pcs', 'Multi-port USB-C adapter with 4K HDMI, 100W Power Delivery, SD/TF card reader, and 3x USB 3.0 ports.', 'low_stock'),
+(7, 'SKU-APC-SU1500', 'APC Smart-UPS 1500VA LCD Rackmount', 6, 599.00, 380.00, 14, 10, 'pcs', '1500VA / 1000W Line-Interactive 2U Rackmount Uninterruptible Power Supply with LCD display and SmartConnect port.', 'in_stock')
+ON DUPLICATE KEY UPDATE name = VALUES(name), price = VALUES(price);
 
 -- 4. Insert Initial Stock Audit Logs
 INSERT INTO stock_logs (id, product_id, user_id, type, quantity_changed, previous_quantity, new_quantity, notes) VALUES
-(1, 1, 1, 'IN', 100, 45, 145, 'Restocked from SoundWave Global shipment #SW-902'),
-(2, 6, 2, 'OUT', 35, 40, 5, 'Issued items to main engineering workspace'),
-(3, 3, 3, 'ADJUSTMENT', -15, 15, 0, 'Inventory reconciliation - 15 damaged in warehouse transit')
+(1, 1, 1, 'IN', 20, 25, 45, 'Restocked from TechData Global shipment #TD-902'),
+(2, 6, 2, 'OUT', 35, 40, 5, 'Issued items to engineering workstation setup'),
+(3, 3, 3, 'ADJUSTMENT', -5, 5, 0, 'Inventory audit reconciliation - items damaged in server rack deployment')
 ON DUPLICATE KEY UPDATE notes = VALUES(notes);
