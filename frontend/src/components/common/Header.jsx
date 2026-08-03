@@ -216,24 +216,64 @@ export const Header = () => {
         isOpen={showHelpModal}
         onClose={() => setShowHelpModal(false)}
         title="StockFlow Quick Guide"
+        maxWidth="max-w-xl"
       >
-        <div className="space-y-4 text-sm text-slate-600">
-          <p>Welcome to <strong>StockFlow Enterprise ERP</strong>!</p>
-          <div className="space-y-2">
-            <h4 className="font-bold text-slate-800">Quick Keyboard Shortcuts & Nav:</h4>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Use search bar at the top to instantly find products by SKU or Name.</li>
-              <li>Click <strong>+ New Product</strong> to register a new stock item.</li>
-              <li>Click any Category card in Categories view to filter inventory.</li>
-              <li>Use <strong>Bulk Import</strong> to upload CSV spreadsheets.</li>
-            </ul>
+        <div className="space-y-4 text-xs text-slate-600">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-blue-900">
+            <div>
+              <span className="font-extrabold text-sm block">StockFlow Enterprise ERP v2.4</span>
+              <span className="text-xs font-semibold text-blue-700">IT Hardware & Equipment Inventory Management Platform</span>
+            </div>
+            <span className="px-2.5 py-1 bg-blue-600 text-white font-extrabold text-[10px] uppercase rounded-md shadow-xs">
+              System Guide
+            </span>
           </div>
-          <div className="pt-4 border-t border-slate-100 flex justify-end">
+
+          <div className="space-y-3">
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+              <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                <span>🔍 Global Search & Navigation</span>
+              </h4>
+              <p className="text-slate-600 leading-relaxed font-medium">
+                Use the top search bar to instantly find items by name, SKU, or category. Click any search result to open product details directly.
+              </p>
+            </div>
+
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+              <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                <span>💻 IT Equipment Categories</span>
+              </h4>
+              <p className="text-slate-600 leading-relaxed font-medium">
+                Inventory is organized into 6 IT Industry Categories: <em>Computers & Laptops, Servers & Storage, Networking & Telecom, Monitors & Displays, Peripherals & Components, Power & Infrastructure</em>.
+              </p>
+            </div>
+
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+              <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                <span>📁 Bulk CSV Import</span>
+              </h4>
+              <p className="text-slate-600 leading-relaxed font-medium">
+                Import large product batches via the <strong>Bulk Product Import</strong> tool on the Dashboard. Upload standard CSV files with headers: <code className="bg-white px-1 font-mono font-bold text-blue-700">name, sku, category, quantity, buyingPrice, sellingPrice</code>.
+              </p>
+            </div>
+
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+              <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                <span>👑 Role-Based Access Controls (RBAC)</span>
+              </h4>
+              <ul className="list-disc pl-4 space-y-1 text-slate-600 font-medium">
+                <li><strong>Administrator:</strong> Full system access, valuation reports, category creation/deletion, user management, and company profile.</li>
+                <li><strong>Staff Member:</strong> Operational portal for inventory tracking, low-stock reordering, and stock movements.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 flex justify-end">
             <button
               onClick={() => setShowHelpModal(false)}
-              className="px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-colors"
             >
-              Got it!
+              Got it, Close Guide!
             </button>
           </div>
         </div>
