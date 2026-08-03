@@ -33,27 +33,39 @@ export const InventoryPage = () => {
   }, [searchTerm, selectedCategoryFilter]);
 
   // Filter products by search and category
-  let filteredProducts = products.filter(p => {
+  let filteredProducts = (products || []).filter(p => {
+    if (!p) return false;
+    const prodName = p.name || '';
+    const skuCode = p.sku || '';
+    const categoryName = p.category || p.category_name || '';
+
     const matchesSearch =
       !searchTerm ||
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchTerm.toLowerCase());
+      prodName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      skuCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      categoryName.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesCategory =
       selectedCategoryFilter === 'All Categories' ||
-      p.category.toLowerCase() === selectedCategoryFilter.toLowerCase();
+      categoryName.toLowerCase() === selectedCategoryFilter.toLowerCase();
 
     return matchesSearch && matchesCategory;
   });
 
   // Sort products
   filteredProducts.sort((a, b) => {
-    if (sortOption === 'name-asc') return a.name.localeCompare(b.name);
-    if (sortOption === 'name-desc') return b.name.localeCompare(a.name);
-    if (sortOption === 'stock-low') return a.quantity - b.quantity;
-    if (sortOption === 'stock-high') return b.quantity - a.quantity;
-    if (sortOption === 'price-high') return b.sellingPrice - a.sellingPrice;
+    const aName = a.name || '';
+    const bName = b.name || '';
+    const aPrice = Number(a.sellingPrice ?? a.price ?? 0);
+    const bPrice = Number(b.sellingPrice ?? b.price ?? 0);
+    const aQty = Number(a.quantity ?? 0);
+    const bQty = Number(b.quantity ?? 0);
+
+    if (sortOption === 'name-asc') return aName.localeCompare(bName);
+    if (sortOption === 'name-desc') return bName.localeCompare(aName);
+    if (sortOption === 'stock-low') return aQty - bQty;
+    if (sortOption === 'stock-high') return bQty - aQty;
+    if (sortOption === 'price-high') return bPrice - aPrice;
     return 0;
   });
 

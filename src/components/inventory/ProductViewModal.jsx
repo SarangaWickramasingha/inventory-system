@@ -44,7 +44,7 @@ export const ProductViewModal = ({ productId, isOpen, onClose }) => {
             <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 text-sm">
               <div>
                 <span className="text-xs text-slate-400 font-semibold uppercase">Category</span>
-                <p className="font-bold text-slate-800">{product.category}</p>
+                <p className="font-bold text-slate-800">{product.category || product.category_name || 'Uncategorized'}</p>
               </div>
               <div>
                 <span className="text-xs text-slate-400 font-semibold uppercase">Brand</span>
@@ -52,11 +52,11 @@ export const ProductViewModal = ({ productId, isOpen, onClose }) => {
               </div>
               <div>
                 <span className="text-xs text-slate-400 font-semibold uppercase">Buying Price</span>
-                <p className="font-bold text-slate-700">${product.buyingPrice.toFixed(2)}</p>
+                <p className="font-bold text-slate-700">${Number(product.buyingPrice ?? product.cost_price ?? 0).toFixed(2)}</p>
               </div>
               <div>
                 <span className="text-xs text-slate-400 font-semibold uppercase">Selling Price</span>
-                <p className="font-bold text-blue-600">${product.sellingPrice.toFixed(2)}</p>
+                <p className="font-bold text-blue-600">${Number(product.sellingPrice ?? product.price ?? 0).toFixed(2)}</p>
               </div>
               <div>
                 <span className="text-xs text-slate-400 font-semibold uppercase">Current Stock</span>
