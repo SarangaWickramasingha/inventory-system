@@ -7,6 +7,13 @@
 
 USE stockflow_db;
 
+-- Clear previous tables to ensure clean IT Hardware seed data
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE stock_logs;
+TRUNCATE TABLE products;
+TRUNCATE TABLE categories;
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- 1. Insert Initial Users
 -- Password for admin (admin@stockflow.com): admin123
 -- Password for staff (john.doe@stockflow.com / alice.smith@stockflow.com): staff123

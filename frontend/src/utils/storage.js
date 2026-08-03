@@ -11,7 +11,15 @@ const STORAGE_KEYS = {
 export const getStoredProducts = () => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-    return data ? JSON.parse(data) : INITIAL_PRODUCTS;
+    if (!data) return INITIAL_PRODUCTS;
+    const parsed = JSON.parse(data);
+    // Auto-purge legacy non-IT products from browser cache
+    const hasLegacy = parsed.some(p => ['Furniture', 'Apparel', 'Home & Garden', 'Office Supplies', 'Electronics'].includes(p.category));
+    if (hasLegacy) {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
+      return INITIAL_PRODUCTS;
+    }
+    return parsed;
   } catch (e) {
     console.error('Failed to parse stored products', e);
     return INITIAL_PRODUCTS;
@@ -29,7 +37,15 @@ export const saveStoredProducts = (products) => {
 export const getStoredCategories = () => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-    return data ? JSON.parse(data) : INITIAL_CATEGORIES;
+    if (!data) return INITIAL_CATEGORIES;
+    const parsed = JSON.parse(data);
+    // Auto-purge legacy non-IT categories from browser cache
+    const hasLegacy = parsed.some(cat => ['Furniture', 'Apparel', 'Home & Garden', 'Office Supplies', 'Electronics'].includes(cat.name));
+    if (hasLegacy) {
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(INITIAL_CATEGORIES));
+      return INITIAL_CATEGORIES;
+    }
+    return parsed;
   } catch (e) {
     console.error('Failed to parse stored categories', e);
     return INITIAL_CATEGORIES;
