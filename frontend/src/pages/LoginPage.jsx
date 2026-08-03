@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Lock, Mail, ShieldCheck, Eye, EyeOff, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Box, Lock, Mail, User, ShieldCheck, Eye, EyeOff, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useInventory } from '../context/InventoryContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -114,24 +114,36 @@ export const LoginPage = () => {
           )}
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {/* Role Selection Dropdown on Sign In */}
+            {/* Role Selection Switch Toggle on Sign In */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Sign In As (Role Selection)
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Sign In Role
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <ShieldCheck className="h-4 h-4 text-slate-400" />
-                </div>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all cursor-pointer"
+              <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, role: 'admin' }))}
+                  className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                    formData.role === 'admin'
+                      ? 'bg-white text-blue-600 shadow-md ring-1 ring-slate-200/50'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
                 >
-                  <option value="admin">👑 Administrator (Full System & User Management Access)</option>
-                  <option value="staff">👤 Staff Member (Inventory Operations Access)</option>
-                </select>
+                  <ShieldCheck className={`w-4 h-4 ${formData.role === 'admin' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <span>👑 Admin</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, role: 'staff' }))}
+                  className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                    formData.role === 'staff'
+                      ? 'bg-white text-blue-600 shadow-md ring-1 ring-slate-200/50'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <User className={`w-4 h-4 ${formData.role === 'staff' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <span>👤 Staff</span>
+                </button>
               </div>
             </div>
 
