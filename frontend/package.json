@@ -1,17 +1,12 @@
 {
-  "name": "stockflow-monorepo",
+  "name": "stockflow-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "workspaces": [
-    "frontend"
-  ],
   "scripts": {
-    "dev": "npm run dev --prefix frontend",
-    "dev:frontend": "npm run dev --prefix frontend",
-    "dev:backend": "cd backend && php -S localhost:8000 -t public",
-    "build": "npm run build --prefix frontend",
-    "preview": "npm run preview --prefix frontend"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",

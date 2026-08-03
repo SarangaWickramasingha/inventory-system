@@ -1,4 +1,4 @@
-# StockFlow - Modern Inventory Management System Frontend
+# StockFlow - Modern Inventory Management System
 
 StockFlow is a feature-rich, intuitive, and responsive inventory management web application built with modern web technologies. Designed for small-to-medium businesses and enterprise inventory tracking, StockFlow provides real-time overview analytics, product catalog management, category organization, comprehensive reporting, and customizable settings.
 
@@ -18,10 +18,8 @@ StockFlow is a feature-rich, intuitive, and responsive inventory management web 
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [React 18](https://reactjs.org/) + [Vite 5](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS 3](https://tailwindcss.com/) + [PostCSS](https://postcss.org/) + [Autoprefixer](https://github.com/postcss/autoprefixer)
-- **Data Visualization**: [Recharts](https://recharts.org/)
-- **Icons**: [Lucide React](https://lucide.dev/)
+- **Frontend**: [React 18](https://reactjs.org/) + [Vite 5](https://vitejs.dev/) + [Tailwind CSS 3](https://tailwindcss.com/) + [Recharts](https://recharts.org/) + [Lucide React](https://lucide.dev/)
+- **Backend**: Pure PHP 8 OOP Architecture + MySQL (Database)
 
 ---
 
@@ -29,26 +27,36 @@ StockFlow is a feature-rich, intuitive, and responsive inventory management web 
 
 ```text
 inventory-system-frontend/
-├── public/                # Static public assets
-├── src/
-│   ├── components/        # Reusable UI components (Sidebar, Navbar, Cards, Modals)
-│   ├── context/           # React Context providers for global state
-│   ├── pages/             # Page components
-│   │   ├── LandingPage.jsx
-│   │   ├── DashboardPage.jsx
-│   │   ├── InventoryPage.jsx
-│   │   ├── CategoriesPage.jsx
-│   │   ├── AddProductPage.jsx
-│   │   ├── EditProductPage.jsx
-│   │   ├── ReportsPage.jsx
-│   │   └── SettingsPage.jsx
-│   ├── utils/             # Helper utilities and data formatters
-│   ├── App.jsx            # Main app router and layout shell
-│   ├── index.css          # Tailwind CSS directives & custom styles
-│   └── main.jsx           # React application entry point
-├── .gitignore             # Git ignore patterns
-├── package.json           # Dependencies and build scripts
-└── vite.config.js         # Vite configuration
+├── frontend/                     # React Single Page Application
+│   ├── src/
+│   │   ├── components/           # Reusable UI components
+│   │   ├── context/              # React Context providers for global state
+│   │   ├── hooks/                # Custom React hooks (useAuth, useForm)
+│   │   ├── pages/                # Application page views
+│   │   ├── services/             # API integration services
+│   │   ├── utils/                # Helper utilities and formatters
+│   │   ├── App.jsx               # Main layout and routing shell
+│   │   ├── index.css             # Tailwind CSS directives & global styling
+│   │   └── main.jsx              # React application entry point
+│   ├── index.html                # Vite HTML entry point
+│   ├── package.json              # Frontend package dependencies
+│   ├── vite.config.js            # Vite dev server & proxy settings
+│   ├── tailwind.config.js        # Tailwind CSS configuration
+│   └── postcss.config.js         # PostCSS configuration
+├── backend/                      # Pure PHP Backend System
+│   ├── config/                   # Backend routes & configuration
+│   ├── database/                 # Database Schema & Seed data SQL files
+│   │   ├── schema.sql
+│   │   └── seeders.sql
+│   ├── public/                   # Front controller entry point & index.php
+│   └── src/                      # PHP Core, Controllers, Models, Repositories, Services
+│       ├── Controllers/
+│       ├── Core/
+│       ├── Models/
+│       ├── Repositories/
+│       └── Services/
+├── package.json                  # Root monorepo orchestration package.json
+└── README.md                     # Project documentation
 ```
 
 ---
@@ -58,7 +66,8 @@ inventory-system-frontend/
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v16.0 or higher)
-- `npm` or `yarn` / `pnpm`
+- PHP (v8.0 or higher for backend execution)
+- MySQL Server
 
 ### Installation & Setup
 
@@ -73,13 +82,17 @@ inventory-system-frontend/
    npm install
    ```
 
-3. **Start the development server**:
+3. **Start the Frontend development server**:
    ```bash
    npm run dev
    ```
-   Open `http://localhost:PORT` in your browser.
 
-4. **Build for production**:
+4. **Start the Backend server**:
+   ```bash
+   npm run dev:backend
+   ```
+
+5. **Build for production**:
    ```bash
    npm run build
    ```
