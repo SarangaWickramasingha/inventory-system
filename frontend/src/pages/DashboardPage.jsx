@@ -71,8 +71,8 @@ export const DashboardPage = () => {
             <div className="flex items-start gap-4">
               <div className={`p-3.5 rounded-2xl text-white shadow-md ${
                 currentRole === 'admin'
-                  ? 'bg-linear-to-br from-blue-600 to-indigo-700'
-                  : 'bg-linear-to-br from-emerald-600 to-teal-700'
+                  ? 'bg-gradient-to-br from-blue-600 to-indigo-700'
+                  : 'bg-gradient-to-br from-emerald-600 to-teal-700'
               }`}>
                 {currentRole === 'admin' ? (
                   <Shield className="w-7 h-7" />
@@ -242,18 +242,18 @@ export const DashboardPage = () => {
               {/* Bulk Import Banner */}
               <div
                 onClick={() => setShowBulkImportModal(true)}
-                className="bg-linear-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg card-hover cursor-pointer relative overflow-hidden group"
+                className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl border border-slate-800 card-hover cursor-pointer relative overflow-hidden group"
               >
-                <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-white/10 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xs">
-                  <Zap className="w-5 h-5 text-amber-300 fill-amber-300" />
+                <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-blue-500/10 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
+                <div className="w-10 h-10 bg-blue-600/30 border border-blue-400/30 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xs shadow-sm">
+                  <Zap className="w-5 h-5 text-amber-400 fill-amber-400" />
                 </div>
-                <h4 className="text-lg font-extrabold mb-1">Bulk Product Import</h4>
-                <p className="text-xs text-blue-100 leading-relaxed mb-4">
+                <h4 className="text-lg font-extrabold text-white mb-1.5 tracking-tight">Bulk Product Import</h4>
+                <p className="text-xs text-slate-300 font-semibold leading-relaxed mb-4">
                   Easily import hundreds of inventory products from a CSV file into your system.
                 </p>
-                <span className="inline-flex items-center text-xs font-extrabold bg-white text-blue-700 px-4 py-2 rounded-xl shadow-sm group-hover:bg-blue-50 transition-colors">
-                  Upload CSV File <ArrowUpRight className="w-4 h-4 ml-1" />
+                <span className="inline-flex items-center text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl shadow-md transition-all gap-1.5">
+                  Upload CSV File <ArrowUpRight className="w-4 h-4" />
                 </span>
               </div>
 
