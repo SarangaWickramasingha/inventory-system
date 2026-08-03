@@ -10,6 +10,7 @@
     "dev": "npm run dev --prefix frontend",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:backend": "cd backend && php -S localhost:8000 -t public",
+    "seed:backend": "php backend/database/seed.php",
     "build": "npm run build --prefix frontend",
     "preview": "npm run preview --prefix frontend"
   },
