@@ -5,7 +5,6 @@ import { useInventory } from '../context/InventoryContext';
 import { useAuth } from '../context/AuthContext';
 import { Modal } from '../components/common/Modal';
 import { ThresholdSettingsCard } from '../components/settings/ThresholdSettingsCard';
-import { CompanyProfileCard } from '../components/settings/CompanyProfileCard';
 import { Lock, AlertTriangle, LogOut, Edit2, Mail, Shield, User, Key, Check } from 'lucide-react';
 
 import { updatePasswordApi } from '../services/userService';
@@ -32,6 +31,7 @@ export const SettingsPage = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
@@ -48,6 +48,7 @@ export const SettingsPage = () => {
       return;
     }
 
+    setIsUpdatingPassword(true);
     try {
       const res = await updatePasswordApi({
         current_password: currentPassword,
@@ -55,19 +56,18 @@ export const SettingsPage = () => {
       });
 
       if (res && res.success) {
-        showToast('Security password updated in database!');
+        showToast('Security password updated successfully in database!');
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        showToast(res?.message || 'Failed to update password', 'error');
+        showToast(res?.message || 'Failed to update password. Check your current password.', 'error');
       }
     } catch (err) {
       console.warn('Password API error:', err);
-      showToast('Security password updated!');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      showToast('Failed to update password', 'error');
+    } finally {
+      setIsUpdatingPassword(false);
     }
   };
 
@@ -143,9 +143,6 @@ export const SettingsPage = () => {
           {/* Low-Stock Threshold Settings Component */}
           <ThresholdSettingsCard />
 
-          {/* Company Profile Details Component (Admin Only) */}
-          {isAdmin && <CompanyProfileCard />}
-
           {/* Security & Password Form */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/50">
@@ -205,9 +202,10 @@ export const SettingsPage = () => {
               <div className="pt-2 flex justify-end">
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors flex items-center gap-1.5"
+                  disabled={isUpdatingPassword}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md transition-colors flex items-center gap-1.5"
                 >
-                  <Key className="w-4 h-4" /> Update Password
+                  <Key className="w-4 h-4" /> {isUpdatingPassword ? 'Updating Password...' : 'Update Password'}
                 </button>
               </div>
             </form>

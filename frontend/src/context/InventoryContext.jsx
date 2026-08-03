@@ -9,7 +9,9 @@ import {
   getStoredNotifications,
   saveStoredNotifications,
   getStoredProfile,
-  saveStoredProfile
+  saveStoredProfile,
+  getStoredThresholdSettings,
+  saveStoredThresholdSettings
 } from '../utils/storage';
 import { 
   getProducts as fetchProductsFromAPI,
@@ -19,6 +21,7 @@ import {
 } from '../services/productService';
 import { getCategories as fetchCategoriesFromAPI } from '../services/categoryService';
 import { getMe, updateProfileApi, updatePasswordApi } from '../services/userService';
+import { getStockLogs, createStockLog } from '../services/stockService';
 
 const InventoryContext = createContext();
 
@@ -28,6 +31,7 @@ export const InventoryProvider = ({ children }) => {
   const [activities, setActivities] = useState(getStoredActivities);
   const [notifications, setNotifications] = useState(getStoredNotifications);
   const [profile, setProfile] = useState(getStoredProfile);
+  const [thresholdSettings, setThresholdSettings] = useState(getStoredThresholdSettings);
 
   // URL path mapping dictionary
   const viewToPathMap = {
@@ -193,6 +197,18 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
+  // Fetch stock movement audit logs dynamically from backend MySQL database
+  const loadStockLogs = async () => {
+    try {
+      const res = await getStockLogs();
+      if (res && res.success && Array.isArray(res.data?.logs)) {
+        setStockLogs(res.data.logs);
+      }
+    } catch (err) {
+      console.warn('Backend stock logs API unavailable:', err);
+    }
+  };
+
   useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
@@ -204,6 +220,7 @@ export const InventoryProvider = ({ children }) => {
     loadProducts();
     loadCategories();
     loadProfile();
+    loadStockLogs();
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
@@ -418,12 +435,24 @@ export const InventoryProvider = ({ children }) => {
     newQty = Math.max(0, newQty);
 
     try {
+      try {
+        await createStockLog({
+          product_id: productId,
+          type: type,
+          quantity: amount,
+          notes: notes || `Stock ${type} adjustment for ${targetProduct.name}`
+        });
+      } catch (logErr) {
+        console.warn('Could not post stock log entry:', logErr);
+      }
+
       const res = await updateProductApi(productId, {
         quantity: newQty
       });
 
       if (res && res.success) {
         await loadProducts();
+        await loadStockLogs();
 
         const msg = type === 'IN'
           ? `Stock IN logged for "${targetProduct.name}" (+${amount} pcs). New total: ${newQty}`
@@ -451,6 +480,13 @@ export const InventoryProvider = ({ children }) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   };
 
+  const updateThresholdSettings = (newSettings) => {
+    const updated = { ...thresholdSettings, ...newSettings };
+    setThresholdSettings(updated);
+    saveStoredThresholdSettings(updated);
+    showToast('Low-stock threshold settings updated successfully!');
+  };
+
   return (
     <InventoryContext.Provider value={{
       products,
@@ -462,6 +498,8 @@ export const InventoryProvider = ({ children }) => {
       stockLogs,
       notifications,
       profile,
+      thresholdSettings,
+      updateThresholdSettings,
       currentView,
       setCurrentView,
       authMode,
