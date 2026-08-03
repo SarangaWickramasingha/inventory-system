@@ -63,16 +63,16 @@ export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdj
                     {prod.sku}
                   </td>
                   <td className="py-3 px-4 text-slate-600 font-medium">
-                    {prod.category}
+                    {prod.category || prod.category_name || 'Uncategorized'}
                   </td>
                   <td className="py-3 px-4 text-center font-bold text-slate-800">
-                    {prod.quantity}
+                    {prod.quantity ?? 0}
                   </td>
                   <td className="py-3 px-4 text-right font-medium text-slate-600">
-                    ${prod.buyingPrice.toFixed(2)}
+                    ${Number(prod.buyingPrice ?? prod.cost_price ?? 0).toFixed(2)}
                   </td>
                   <td className="py-3 px-4 text-right font-bold text-slate-900">
-                    ${prod.sellingPrice.toFixed(2)}
+                    ${Number(prod.sellingPrice ?? prod.price ?? 0).toFixed(2)}
                   </td>
                   <td className="py-3 px-4 text-center">
                     <StatusBadge status={getProductStatus(prod)} />

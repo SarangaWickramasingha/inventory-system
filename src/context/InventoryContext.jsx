@@ -77,13 +77,43 @@ export const InventoryProvider = ({ children }) => {
     totalPages: 1
   });
 
+  const normalizeProduct = (item) => {
+    if (!item) return null;
+    const priceVal = Number(item.sellingPrice ?? item.price ?? 0);
+    const costVal = Number(item.buyingPrice ?? item.cost_price ?? 0);
+    const qtyVal = Number(item.quantity ?? 0);
+    const alertVal = Number(item.reorderPoint ?? item.min_stock_alert ?? 5);
+    const categoryVal = item.category || item.category_name || 'Uncategorized';
+
+    return {
+      ...item,
+      id: item.id,
+      sku: item.sku || '',
+      name: item.name || '',
+      category: categoryVal,
+      category_name: categoryVal,
+      price: priceVal,
+      sellingPrice: priceVal,
+      cost_price: costVal,
+      buyingPrice: costVal,
+      quantity: qtyVal,
+      reorderPoint: alertVal,
+      min_stock_alert: alertVal,
+      unit: item.unit || 'pcs',
+      description: item.description || '',
+      status: item.status === 'in_stock' ? 'In Stock' : item.status === 'low_stock' ? 'Low Stock' : item.status === 'out_of_stock' ? 'Out of Stock' : (item.status || 'In Stock'),
+      image: item.image || item.image_url || 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&q=80',
+      additionalImages: item.additionalImages || []
+    };
+  };
+
   // Fetch products from backend API with fallback
   const loadProducts = async (filters = {}) => {
     setLoadingProducts(true);
     try {
       const response = await fetchProductsFromAPI(filters);
       if (response && response.success && Array.isArray(response.data?.items)) {
-        setProducts(response.data.items);
+        setProducts(response.data.items.map(normalizeProduct));
         if (response.data.pagination) {
           setPaginationMeta({
             currentPage: response.data.pagination.current_page || 1,
