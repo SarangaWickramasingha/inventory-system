@@ -29,31 +29,31 @@ export const DashboardPage = () => {
   };
 
   // KPI Computations
-  const totalProducts = products.length;
-  const lowStockCount = products.filter(p => p.status === 'Low Stock').length;
-  const outOfStockCount = products.filter(p => p.status === 'Out of Stock').length;
+  const totalProducts = (products || []).length;
+  const lowStockCount = (products || []).filter(p => p?.status === 'Low Stock' || p?.status === 'low_stock').length;
+  const outOfStockCount = (products || []).filter(p => p?.status === 'Out of Stock' || p?.status === 'out_of_stock').length;
   
   // Total Valuation calculation: sum of (buyingPrice * quantity)
-  const totalValuation = products.reduce(
-    (sum, p) => sum + (Number(p.buyingPrice || 0) * Number(p.quantity || 0)),
+  const totalValuation = (products || []).reduce(
+    (sum, p) => sum + (Number(p?.buyingPrice ?? p?.cost_price ?? p?.price ?? 0) * Number(p?.quantity || 0)),
     0
   );
 
   // Staff specific metrics
-  const activeItemsCount = products.filter(p => p.isActive !== false).length;
+  const activeItemsCount = (products || []).filter(p => p?.isActive !== false).length;
   const itemsToRestock = lowStockCount + outOfStockCount;
 
   // Export handler
   const handleExportReport = () => {
-    const reportData = products.map(p => ({
-      SKU: p.sku,
-      Name: p.name,
-      Category: p.category,
-      Quantity: p.quantity,
-      BuyingPrice: p.buyingPrice,
-      SellingPrice: p.sellingPrice,
-      TotalValuation: (p.quantity * p.buyingPrice).toFixed(2),
-      Status: p.status
+    const reportData = (products || []).map(p => ({
+      SKU: p?.sku || '',
+      Name: p?.name || '',
+      Category: p?.category || p?.category_name || '',
+      Quantity: p?.quantity || 0,
+      BuyingPrice: p?.buyingPrice ?? p?.cost_price ?? 0,
+      SellingPrice: p?.sellingPrice ?? p?.price ?? 0,
+      TotalValuation: ((p?.quantity || 0) * (p?.buyingPrice ?? p?.cost_price ?? p?.price ?? 0)).toFixed(2),
+      Status: p?.status || ''
     }));
     exportToCSV('stockflow_inventory_summary.csv', reportData);
   };

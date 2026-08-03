@@ -11,15 +11,19 @@ export const CategoryChart = () => {
   const totalProductsCount = products.length || 1;
 
   // Compute category breakdown dynamically
-  const data = categories.map((cat, index) => {
-    const count = products.filter(p => p.category.toLowerCase() === cat.name.toLowerCase()).length;
+  const data = (categories || []).map((cat, index) => {
+    const catName = (cat?.name || '').toLowerCase();
+    const count = (products || []).filter(p => {
+      const prodCat = (p?.category || p?.category_name || '').toLowerCase();
+      return prodCat === catName;
+    }).length;
     const share = Math.round((count / totalProductsCount) * 100) || 0;
 
     return {
-      name: cat.name,
+      name: cat?.name || 'Uncategorized',
       value: count,
       share: share,
-      color: cat.color || FALLBACK_COLORS[index % FALLBACK_COLORS.length]
+      color: cat?.color || FALLBACK_COLORS[index % FALLBACK_COLORS.length]
     };
   });
 

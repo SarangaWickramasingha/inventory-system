@@ -159,6 +159,7 @@ export const InventoryProvider = ({ children }) => {
     };
 
     window.addEventListener('popstate', handlePopState);
+    loadProducts();
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 

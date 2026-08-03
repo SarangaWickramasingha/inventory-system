@@ -9,20 +9,24 @@ export const CategoryStockBarChart = () => {
   const { products, categories } = useInventory();
 
   // Aggregate quantity per category dynamically
-  const categoryData = categories.map((cat, index) => {
-    const totalQty = products
-      .filter(p => p.category.toLowerCase() === cat.name.toLowerCase())
-      .reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+  const categoryData = (categories || []).map((cat, index) => {
+    const catName = (cat?.name || '').toLowerCase();
+    const matchingProducts = (products || []).filter(p => {
+      const prodCat = (p?.category || p?.category_name || '').toLowerCase();
+      return prodCat === catName;
+    });
 
-    const totalValuation = products
-      .filter(p => p.category.toLowerCase() === cat.name.toLowerCase())
-      .reduce((sum, p) => sum + ((Number(p.quantity) || 0) * (Number(p.buyingPrice) || 0)), 0);
+    const totalQty = matchingProducts.reduce((sum, p) => sum + (Number(p?.quantity) || 0), 0);
+    const totalValuation = matchingProducts.reduce(
+      (sum, p) => sum + ((Number(p?.quantity) || 0) * (Number(p?.buyingPrice ?? p?.price) || 0)),
+      0
+    );
 
     return {
-      name: cat.name,
+      name: cat?.name || 'Uncategorized',
       stockUnits: totalQty,
       valuation: totalValuation,
-      color: cat.color || BAR_COLORS[index % BAR_COLORS.length]
+      color: cat?.color || BAR_COLORS[index % BAR_COLORS.length]
     };
   });
 

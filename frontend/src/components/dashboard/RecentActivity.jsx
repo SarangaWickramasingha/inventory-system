@@ -28,7 +28,14 @@ export const RecentActivity = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-sm">
-            {activities.slice(0, 5).map((act) => (
+            {(activities || []).length === 0 ? (
+              <tr>
+                <td colSpan="4" className="py-6 text-center text-xs text-slate-400 font-medium">
+                  No recent activity logged.
+                </td>
+              </tr>
+            ) : (
+              (activities || []).slice(0, 5).map((act) => (
               <tr key={act.id} className="hover:bg-slate-50/70 transition-colors">
                 <td className="py-3.5 pl-2 font-semibold text-slate-800 max-w-xs truncate">
                   {act.productName}
@@ -52,7 +59,7 @@ export const RecentActivity = () => {
                   {act.time}
                 </td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
       </div>

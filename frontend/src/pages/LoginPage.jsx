@@ -56,18 +56,18 @@ export const LoginPage = () => {
     }
   };
 
-  const handleQuickDemo = (role) => {
+  const handleQuickDemo = async (role) => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setUser({
-        name: role === 'admin' ? 'Saranga Wickramasingha' : 'Manuja Staff',
-        email: role === 'admin' ? 'admin@stockflow.com' : 'staff@stockflow.com',
-        role: role,
-      });
-      setToken(`mock-hmac-sha256-${role}-token`);
+    setError('');
+    const email = role === 'admin' ? 'admin@stockflow.com' : 'john.doe@stockflow.com';
+    const password = role === 'admin' ? 'admin123' : 'staff123';
+    const result = await login(email, password, role);
+    setIsLoading(false);
+    if (result && result.success) {
       setCurrentView('dashboard');
-    }, 500);
+    } else {
+      setError(result?.message || 'Quick demo login failed.');
+    }
   };
 
   return (
