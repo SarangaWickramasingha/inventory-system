@@ -1,19 +1,23 @@
 import React from 'react';
 import { LayoutDashboard, Package, Shapes, BarChart3, Users, Settings, Plus, Box, Activity } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const Sidebar = () => {
   const { currentView, setCurrentView } = useInventory();
+  const { isAdmin } = useAuth();
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'inventory', label: 'Inventory', icon: Package },
     { id: 'categories', label: 'Categories', icon: Shapes },
-    { id: 'staff-activity', label: 'Staff Activity', icon: Activity },
-    { id: 'users', label: 'Users & Roles', icon: Users },
+    { id: 'staff-activity', label: 'Staff Activity', icon: Activity, adminOnly: true },
+    { id: 'users', label: 'Users & Roles', icon: Users, adminOnly: true },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
+
+  const visibleNavItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 flex flex-col justify-between h-screen sticky top-0 z-20 select-none">
@@ -36,7 +40,7 @@ export const Sidebar = () => {
 
         {/* Navigation Items */}
         <nav className="mt-2 px-3 space-y-1">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id || 
               (item.id === 'inventory' && (currentView === 'add-product' || currentView === 'edit-product'));
