@@ -18,6 +18,7 @@ import {
   deleteProduct as deleteProductApi
 } from '../services/productService';
 import { getCategories as fetchCategoriesFromAPI } from '../services/categoryService';
+import { getMe, updateProfileApi, updatePasswordApi } from '../services/userService';
 
 const InventoryContext = createContext();
 
@@ -169,6 +170,29 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
+  // Fetch authenticated user profile dynamically from backend MySQL database
+  const loadProfile = async () => {
+    try {
+      const res = await getMe();
+      if (res && res.success && res.data?.user) {
+        const u = res.data.user;
+        const normalizedProfile = {
+          id: u.id,
+          name: u.full_name || u.name || u.username,
+          username: u.username,
+          email: u.email,
+          role: (u.role || 'admin').toUpperCase(),
+          status: u.status,
+          avatar: u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80'
+        };
+        setProfile(normalizedProfile);
+        saveStoredProfile(normalizedProfile);
+      }
+    } catch (err) {
+      console.warn('Backend user profile API unavailable:', err);
+    }
+  };
+
   useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
@@ -179,6 +203,7 @@ export const InventoryProvider = ({ children }) => {
     window.addEventListener('popstate', handlePopState);
     loadProducts();
     loadCategories();
+    loadProfile();
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
@@ -348,9 +373,21 @@ export const InventoryProvider = ({ children }) => {
     setCurrentView('edit-product');
   };
 
-  const updateProfile = (newProfile) => {
-    setProfile(prev => ({ ...prev, ...newProfile }));
-    showToast('Profile settings updated successfully!');
+  const updateProfile = async (newProfile) => {
+    try {
+      const res = await updateProfileApi(newProfile);
+      if (res && res.success) {
+        await loadProfile();
+        showToast('Profile settings updated successfully!');
+        return res;
+      } else {
+        showToast(res?.message || 'Failed to update profile in database', 'error');
+      }
+    } catch (err) {
+      console.warn('API profile error, saving locally:', err);
+      setProfile(prev => ({ ...prev, ...newProfile }));
+      showToast('Profile settings updated!');
+    }
   };
 
   const [stockLogs, setStockLogs] = useState([]);

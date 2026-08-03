@@ -94,6 +94,55 @@ class AuthController
         ], 200);
     }
 
+    public function updateProfile(): void
+    {
+        $payload = $this->authMiddleware->handle();
+        if (!$payload) return;
+
+        $userId = $payload['sub'] ?? null;
+        if (!$userId) {
+            $this->jsonResponse(false, 'Unauthorized access.', null, 401);
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        try {
+            $updatedUser = $this->userService->updateUserProfile((int)$userId, $input);
+            $this->jsonResponse(true, 'Profile updated successfully.', [
+                'user' => $updatedUser->toArray()
+            ], 200);
+        } catch (\InvalidArgumentException $e) {
+            $this->jsonResponse(false, $e->getMessage(), null, 400);
+        } catch (\Exception $e) {
+            $this->jsonResponse(false, 'Failed to update profile.', null, 500);
+        }
+    }
+
+    public function updatePassword(): void
+    {
+        $payload = $this->authMiddleware->handle();
+        if (!$payload) return;
+
+        $userId = $payload['sub'] ?? null;
+        if (!$userId) {
+            $this->jsonResponse(false, 'Unauthorized access.', null, 401);
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        $currentPassword = $input['current_password'] ?? $input['currentPassword'] ?? '';
+        $newPassword = $input['new_password'] ?? $input['newPassword'] ?? '';
+
+        try {
+            $this->userService->updateUserPassword((int)$userId, $currentPassword, $newPassword);
+            $this->jsonResponse(true, 'Password updated successfully.', null, 200);
+        } catch (\InvalidArgumentException $e) {
+            $this->jsonResponse(false, $e->getMessage(), null, 400);
+        } catch (\Exception $e) {
+            $this->jsonResponse(false, 'Failed to update password.', null, 500);
+        }
+    }
+
     private function jsonResponse(bool $success, string $message, $data = null, int $statusCode = 200): void
     {
         http_response_code($statusCode);
