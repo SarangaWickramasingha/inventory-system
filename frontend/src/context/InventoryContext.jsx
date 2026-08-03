@@ -9,7 +9,9 @@ import {
   getStoredNotifications,
   saveStoredNotifications,
   getStoredProfile,
-  saveStoredProfile
+  saveStoredProfile,
+  getStoredThresholdSettings,
+  saveStoredThresholdSettings
 } from '../utils/storage';
 import { 
   getProducts as fetchProductsFromAPI,
@@ -29,6 +31,7 @@ export const InventoryProvider = ({ children }) => {
   const [activities, setActivities] = useState(getStoredActivities);
   const [notifications, setNotifications] = useState(getStoredNotifications);
   const [profile, setProfile] = useState(getStoredProfile);
+  const [thresholdSettings, setThresholdSettings] = useState(getStoredThresholdSettings);
 
   // URL path mapping dictionary
   const viewToPathMap = {
@@ -477,6 +480,13 @@ export const InventoryProvider = ({ children }) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   };
 
+  const updateThresholdSettings = (newSettings) => {
+    const updated = { ...thresholdSettings, ...newSettings };
+    setThresholdSettings(updated);
+    saveStoredThresholdSettings(updated);
+    showToast('Low-stock threshold settings updated successfully!');
+  };
+
   return (
     <InventoryContext.Provider value={{
       products,
@@ -488,6 +498,8 @@ export const InventoryProvider = ({ children }) => {
       stockLogs,
       notifications,
       profile,
+      thresholdSettings,
+      updateThresholdSettings,
       currentView,
       setCurrentView,
       authMode,

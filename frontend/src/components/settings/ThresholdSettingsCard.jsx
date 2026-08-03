@@ -1,18 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useInventory } from '../../context/InventoryContext';
 import { Sliders, Bell, AlertTriangle, ShieldCheck, Check } from 'lucide-react';
 
 export const ThresholdSettingsCard = () => {
-  const { showToast } = useInventory();
-  const [defaultThreshold, setDefaultThreshold] = useState('30');
-  const [criticalThreshold, setCriticalThreshold] = useState('5');
-  const [enableEmailAlerts, setEnableEmailAlerts] = useState(true);
-  const [enableDashboardAlerts, setEnableDashboardAlerts] = useState(true);
-  const [autoReorderFlag, setAutoReorderFlag] = useState(false);
+  const { thresholdSettings, updateThresholdSettings } = useInventory();
+
+  const [defaultThreshold, setDefaultThreshold] = useState(thresholdSettings?.defaultThreshold ?? 30);
+  const [criticalThreshold, setCriticalThreshold] = useState(thresholdSettings?.criticalThreshold ?? 5);
+  const [enableDashboardAlerts, setEnableDashboardAlerts] = useState(thresholdSettings?.enableDashboardAlerts ?? true);
+  const [autoReorderFlag, setAutoReorderFlag] = useState(thresholdSettings?.autoReorderFlag ?? false);
+
+  useEffect(() => {
+    if (thresholdSettings) {
+      setDefaultThreshold(thresholdSettings.defaultThreshold ?? 30);
+      setCriticalThreshold(thresholdSettings.criticalThreshold ?? 5);
+      setEnableDashboardAlerts(thresholdSettings.enableDashboardAlerts ?? true);
+      setAutoReorderFlag(thresholdSettings.autoReorderFlag ?? false);
+    }
+  }, [thresholdSettings]);
 
   const handleSaveThresholds = (e) => {
     e.preventDefault();
-    showToast('Low-stock threshold settings updated successfully!');
+    updateThresholdSettings({
+      defaultThreshold: Number(defaultThreshold) || 10,
+      criticalThreshold: Number(criticalThreshold) || 5,
+      enableDashboardAlerts: Boolean(enableDashboardAlerts),
+      autoReorderFlag: Boolean(autoReorderFlag)
+    });
   };
 
   return (
