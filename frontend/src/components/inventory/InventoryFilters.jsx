@@ -20,8 +20,8 @@ export const InventoryFilters = ({
           className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-semibold py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer shadow-2xs"
         >
           <option value="All Categories">All Categories</option>
-          {categories.map(c => (
-            <option key={c.id} value={c.name}>{c.name}</option>
+          {(categories || []).map(c => (
+            <option key={c.id || c.name} value={c.name}>{c.name}</option>
           ))}
         </select>
         <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />

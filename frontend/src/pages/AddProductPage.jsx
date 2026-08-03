@@ -217,7 +217,7 @@ export const AddProductPage = () => {
                     type="number"
                     min="0"
                     value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
+                    onChange={(e) => setQuantity(Math.max(0, Number(e.target.value) || 0))}
                     className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white"
                   />
                 </div>

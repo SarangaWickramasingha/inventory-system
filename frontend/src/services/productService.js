@@ -41,3 +41,36 @@ export const getProductById = async (id) => {
     method: 'GET',
   });
 };
+
+/**
+ * Create a new product.
+ * @param {Object} productData
+ */
+export const createProduct = async (productData) => {
+  return fetchAPI('/products', {
+    method: 'POST',
+    body: JSON.stringify(productData),
+  });
+};
+
+/**
+ * Update an existing product by ID.
+ * @param {number|string} id
+ * @param {Object} productData
+ */
+export const updateProduct = async (id, productData) => {
+  return fetchAPI(`/products/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(productData),
+  });
+};
+
+/**
+ * Delete a product by ID.
+ * @param {number|string} id
+ */
+export const deleteProduct = async (id) => {
+  return fetchAPI(`/products/${id}`, {
+    method: 'DELETE',
+  });
+};
