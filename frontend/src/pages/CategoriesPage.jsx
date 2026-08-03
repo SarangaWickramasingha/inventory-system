@@ -4,10 +4,13 @@ import { Sidebar } from '../components/common/Sidebar';
 import { CategoryCard, CreateCategoryCard } from '../components/categories/CategoryCard';
 import { AddCategoryModal } from '../components/categories/AddCategoryModal';
 import { useInventory } from '../context/InventoryContext';
+import { useAuth } from '../context/AuthContext';
 import { Plus } from 'lucide-react';
 
 export const CategoriesPage = () => {
   const { categories, products } = useInventory();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [showAddModal, setShowAddModal] = useState(false);
 
   const displayCategories = (categories || []).map(cat => {
@@ -38,12 +41,14 @@ export const CategoriesPage = () => {
               </p>
             </div>
 
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-colors flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" /> Add Category
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-colors flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4 stroke-[3]" /> Add Category
+              </button>
+            )}
           </div>
 
           {/* Category Cards Grid */}
@@ -51,7 +56,7 @@ export const CategoriesPage = () => {
             {displayCategories.map((cat) => (
               <CategoryCard key={cat.id || cat.name} category={cat} />
             ))}
-            <CreateCategoryCard onClick={() => setShowAddModal(true)} />
+            {isAdmin && <CreateCategoryCard onClick={() => setShowAddModal(true)} />}
           </div>
         </main>
       </div>

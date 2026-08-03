@@ -1,6 +1,7 @@
 import React from 'react';
-import { Laptop, Server, Network, Monitor, Cpu, Zap, Folder, Plus } from 'lucide-react';
+import { Laptop, Server, Network, Monitor, Cpu, Zap, Folder, Plus, Trash2 } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
+import { useAuth } from '../../context/AuthContext';
 
 const ICON_MAP = {
   Laptop: Laptop,
@@ -13,7 +14,9 @@ const ICON_MAP = {
 };
 
 export const CategoryCard = ({ category }) => {
-  const { setSelectedCategoryFilter, setCurrentView } = useInventory();
+  const { setSelectedCategoryFilter, setCurrentView, deleteCategory } = useInventory();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const IconComponent = ICON_MAP[category.icon] || Folder;
 
   const handleClick = () => {
@@ -21,18 +24,39 @@ export const CategoryCard = ({ category }) => {
     setCurrentView('inventory');
   };
 
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    if (window.confirm(`Are you sure you want to delete category "${category.name}"?`)) {
+      deleteCategory(category.id || category.name);
+    }
+  };
+
   return (
     <div
       onClick={handleClick}
-      className="bg-white rounded-2xl p-6 border border-slate-200 shadow-2xs card-hover cursor-pointer flex flex-col justify-between"
+      className="bg-white rounded-2xl p-6 border border-slate-200 shadow-2xs card-hover cursor-pointer flex flex-col justify-between relative group"
     >
       <div>
-        <div
-          className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 text-white shadow-sm"
-          style={{ backgroundColor: category.color || '#2563EB' }}
-        >
-          <IconComponent className="w-6 h-6" />
+        <div className="flex items-center justify-between mb-4">
+          <div
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm"
+            style={{ backgroundColor: category.color || '#2563EB' }}
+          >
+            <IconComponent className="w-6 h-6" />
+          </div>
+
+          {/* Delete Button (Admin Only) */}
+          {isAdmin && (
+            <button
+              onClick={handleDelete}
+              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+              title={`Delete category "${category.name}"`}
+            >
+              <Trash2 className="w-4 h-4 stroke-[2]" />
+            </button>
+          )}
         </div>
+
         <h3 className="text-lg font-bold text-slate-900 mb-1">{category.name}</h3>
         <p className="text-xs text-slate-500 line-clamp-2">{category.description}</p>
       </div>

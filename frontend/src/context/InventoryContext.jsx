@@ -330,6 +330,12 @@ export const InventoryProvider = ({ children }) => {
     showToast(`Category "${newCat.name}" created!`);
   };
 
+  const deleteCategory = (categoryId) => {
+    const target = categories.find(c => c.id === categoryId || c.name === categoryId);
+    setCategories(prev => prev.filter(c => c.id !== categoryId && c.name !== categoryId));
+    showToast(`Category "${target?.name || 'Category'}" deleted!`, 'warning');
+  };
+
   const bulkImportProducts = (importedList) => {
     if (!Array.isArray(importedList) || importedList.length === 0) return;
     setProducts(prev => [...importedList, ...prev]);
@@ -439,6 +445,7 @@ export const InventoryProvider = ({ children }) => {
       deleteProduct,
       adjustStock,
       addCategory,
+      deleteCategory,
       bulkImportProducts,
       navigateToEdit,
       updateProfile,
