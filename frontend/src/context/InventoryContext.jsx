@@ -102,7 +102,8 @@ export const InventoryProvider = ({ children }) => {
       unit: item.unit || 'pcs',
       description: item.description || '',
       status: item.status === 'in_stock' ? 'In Stock' : item.status === 'low_stock' ? 'Low Stock' : item.status === 'out_of_stock' ? 'Out of Stock' : (item.status || 'In Stock'),
-      image: item.image || item.image_url || 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&q=80',
+      image: item.image_url || item.image || 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&q=80',
+      image_url: item.image_url || item.image || 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&q=80',
       additionalImages: item.additionalImages || []
     };
   };

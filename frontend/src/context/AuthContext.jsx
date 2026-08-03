@@ -19,8 +19,8 @@ export const AuthProvider = ({ children }) => {
         return null;
       }
     }
-    // Default fallback initial session
-    return { name: 'Admin User', email: 'admin@stockflow.com', role: 'admin' };
+    // Default: null when unauthenticated
+    return null;
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     setUserState(newUser);
   };
 
-  // Login handler with backend API connection + mock fallback support
+  // Login handler connected to backend API
   const login = async (email, password) => {
     setIsLoading(true);
     setError(null);
@@ -74,18 +74,10 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: errMsg };
       }
     } catch (err) {
-      console.warn('Backend API server unavailable. Falling back to local authentication mode.', err);
-      // Fallback local authentication for standalone UI demo
-      const fallbackUser = {
-        name: email.includes('admin') ? 'Saranga Wickramasingha' : 'Manuja Staff',
-        email: email,
-        role: email.includes('admin') ? 'admin' : 'staff',
-      };
-      const mockToken = 'mock-hmac-sha256-token-' + Date.now();
-      setToken(mockToken);
-      setUser(fallbackUser);
+      const errMsg = 'Backend API server unavailable. Please make sure the backend server is running.';
+      setError(errMsg);
       setIsLoading(false);
-      return { success: true, user: fallbackUser };
+      return { success: false, message: errMsg };
     }
   };
 
@@ -126,17 +118,10 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: errMsg };
       }
     } catch (err) {
-      console.warn('Backend API server unavailable. Falling back to local registration mode.', err);
-      const fallbackUser = {
-        name: formData.fullName || 'New User',
-        email: formData.email,
-        role: formData.role || 'staff',
-      };
-      const mockToken = 'mock-hmac-sha256-token-' + Date.now();
-      setToken(mockToken);
-      setUser(fallbackUser);
+      const errMsg = 'Backend API server unavailable.';
+      setError(errMsg);
       setIsLoading(false);
-      return { success: true, user: fallbackUser };
+      return { success: false, message: errMsg };
     }
   };
 
