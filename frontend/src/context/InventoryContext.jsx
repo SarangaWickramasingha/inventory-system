@@ -13,6 +13,7 @@ import {
   getStoredThresholdSettings,
   saveStoredThresholdSettings
 } from '../utils/storage';
+import { getDiceBearAvatar } from '../utils/avatar';
 import { 
   getProducts as fetchProductsFromAPI,
   createProduct as createProductApi,
@@ -38,6 +39,11 @@ export const InventoryProvider = ({ children }) => {
     'landing': '/',
     'login': '/login',
     'register': '/register',
+    'features': '/features',
+    'about': '/about',
+    'contact': '/contact',
+    'privacy': '/privacy',
+    'terms': '/terms',
     'dashboard': '/dashboard',
     'inventory': '/inventory',
     'categories': '/categories',
@@ -55,6 +61,11 @@ export const InventoryProvider = ({ children }) => {
     '/': 'landing',
     '/login': 'login',
     '/register': 'register',
+    '/features': 'features',
+    '/about': 'about',
+    '/contact': 'contact',
+    '/privacy': 'privacy',
+    '/terms': 'terms',
     '/dashboard': 'dashboard',
     '/inventory': 'inventory',
     '/categories': 'categories',
@@ -187,7 +198,7 @@ export const InventoryProvider = ({ children }) => {
           email: u.email,
           role: (u.role || 'admin').toUpperCase(),
           status: u.status,
-          avatar: u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80'
+          avatar: getDiceBearAvatar(u.full_name || u.name || u.username)
         };
         setProfile(normalizedProfile);
         saveStoredProfile(normalizedProfile);
@@ -257,9 +268,9 @@ export const InventoryProvider = ({ children }) => {
       id: `act-${Date.now()}`,
       productName,
       action,
-      user: profile.name || 'Alex Mercer',
-      userInitials: (profile.name || 'Alex Mercer').split(' ').map(n => n[0]).join(''),
-      userAvatar: profile.avatar,
+      user: profile.name || 'Saranga Wickramasingha',
+      userInitials: (profile.name || 'Saranga Wickramasingha').split(' ').map(n => n[0]).join(''),
+      userAvatar: getDiceBearAvatar(profile.name || 'Saranga Wickramasingha'),
       time: 'Just now',
       timestamp: new Date().toISOString()
     };

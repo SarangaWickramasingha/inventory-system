@@ -3,6 +3,7 @@ import { Eye, Edit3, Trash2, ChevronLeft, ChevronRight, Sliders } from 'lucide-r
 import { useInventory } from '../../context/InventoryContext';
 import { StatusBadge } from '../common/Badge';
 import { StockAdjustModal } from './StockAdjustModal';
+import { ConfirmModal } from '../common/ConfirmModal';
 
 const getProductStatus = (prod, defaultThreshold = 30) => {
   const qty = Number(prod.quantity ?? 0);
@@ -16,6 +17,7 @@ export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdj
   const { deleteProduct, thresholdSettings } = useInventory();
   const [currentPage, setCurrentPage] = useState(1);
   const [adjustingProduct, setAdjustingProduct] = useState(null);
+  const [deletingProduct, setDeletingProduct] = useState(null);
   const itemsPerPage = 6;
 
   const totalPages = Math.ceil(products.length / itemsPerPage) || 1;
@@ -101,11 +103,7 @@ export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdj
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (window.confirm(`Are you sure you want to delete "${prod.name}"?`)) {
-                            deleteProduct(prod.id);
-                          }
-                        }}
+                        onClick={() => setDeletingProduct(prod)}
                         className="p-1.5 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                         title="Delete Product"
                       >
@@ -166,6 +164,20 @@ export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdj
         isOpen={Boolean(adjustingProduct)}
         onClose={() => setAdjustingProduct(null)}
         product={adjustingProduct}
+      />
+
+      {/* Unified System Product Delete Confirm Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deletingProduct)}
+        onClose={() => setDeletingProduct(null)}
+        onConfirm={() => {
+          if (deletingProduct) {
+            deleteProduct(deletingProduct.id);
+          }
+        }}
+        title="Delete Product"
+        message={`Are you sure you want to delete product "${deletingProduct?.name}"?`}
+        confirmText="Delete Product"
       />
     </div>
   );

@@ -2,6 +2,11 @@ import React from 'react';
 import { InventoryProvider, useInventory } from './context/InventoryContext';
 import { AuthProvider } from './context/AuthContext';
 import { LandingPage } from './pages/LandingPage';
+import { FeaturesPage } from './pages/FeaturesPage';
+import { AboutPage } from './pages/AboutPage';
+import { ContactPage } from './pages/ContactPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { CategoriesPage } from './pages/CategoriesPage';
@@ -27,6 +32,16 @@ const MainContent = () => {
       return <LoginPage />;
     case 'register':
       return <RegisterPage />;
+    case 'features':
+      return <FeaturesPage />;
+    case 'about':
+      return <AboutPage />;
+    case 'contact':
+      return <ContactPage />;
+    case 'privacy':
+      return <PrivacyPolicyPage />;
+    case 'terms':
+      return <TermsOfServicePage />;
     case 'dashboard':
       return <DashboardPage />;
     case 'inventory':

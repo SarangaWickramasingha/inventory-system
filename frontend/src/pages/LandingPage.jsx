@@ -1,29 +1,30 @@
 import React, { useState } from 'react';
 import { LandingNavbar } from '../components/landing/LandingNavbar';
-import { Hero, FeatureSection } from '../components/landing/Hero';
+import { Hero, FeatureSection, AboutSection } from '../components/landing/Hero';
 import { Modal } from '../components/common/Modal';
 import { useInventory } from '../context/InventoryContext';
 import { Box, Check } from 'lucide-react';
 
 export const LandingPage = () => {
-  const { navigateToAuth } = useInventory();
+  const { setCurrentView, navigateToAuth } = useInventory();
   const [showDemoModal, setShowDemoModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
       <div>
-        <LandingNavbar onOpenAuth={(mode = 'login') => navigateToAuth(mode)} />
+        <LandingNavbar />
         <main>
           <Hero onOpenDemo={() => setShowDemoModal(true)} />
           <FeatureSection />
+          <AboutSection />
         </main>
       </div>
 
-      {/* Footer */}
+      {/* Clean Footer with Page Navigation */}
       <footer className="bg-white border-t border-slate-200 py-12 px-8">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8 mb-8 text-sm">
           <div className="col-span-2">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-3 cursor-pointer" onClick={() => setCurrentView('landing')}>
               <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-white">
                 <Box className="w-4 h-4" />
               </div>
@@ -37,37 +38,55 @@ export const LandingPage = () => {
           <div>
             <h4 className="font-bold text-slate-900 mb-3 text-xs uppercase tracking-wider">Product</h4>
             <ul className="space-y-2 text-xs text-slate-500 font-medium">
-              <li>Features</li>
-              <li>Pricing</li>
-              <li>Integrations</li>
-              <li>Changelog</li>
+              <li>
+                <button onClick={() => setCurrentView('features')} className="hover:text-blue-600 transition-colors">
+                  Features Overview
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setCurrentView('contact')} className="hover:text-blue-600 transition-colors">
+                  Contact Support
+                </button>
+              </li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold text-slate-900 mb-3 text-xs uppercase tracking-wider">Company</h4>
             <ul className="space-y-2 text-xs text-slate-500 font-medium">
-              <li>About Us</li>
-              <li>Careers</li>
-              <li>Blog</li>
-              <li>Contact</li>
+              <li>
+                <button onClick={() => setCurrentView('about')} className="hover:text-blue-600 transition-colors">
+                  About Us
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setCurrentView('contact')} className="hover:text-blue-600 transition-colors">
+                  Contact Us
+                </button>
+              </li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold text-slate-900 mb-3 text-xs uppercase tracking-wider">Legal</h4>
             <ul className="space-y-2 text-xs text-slate-500 font-medium">
-              <li>Privacy Policy</li>
-              <li>Terms of Service</li>
-              <li>Cookie Policy</li>
-              <li>Security</li>
+              <li>
+                <button onClick={() => setCurrentView('privacy')} className="hover:text-blue-600 transition-colors">
+                  Privacy Policy
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setCurrentView('terms')} className="hover:text-blue-600 transition-colors">
+                  Terms of Service
+                </button>
+              </li>
             </ul>
           </div>
         </div>
 
         <div className="max-w-6xl mx-auto border-t border-slate-100 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400">
-          <p>© 2026 StockFlow. All rights reserved.</p>
-          <p>Designed for Enterprise ERP Performance</p>
+          <p>© 2026 StockFlow ERP. All rights reserved.</p>
+          <p>Enterprise ERP Performance & Reliability</p>
         </div>
       </footer>
 

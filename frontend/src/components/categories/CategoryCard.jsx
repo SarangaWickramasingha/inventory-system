@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Laptop, Server, Network, Monitor, Cpu, Zap, Folder, Plus, Trash2 } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
 import { useAuth } from '../../context/AuthContext';
+import { ConfirmModal } from '../common/ConfirmModal';
 
 const ICON_MAP = {
   Laptop: Laptop,
@@ -16,6 +17,8 @@ const ICON_MAP = {
 export const CategoryCard = ({ category }) => {
   const { setSelectedCategoryFilter, setCurrentView, deleteCategory } = useInventory();
   const { user } = useAuth();
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+
   const isAdmin = user?.role === 'admin';
   const IconComponent = ICON_MAP[category.icon] || Folder;
 
@@ -26,9 +29,7 @@ export const CategoryCard = ({ category }) => {
 
   const handleDelete = (e) => {
     e.stopPropagation();
-    if (window.confirm(`Are you sure you want to delete category "${category.name}"?`)) {
-      deleteCategory(category.id || category.name);
-    }
+    setShowConfirmDelete(true);
   };
 
   return (
@@ -67,6 +68,17 @@ export const CategoryCard = ({ category }) => {
           {category.productCount ? category.productCount.toLocaleString() : 0}
         </span>
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirmDelete}
+        onClose={() => setShowConfirmDelete(false)}
+        onConfirm={() => {
+          deleteCategory(category.id || category.name);
+        }}
+        title="Delete Category"
+        message={`Are you sure you want to delete category "${category.name}"? Products under this category will be unassigned.`}
+        confirmText="Delete Category"
+      />
     </div>
   );
 };
