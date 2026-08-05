@@ -102,3 +102,27 @@ export const saveStoredProfile = (profile) => {
     console.error('Failed to save profile', e);
   }
 };
+
+const DEFAULT_THRESHOLDS = {
+  defaultThreshold: 30,
+  criticalThreshold: 5,
+  enableDashboardAlerts: true,
+  autoReorderFlag: false
+};
+
+export const getStoredThresholdSettings = () => {
+  try {
+    const data = localStorage.getItem('stockflow_threshold_settings');
+    return data ? { ...DEFAULT_THRESHOLDS, ...JSON.parse(data) } : DEFAULT_THRESHOLDS;
+  } catch (e) {
+    return DEFAULT_THRESHOLDS;
+  }
+};
+
+export const saveStoredThresholdSettings = (settings) => {
+  try {
+    localStorage.setItem('stockflow_threshold_settings', JSON.stringify(settings));
+  } catch (e) {
+    console.error('Failed to save threshold settings', e);
+  }
+};
