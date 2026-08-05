@@ -26,7 +26,7 @@ export const StockMovementTimeline = () => {
       productName: 'Ultra-Wide Curved Monitor 34"',
       sku: 'SKU-1002',
       qtyChange: '-5 units',
-      user: 'Alex Mercer',
+      user: 'Saranga Wickramasingha',
       role: 'Store Admin',
       time: '1 hour ago',
       date: '2026-07-31 19:20',

@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, ArrowRight } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
 
-export const LandingNavbar = ({ onOpenAuth }) => {
+export const LandingNavbar = () => {
   const { setCurrentView } = useInventory();
 
   return (
@@ -16,9 +16,15 @@ export const LandingNavbar = ({ onOpenAuth }) => {
         </div>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-          <a href="#features" className="hover:text-blue-600 transition-colors">Features</a>
-          <a href="#pricing" className="hover:text-blue-600 transition-colors">Pricing</a>
-          <a href="#about" className="hover:text-blue-600 transition-colors">About</a>
+          <button onClick={() => setCurrentView('features')} className="hover:text-blue-600 transition-colors font-semibold">
+            Features
+          </button>
+          <button onClick={() => setCurrentView('about')} className="hover:text-blue-600 transition-colors font-semibold">
+            About
+          </button>
+          <button onClick={() => setCurrentView('contact')} className="hover:text-blue-600 transition-colors font-semibold">
+            Contact
+          </button>
         </div>
 
         <div className="flex items-center gap-3">

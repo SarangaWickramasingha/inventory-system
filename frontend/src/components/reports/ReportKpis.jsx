@@ -3,7 +3,7 @@ import { DollarSign, ArrowUpRight, Award, TrendingUp } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
 
 export const ReportKpis = () => {
-  const { products, categories, activities } = useInventory();
+  const { products, categories, setCurrentView, setSelectedCategoryFilter } = useInventory();
 
   // Dynamic calculations
   const totalCostValuation = products.reduce(
@@ -43,7 +43,11 @@ export const ReportKpis = () => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {/* Total Asset Valuation */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs card-hover flex flex-col justify-between">
+      <div
+        onClick={() => setCurrentView('inventory')}
+        className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs card-hover cursor-pointer hover:border-blue-300 transition-all flex flex-col justify-between"
+        title="View Total Asset Valuation in Product Registry"
+      >
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
             TOTAL ASSET VALUATION
@@ -64,7 +68,11 @@ export const ReportKpis = () => {
       </div>
 
       {/* Retail Market Potential */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs card-hover flex flex-col justify-between">
+      <div
+        onClick={() => setCurrentView('inventory')}
+        className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs card-hover cursor-pointer hover:border-blue-300 transition-all flex flex-col justify-between"
+        title="View Retail Potential & Selling Prices in Product Registry"
+      >
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
             RETAIL VALUE POTENTIAL
@@ -85,7 +93,14 @@ export const ReportKpis = () => {
       </div>
 
       {/* Total Inventory Stock Units */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs card-hover flex flex-col justify-between">
+      <div
+        onClick={() => {
+          setSelectedCategoryFilter('All Categories');
+          setCurrentView('inventory');
+        }}
+        className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs card-hover cursor-pointer hover:border-blue-300 transition-all flex flex-col justify-between"
+        title="View All Product Lines & Stock Units"
+      >
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
             TOTAL STOCK UNITS
@@ -105,7 +120,14 @@ export const ReportKpis = () => {
       </div>
 
       {/* Top Performing Category */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs card-hover flex flex-col justify-between">
+      <div
+        onClick={() => {
+          setSelectedCategoryFilter(topCategory);
+          setCurrentView('inventory');
+        }}
+        className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs card-hover cursor-pointer hover:border-blue-300 transition-all flex flex-col justify-between"
+        title={`Filter Stock Registry by ${topCategory}`}
+      >
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
             TOP STOCK CATEGORY

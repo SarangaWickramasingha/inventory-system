@@ -79,14 +79,9 @@ export const ReportsPage = () => {
           {/* Top Title & Valuation Export Toolbar */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="p-2 bg-blue-100 text-blue-700 rounded-xl font-bold text-xs uppercase tracking-wider print:hidden">
-                  Page 10
-                </span>
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                  Reports & Analytics Center
-                </h1>
-              </div>
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                Reports & Analytics Center
+              </h1>
               <p className="text-xs text-slate-500 font-medium mt-1">
                 Real-time financial valuation, inventory stock movements timeline, and audit analytics.
               </p>

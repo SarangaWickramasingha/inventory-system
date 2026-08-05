@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Search, Bell, HelpCircle, ChevronDown, User, Settings, LogOut, Check, ExternalLink, X } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
+import { useAuth } from '../../context/AuthContext';
 import { Modal } from './Modal';
+import { getDiceBearAvatar } from '../../utils/avatar';
 
 export const Header = () => {
+  const { user } = useAuth();
   const {
     searchTerm,
     setSearchTerm,
@@ -22,10 +25,11 @@ export const Header = () => {
 
   const safeNotifications = notifications || [];
   const safeProducts = products || [];
-  const safeProfile = profile || {
-    name: 'Admin User',
-    email: 'admin@stockflow.com',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80'
+  const safeProfile = {
+    name: user?.name || profile?.name || 'Admin User',
+    username: user?.username || profile?.username || 'admin',
+    email: user?.email || profile?.email || 'admin@stockflow.com',
+    avatar: getDiceBearAvatar(user?.name || profile?.name || 'Admin User'),
   };
 
   const unreadCount = safeNotifications.filter(n => !n.read).length;

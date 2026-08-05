@@ -7,6 +7,7 @@ import { Modal } from '../components/common/Modal';
 import { ThresholdSettingsCard } from '../components/settings/ThresholdSettingsCard';
 import { CompanyProfileCard } from '../components/settings/CompanyProfileCard';
 import { Lock, AlertTriangle, LogOut, Edit2, Mail, Shield, User, Key, Check } from 'lucide-react';
+import { getDiceBearAvatar } from '../utils/avatar';
 
 import { updatePasswordApi } from '../services/userService';
 
@@ -17,17 +18,18 @@ export const SettingsPage = () => {
   const currentRole = user?.role || (profile.role?.toLowerCase().includes('admin') ? 'admin' : 'staff');
   const isAdmin = currentRole === 'admin';
 
-  const userProfile = profile || {
-    name: 'Ashan Wickramasingha',
-    role: 'Admin',
-    email: 'admin@stockflow.com',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80'
+  const userProfile = {
+    name: user?.name || profile?.name || 'Saranga Wickramasingha',
+    role: (user?.role || profile?.role || 'admin').toUpperCase() === 'ADMIN' ? 'Senior IT Asset Administrator' : 'Staff Operations Member',
+    email: user?.email || profile?.email || 'saranga@stockflow.com',
+    username: user?.username || profile?.username || 'saranga_admin',
+    avatar: getDiceBearAvatar(user?.name || profile?.name || 'Saranga Wickramasingha')
   };
 
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
-  const [name, setName] = useState(userProfile.name || 'Admin User');
-  const [role, setRole] = useState(userProfile.role || 'Admin');
-  const [email, setEmail] = useState(userProfile.email || 'admin@stockflow.com');
+  const [name, setName] = useState(userProfile.name);
+  const [role, setRole] = useState(userProfile.role);
+  const [email, setEmail] = useState(userProfile.email);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -105,9 +107,9 @@ export const SettingsPage = () => {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <img
-                  src={userProfile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80'}
+                  src={getDiceBearAvatar(userProfile.name || 'User')}
                   alt={userProfile.name || 'User'}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-slate-200 shadow-sm"
+                  className="w-16 h-16 rounded-full object-cover border-2 border-slate-200 shadow-sm bg-slate-100"
                 />
                 <button
                   onClick={() => setShowEditProfileModal(true)}
@@ -125,9 +127,11 @@ export const SettingsPage = () => {
                     {userProfile.role || 'Admin'}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1 font-medium">
+                <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 font-medium">
                   <Mail className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{userProfile.email || 'admin@stockflow.com'}</span>
+                  <span>{userProfile.email}</span>
+                  <span>•</span>
+                  <span className="text-blue-600 font-bold">@{userProfile.username}</span>
                 </div>
               </div>
             </div>
@@ -160,23 +164,25 @@ export const SettingsPage = () => {
               </div>
             </div>
 
-            <form onSubmit={handleUpdatePassword} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-blue-600 focus:outline-none"
-                  />
-                </div>
+            <form onSubmit={handleUpdatePassword} className="p-6 space-y-5">
+              {/* Row 1: Current Password on its own line */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-blue-600 focus:outline-none"
+                />
+              </div>
 
+              {/* Row 2: New Password and Confirm New Password in new line */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
                     New Password
                   </label>
                   <input
@@ -189,7 +195,7 @@ export const SettingsPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
                     Confirm New Password
                   </label>
                   <input

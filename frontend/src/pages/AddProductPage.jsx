@@ -100,8 +100,40 @@ export const AddProductPage = () => {
               >
                 {imageUrl ? (
                   <div className="flex flex-col items-center">
-                    <img src={imageUrl} alt="Preview" className="w-28 h-28 object-cover rounded-xl border border-slate-200 shadow-sm mb-3" />
-                    <p className="text-xs font-bold text-slate-700">Click or drag image to replace</p>
+                    <div className="relative mb-3">
+                      <img src={imageUrl} alt="Preview" className="w-32 h-32 object-cover rounded-2xl border-2 border-slate-200 shadow-md" />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setImageUrl('');
+                        }}
+                        className="absolute -top-2.5 -right-2.5 bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-full shadow-lg transition-all transform hover:scale-110 flex items-center justify-center"
+                        title="Delete Photo"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <label
+                        htmlFor="product-image-file"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+                      >
+                        Replace Image
+                      </label>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setImageUrl('');
+                        }}
+                        className="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete Photo
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <label className="cursor-pointer flex flex-col items-center">
