@@ -32,6 +32,8 @@ class AuthController
         $email = trim($input['email'] ?? $input['username'] ?? '');
         $password = $input['password'] ?? '';
 
+        $requestedRole = trim($input['role'] ?? '');
+
         if (empty($email) || empty($password)) {
             $this->jsonResponse(false, 'Email and password are required.', null, 400);
             return;
@@ -40,6 +42,12 @@ class AuthController
         $user = $this->authService->getUserByCredentials($email);
         if (!$user || !$user->verifyPassword($password)) {
             $this->jsonResponse(false, 'Invalid login credentials.', null, 401);
+            return;
+        }
+
+        if (!empty($requestedRole) && strtolower($user->getRole()) !== strtolower($requestedRole)) {
+            $registeredRoleName = strtolower($user->getRole()) === 'admin' ? 'Administrator' : 'Staff';
+            $this->jsonResponse(false, "This account is registered as a {$registeredRoleName}. Please select the {$registeredRoleName} role to sign in.", null, 403);
             return;
         }
 

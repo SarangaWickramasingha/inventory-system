@@ -19,15 +19,8 @@ export const DashboardPage = () => {
   const { user, setUser } = useAuth();
   const [showBulkImportModal, setShowBulkImportModal] = useState(false);
 
-  // Active Role state: fallback to context role or local toggle
-  const currentRole = user?.role || 'admin';
-
-  // Toggle role helper (Admin <-> Staff) for interactive demonstration
-  const handleToggleRole = () => {
-    const nextRole = currentRole === 'admin' ? 'staff' : 'admin';
-    const nextName = nextRole === 'admin' ? 'Admin User' : 'Sarah Jenkins';
-    setUser({ ...user, role: nextRole, name: nextName });
-  };
+  // Active Role state: from authenticated user context
+  const currentRole = user?.role || 'staff';
 
   // KPI Computations
   const totalProducts = (products || []).length;
@@ -103,17 +96,8 @@ export const DashboardPage = () => {
               </div>
             </div>
 
-            {/* Quick Actions & Role Switcher Toggle */}
+            {/* Quick Actions */}
             <div className="flex items-center gap-3 self-start md:self-center flex-wrap">
-              <button
-                onClick={handleToggleRole}
-                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all border border-slate-200 flex items-center gap-2"
-                title="Switch role mode between Admin and Staff"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
-                Switch to {currentRole === 'admin' ? 'Staff Mode' : 'Admin Mode'}
-              </button>
-
               {currentRole === 'admin' ? (
                 <button
                   onClick={handleExportReport}

@@ -211,7 +211,7 @@ export const InventoryProvider = ({ children }) => {
           name: u.full_name || u.name || u.username,
           username: u.username,
           email: u.email,
-          role: (u.role || 'admin').toUpperCase(),
+          role: (u.role || 'staff').toUpperCase(),
           status: u.status,
           avatar: getDiceBearAvatar(u.full_name || u.name || u.username)
         };
