@@ -185,18 +185,9 @@ export const Header = () => {
                     setCurrentView('settings');
                     setShowProfileMenu(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                  className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2 font-medium"
                 >
                   <Settings className="w-4 h-4 text-slate-500" /> Account Settings
-                </button>
-                <button
-                  onClick={() => {
-                    setCurrentView('landing');
-                    setShowProfileMenu(false);
-                  }}
-                  className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-                >
-                  <ExternalLink className="w-4 h-4 text-slate-500" /> View Public Landing Page
                 </button>
               </div>
               <div className="border-t border-slate-100 py-1">
@@ -233,42 +224,50 @@ export const Header = () => {
             </span>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 font-medium">
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
               <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
                 <span>🔍 Global Search & Navigation</span>
               </h4>
-              <p className="text-slate-600 leading-relaxed font-medium">
-                Use the top search bar to instantly find items by name, SKU, or category. Click any search result to open product details directly.
+              <p className="text-slate-600 leading-relaxed text-xs">
+                Use the top search bar to instantly lookup products by name, SKU, or category. Click any search result to edit product details directly.
               </p>
             </div>
 
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
               <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                <span>💻 IT Equipment Categories</span>
+                <span>⏳ Staff Approval & RBAC Security</span>
               </h4>
-              <p className="text-slate-600 leading-relaxed font-medium">
-                Inventory is organized into 6 IT Industry Categories: <em>Computers & Laptops, Servers & Storage, Networking & Telecom, Monitors & Displays, Peripherals & Components, Power & Infrastructure</em>.
+              <p className="text-slate-600 leading-relaxed text-xs">
+                Staff member self-registration defaults to <strong>Pending Approval</strong>. System Administrators manage the approval queue, assign usernames, and toggle active/inactive access in <strong>User & Staff Management</strong>.
               </p>
             </div>
 
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
               <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                <span>📁 Bulk CSV Import</span>
+                <span>💻 6 IT Industry Categories</span>
               </h4>
-              <p className="text-slate-600 leading-relaxed font-medium">
-                Import large product batches via the <strong>Bulk Product Import</strong> tool on the Dashboard. Upload standard CSV files with headers: <code className="bg-white px-1 font-mono font-bold text-blue-700">name, sku, category, quantity, buyingPrice, sellingPrice</code>.
+              <p className="text-slate-600 leading-relaxed text-xs">
+                Hardware is structured across 6 core categories: <em>Computers & Laptops, Servers & Storage, Networking & Telecom, Monitors & Displays, Peripherals & Components, Power & Infrastructure</em>.
               </p>
             </div>
 
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
               <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                <span>👑 Role-Based Access Controls (RBAC)</span>
+                <span>🎨 DiceBear SVG Avatars & Security</span>
               </h4>
-              <ul className="list-disc pl-4 space-y-1 text-slate-600 font-medium">
-                <li><strong>Administrator:</strong> Full system access, valuation reports, category creation/deletion, user management, and company profile.</li>
-                <li><strong>Staff Member:</strong> Operational portal for inventory tracking, low-stock reordering, and stock movements.</li>
-              </ul>
+              <p className="text-slate-600 leading-relaxed text-xs">
+                Every user is assigned a dynamic <strong>DiceBear Initials SVG Avatar</strong> based on their full name. User email addresses are locked and immutable for account security.
+              </p>
+            </div>
+
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+              <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                <span>🛡️ Unified Modal Dialogs</span>
+              </h4>
+              <p className="text-slate-600 leading-relaxed text-xs">
+                All deletion prompts and critical actions use StockFlow's custom styled confirmation modals instead of native browser popups.
+              </p>
             </div>
           </div>
 

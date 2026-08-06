@@ -75,7 +75,7 @@ export const SettingsPage = () => {
 
   const handleSaveProfile = (e) => {
     e.preventDefault();
-    updateProfile({ name, role, email });
+    updateProfile({ name, role });
     setShowEditProfileModal(false);
   };
 
@@ -267,14 +267,22 @@ export const SettingsPage = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-bold text-slate-700 uppercase">Email Address</label>
+              <span className="text-[10px] font-extrabold text-amber-700 bg-amber-100 px-2 py-0.5 rounded flex items-center gap-1">
+                <Lock className="w-3 h-3" /> Read-Only
+              </span>
+            </div>
             <input
               type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-blue-600 focus:outline-none"
+              disabled
+              readOnly
+              value={userProfile.email}
+              className="w-full px-3.5 py-2.5 bg-slate-100/80 border border-slate-200 rounded-xl text-sm font-semibold text-slate-500 cursor-not-allowed select-none"
             />
+            <p className="text-[11px] text-slate-400 mt-1 font-medium">
+              Email address is permanently locked to your user account and cannot be modified.
+            </p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
