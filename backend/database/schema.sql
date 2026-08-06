@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     role ENUM('admin', 'staff') NOT NULL DEFAULT 'staff',
-    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    status ENUM('active', 'inactive', 'pending') NOT NULL DEFAULT 'active',
     last_login TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
