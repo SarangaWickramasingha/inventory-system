@@ -8,7 +8,7 @@ import { getDiceBearAvatar } from '../utils/avatar';
 import { ConfirmModal } from '../components/common/ConfirmModal';
 
 export const AdminUsersPage = () => {
-  const { userList, approveStaffUser, toggleUserStatus, deleteUser, loadUsers } = useAuth();
+  const { userList, approveStaffUser, toggleUserStatus, updateUserAccount, deleteUser, loadUsers } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -39,7 +39,7 @@ export const AdminUsersPage = () => {
   const handleSelectUserFromDropdown = (e) => {
     const targetId = Number(e.target.value);
     setSelectedUserId(targetId);
-    const foundUser = userList.find((u) => u.id === targetId);
+    const foundUser = userList.find((u) => u.id == targetId);
 
     if (foundUser) {
       setEditFormData({
@@ -56,7 +56,7 @@ export const AdminUsersPage = () => {
 
   // Toggle active/inactive status in MySQL Database
   const handleToggleStatus = async (id) => {
-    const targetUser = userList.find((u) => u.id === id);
+    const targetUser = userList.find((u) => u.id == id);
     if (!targetUser) return;
 
     const newStatus = targetUser.status === 'active' ? 'inactive' : 'active';
@@ -83,18 +83,19 @@ export const AdminUsersPage = () => {
     setDeleteConfirmTarget({ id, name });
   };
 
-  // Submit modal to update User status for selected user in Database
+  // Submit modal to update User status and details for selected user in Database
   const handleSaveSelectedUser = async (e) => {
     e.preventDefault();
     if (!selectedUserId) return;
 
-    const targetStatus = editFormData.status === 'pending' ? 'active' : editFormData.status;
-    const success = await toggleUserStatus(selectedUserId, targetStatus);
-    if (success) {
-      showNotification(`User account updated successfully in database.`);
+    const result = await updateUserAccount(selectedUserId, editFormData);
+    if (result && result.success) {
+      showNotification(result.message || `User account updated successfully.`);
       setShowAddModal(false);
       setSelectedUserId('');
       setEditFormData({ name: '', username: '', email: '', role: 'staff', status: 'active' });
+    } else {
+      showNotification(result?.message || `Failed to update user account.`);
     }
   };
 
@@ -378,7 +379,7 @@ export const AdminUsersPage = () => {
                               }`}
                             >
                               <span className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-                              {user.status.toUpperCase()}
+                              {(user.status || 'active').toUpperCase()}
                             </span>
                           )}
                         </td>
@@ -528,6 +529,7 @@ export const AdminUsersPage = () => {
                       className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
                     >
                       <option value="active">Active (Approved)</option>
+                      <option value="pending">Pending (Unapproved)</option>
                       <option value="inactive">Inactive</option>
                     </select>
                   </div>

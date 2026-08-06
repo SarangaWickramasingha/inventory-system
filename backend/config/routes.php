@@ -16,6 +16,7 @@ return [
     // User Management Routes (Manuja)
     'GET /api/users' => 'UserController@index',
     'POST /api/users' => 'UserController@create',
+    'PUT /api/users/{id}' => 'UserController@update',
     'PUT /api/users/{id}/status' => 'UserController@updateStatus',
     'DELETE /api/users/{id}' => 'UserController@delete',
 

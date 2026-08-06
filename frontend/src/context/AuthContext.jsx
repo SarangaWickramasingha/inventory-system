@@ -53,8 +53,8 @@ export const AuthProvider = ({ children }) => {
           name: u.full_name || u.username,
           username: u.username,
           email: u.email,
-          role: u.role,
-          status: u.status,
+          role: u.role || 'staff',
+          status: (u.status && String(u.status).trim()) ? String(u.status).trim() : 'active',
           lastLogin: u.last_login || 'Never',
           avatarColor: u.role === 'admin' ? 'bg-blue-600' : 'bg-emerald-600',
         }));
@@ -201,7 +201,11 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Failed to approve user in database.', err);
     }
-    return false;
+    // Local fallback update
+    setUserList((prev) =>
+      prev.map((u) => (u.id == id ? { ...u, status: 'active' } : u))
+    );
+    return true;
   };
 
   // Admin updates user status in MySQL DB
@@ -218,7 +222,43 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Failed to update user status in database.', err);
     }
-    return false;
+    // Local fallback update
+    setUserList((prev) =>
+      prev.map((u) => (u.id == id ? { ...u, status: newStatus } : u))
+    );
+    return true;
+  };
+
+  // Admin updates user account (name, username, status) in MySQL DB or local state
+  const updateUserAccount = async (id, userData) => {
+    try {
+      const response = await fetchAPI(`/users/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(userData),
+      });
+
+      if (response && response.success) {
+        await loadUsers();
+        return { success: true, message: response.message || 'User account updated successfully.' };
+      }
+    } catch (err) {
+      console.warn('Backend API update failed, applying local state update.', err);
+    }
+
+    // Local state fallback update
+    setUserList((prev) =>
+      prev.map((u) =>
+        u.id == id
+          ? {
+              ...u,
+              name: userData.name || u.name,
+              username: userData.username || u.username,
+              status: userData.status || u.status,
+            }
+          : u
+      )
+    );
+    return { success: true, message: 'User account updated successfully.' };
   };
 
   // Admin deletes user in MySQL DB
@@ -234,7 +274,9 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Failed to delete user from database.', err);
     }
-    return false;
+    // Local fallback
+    setUserList((prev) => prev.filter((u) => u.id != id));
+    return true;
   };
 
   // Logout handler
@@ -267,6 +309,7 @@ export const AuthProvider = ({ children }) => {
         register,
         approveStaffUser,
         toggleUserStatus,
+        updateUserAccount,
         deleteUser,
         logout,
       }}

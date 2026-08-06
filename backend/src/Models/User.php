@@ -53,8 +53,8 @@ class User implements JsonSerializable
             $data['email'] ?? '',
             $data['password_hash'] ?? $data['passwordHash'] ?? '',
             $data['full_name'] ?? $data['fullName'] ?? '',
-            $data['role'] ?? 'staff',
-            $data['status'] ?? 'active',
+            !empty($data['role']) ? strtolower(trim($data['role'])) : 'staff',
+            !empty($data['status']) ? strtolower(trim($data['status'])) : 'active',
             $data['last_login'] ?? null,
             $data['created_at'] ?? null,
             $data['updated_at'] ?? null

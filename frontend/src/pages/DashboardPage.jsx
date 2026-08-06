@@ -7,7 +7,6 @@ import { CategoryChart } from '../components/dashboard/CategoryChart';
 import { CategoryStockBarChart } from '../components/dashboard/CategoryStockBarChart';
 import { LowStockAlertPanel } from '../components/dashboard/LowStockAlertPanel';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
-import { BulkImportModal } from '../components/dashboard/BulkImportModal';
 import { StaffTaskChecklist } from '../components/dashboard/StaffTaskChecklist';
 import { useInventory } from '../context/InventoryContext';
 import { useAuth } from '../context/AuthContext';
@@ -17,7 +16,6 @@ import { Download, Plus, Zap, UserCheck, Shield, ClipboardList, ArrowUpRight, Al
 export const DashboardPage = () => {
   const { products, categories, activities, setCurrentView, setSelectedCategoryFilter } = useInventory();
   const { user, setUser } = useAuth();
-  const [showBulkImportModal, setShowBulkImportModal] = useState(false);
 
   // Active Role state: from authenticated user context
   const currentRole = user?.role || 'staff';
@@ -223,24 +221,6 @@ export const DashboardPage = () => {
                 <div className="space-y-6">
                   <CategoryChart />
 
-                  {/* Bulk Import Banner */}
-                  <div
-                    onClick={() => setShowBulkImportModal(true)}
-                    className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl border border-slate-800 card-hover cursor-pointer relative overflow-hidden group"
-                  >
-                    <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-blue-500/10 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
-                    <div className="w-10 h-10 bg-blue-600/30 border border-blue-400/30 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xs shadow-sm">
-                      <Zap className="w-5 h-5 text-amber-400 fill-amber-400" />
-                    </div>
-                    <h4 className="text-lg font-extrabold text-white mb-1.5 tracking-tight">Bulk Product Import</h4>
-                    <p className="text-xs text-slate-300 font-semibold leading-relaxed mb-4">
-                      Easily import hundreds of inventory products from a CSV file into your system.
-                    </p>
-                    <span className="inline-flex items-center text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl shadow-md transition-all gap-1.5">
-                      Upload CSV File <ArrowUpRight className="w-4 h-4" />
-                    </span>
-                  </div>
-
                   {/* System Quick Links Card */}
                   <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
                     <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">Admin Quick Navigation</h4>
@@ -296,17 +276,6 @@ export const DashboardPage = () => {
                         </span>
                         <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
                       </button>
-
-                      <button
-                        onClick={() => setShowBulkImportModal(true)}
-                        className="w-full p-3 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-xl text-left transition-colors flex items-center justify-between border border-blue-200/60"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Zap className="w-4 h-4 text-blue-600" /> Bulk CSV Product Import
-                        </span>
-                        <ArrowUpRight className="w-3.5 h-3.5 text-blue-600" />
-                      </button>
-
                       <button
                         onClick={() => setCurrentView('inventory')}
                         className="w-full p-3 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-left transition-colors flex items-center justify-between border border-slate-200"
@@ -327,11 +296,6 @@ export const DashboardPage = () => {
           )}
         </main>
       </div>
-
-      <BulkImportModal
-        isOpen={showBulkImportModal}
-        onClose={() => setShowBulkImportModal(false)}
-      />
     </div>
   );
 };

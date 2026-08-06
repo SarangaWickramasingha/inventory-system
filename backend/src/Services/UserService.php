@@ -101,6 +101,41 @@ class UserService
         return $this->userRepo->delete($id);
     }
 
+    public function updateUser(int $id, array $data): User
+    {
+        $user = $this->userRepo->findById($id);
+        if (!$user) {
+            throw new InvalidArgumentException("User not found.");
+        }
+
+        $fullName = trim($data['name'] ?? $data['full_name'] ?? $data['fullName'] ?? $user->getFullName());
+        $username = trim($data['username'] ?? $user->getUsername());
+        $email = trim($data['email'] ?? $user->getEmail());
+        $role = !empty($data['role']) ? strtolower(trim($data['role'])) : strtolower($user->getRole());
+        $status = !empty($data['status']) ? strtolower(trim($data['status'])) : strtolower($user->getStatus());
+
+        if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException("Invalid email format.");
+        }
+
+        if (!in_array($status, ['active', 'inactive', 'pending'], true)) {
+            throw new InvalidArgumentException("Status must be 'active', 'inactive', or 'pending'.");
+        }
+
+        $updated = new User(
+            $user->getId(),
+            $username,
+            $email,
+            $user->getPasswordHash(),
+            $fullName,
+            $role,
+            $status
+        );
+
+        $this->userRepo->save($updated);
+        return $this->userRepo->findById($id);
+    }
+
     public function updateUserProfile(int $id, array $data): User
     {
         $user = $this->userRepo->findById($id);

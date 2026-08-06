@@ -59,6 +59,26 @@ class UserController
         }
     }
 
+    public function update(int $id): void
+    {
+        $this->authenticateAdmin();
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+
+        try {
+            $updatedUser = $this->userService->updateUser($id, $input);
+            if ($updatedUser !== null) {
+                $this->jsonResponse(true, 'User account updated successfully.', $updatedUser->toArray(), 200);
+            } else {
+                $this->jsonResponse(false, 'User not found after update.', null, 404);
+            }
+        } catch (\InvalidArgumentException $e) {
+            $this->jsonResponse(false, $e->getMessage(), null, 400);
+        } catch (\Exception $e) {
+            $this->jsonResponse(false, 'Failed to update user account.', null, 500);
+        }
+    }
+
     public function updateStatus(int $id): void
     {
         $this->authenticateAdmin();

@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "npm run dev --prefix frontend",
     "dev:frontend": "npm run dev --prefix frontend",
-    "dev:backend": "cd backend && php -S localhost:8000 -t public",
-    "seed:backend": "php backend/database/seed.php",
+    "dev:backend": "cd backend && (if exist C:\\xampp\\php\\php.exe (C:\\xampp\\php\\php.exe -S localhost:8000 -t public) else (php -S localhost:8000 -t public))",
+    "seed:backend": "if exist C:\\xampp\\php\\php.exe (C:\\xampp\\php\\php.exe backend/database/seed.php) else (php backend/database/seed.php)",
     "build": "npm run build --prefix frontend",
     "preview": "npm run preview --prefix frontend"
   },

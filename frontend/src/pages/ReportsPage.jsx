@@ -118,6 +118,16 @@ export const ReportsPage = () => {
           {/* KPI Summary Cards */}
           <ReportKpis />
 
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <StockMovementChart />
+            </div>
+            <div>
+              <CategoryChart />
+            </div>
+          </div>
+
           {/* Navigation Tabs for Analytics Sections */}
           <div className="flex items-center gap-2 border-b border-slate-200 pb-1 text-xs font-bold print:hidden">
             <button
@@ -141,16 +151,6 @@ export const ReportsPage = () => {
             >
               <Layers className="w-4 h-4" /> Stock Movement Timeline
             </button>
-          </div>
-
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <StockMovementChart />
-            </div>
-            <div>
-              <CategoryChart />
-            </div>
           </div>
 
           {/* Tab Content Display */}
