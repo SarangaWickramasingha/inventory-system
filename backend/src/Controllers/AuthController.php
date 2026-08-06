@@ -37,9 +37,22 @@ class AuthController
             return;
         }
 
-        $user = $this->authService->authenticate($email, $password);
-        if (!$user) {
-            $this->jsonResponse(false, 'Invalid login credentials or account inactive.', null, 401);
+        $user = $this->authService->getUserByCredentials($email);
+        if (!$user || !$user->verifyPassword($password)) {
+            $this->jsonResponse(false, 'Invalid login credentials.', null, 401);
+            return;
+        }
+
+        if ($user->getStatus() === 'pending') {
+            $this->jsonResponse(false, 'Your staff account is pending Admin approval. Please wait for an administrator to approve your account before signing in.', [
+                'user' => $user->toArray(),
+                'pendingApproval' => true
+            ], 200);
+            return;
+        }
+
+        if ($user->getStatus() === 'inactive') {
+            $this->jsonResponse(false, 'Your staff account is inactive. Please contact an administrator.', null, 400);
             return;
         }
 
@@ -56,17 +69,21 @@ class AuthController
         $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 
         try {
+            if (!isset($input['status'])) {
+                $input['status'] = 'pending';
+            }
             $user = $this->userService->createUser($input);
             $token = $this->authService->generateToken($user);
 
-            $this->jsonResponse(true, 'Registration successful.', [
+            $this->jsonResponse(true, 'Registration submitted successfully! Your staff account is currently pending Admin approval.', [
                 'token' => $token,
-                'user' => $user->toArray()
+                'user' => $user->toArray(),
+                'pendingApproval' => ($user->getStatus() === 'pending')
             ], 201);
         } catch (\InvalidArgumentException $e) {
             $this->jsonResponse(false, $e->getMessage(), null, 400);
         } catch (\Exception $e) {
-            $this->jsonResponse(false, 'An unexpected error occurred during registration.', null, 500);
+            $this->jsonResponse(false, 'An unexpected error occurred during registration: ' . $e->getMessage(), null, 500);
         }
     }
 

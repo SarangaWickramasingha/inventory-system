@@ -20,14 +20,18 @@ class AuthService
         $this->secretKey = $secretKey;
     }
 
+    public function getUserByCredentials(string $identifier): ?User
+    {
+        $user = $this->userRepo->findByEmail($identifier);
+        if (!$user) {
+            $user = $this->userRepo->findByUsername($identifier);
+        }
+        return $user;
+    }
+
     public function authenticate(string $email, string $password): ?User
     {
-        $user = $this->userRepo->findByEmail($email);
-
-        if (!$user) {
-            // Also try username fallback
-            $user = $this->userRepo->findByUsername($email);
-        }
+        $user = $this->getUserByCredentials($email);
 
         if (!$user || !$user->isActive()) {
             return null;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '../components/common/Header';
 import { Sidebar } from '../components/common/Sidebar';
 import { MetricCard } from '../components/dashboard/MetricCard';
@@ -8,7 +8,7 @@ import { getDiceBearAvatar } from '../utils/avatar';
 import { ConfirmModal } from '../components/common/ConfirmModal';
 
 export const AdminUsersPage = () => {
-  const { userList, setUserList, approveStaffUser, updateUserInfo } = useAuth();
+  const { userList, approveStaffUser, toggleUserStatus, deleteUser, loadUsers } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -25,6 +25,10 @@ export const AdminUsersPage = () => {
     role: 'staff',
     status: 'active',
   });
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const showNotification = (msg) => {
     setToastMessage(msg);
@@ -50,27 +54,28 @@ export const AdminUsersPage = () => {
     }
   };
 
-  // Toggle active/inactive status
-  const handleToggleStatus = (id) => {
+  // Toggle active/inactive status in MySQL Database
+  const handleToggleStatus = async (id) => {
     const targetUser = userList.find((u) => u.id === id);
     if (!targetUser) return;
 
     const newStatus = targetUser.status === 'active' ? 'inactive' : 'active';
-    setUserList((prev) =>
-      prev.map((u) => {
-        if (u.id === id) {
-          showNotification(`Status for ${u.name} updated to ${newStatus.toUpperCase()}`);
-          return { ...u, status: newStatus };
-        }
-        return u;
-      })
-    );
+    const success = await toggleUserStatus(id, newStatus);
+    if (success) {
+      showNotification(`Status for ${targetUser.name} updated to ${newStatus.toUpperCase()} in database.`);
+    } else {
+      showNotification(`Failed to update status for ${targetUser.name}.`);
+    }
   };
 
-  // Approve a pending staff member
-  const handleApproveStaff = (id, name) => {
-    approveStaffUser(id);
-    showNotification(`Staff account for "${name}" approved successfully! They can now sign in.`);
+  // Approve a pending staff member in MySQL Database
+  const handleApproveStaff = async (id, name) => {
+    const success = await approveStaffUser(id);
+    if (success) {
+      showNotification(`Staff account for "${name}" approved successfully! They can now sign in.`);
+    } else {
+      showNotification(`Failed to approve staff account for "${name}".`);
+    }
   };
 
   // Reject / Delete a user handler - triggers unified ConfirmModal
@@ -78,21 +83,19 @@ export const AdminUsersPage = () => {
     setDeleteConfirmTarget({ id, name });
   };
 
-  // Submit modal to update User Name and Full Name for selected pre-approved user
-  const handleSaveSelectedUser = (e) => {
+  // Submit modal to update User status for selected user in Database
+  const handleSaveSelectedUser = async (e) => {
     e.preventDefault();
     if (!selectedUserId) return;
 
-    updateUserInfo(selectedUserId, {
-      name: editFormData.name,
-      username: editFormData.username,
-      status: editFormData.status === 'pending' ? 'active' : editFormData.status,
-    });
-
-    showNotification(`User account updated: Name "${editFormData.name}", Username "@${editFormData.username}"`);
-    setShowAddModal(false);
-    setSelectedUserId('');
-    setEditFormData({ name: '', username: '', email: '', role: 'staff', status: 'active' });
+    const targetStatus = editFormData.status === 'pending' ? 'active' : editFormData.status;
+    const success = await toggleUserStatus(selectedUserId, targetStatus);
+    if (success) {
+      showNotification(`User account updated successfully in database.`);
+      setShowAddModal(false);
+      setSelectedUserId('');
+      setEditFormData({ name: '', username: '', email: '', role: 'staff', status: 'active' });
+    }
   };
 
   // Pending staff approval list
@@ -556,10 +559,14 @@ export const AdminUsersPage = () => {
       <ConfirmModal
         isOpen={Boolean(deleteConfirmTarget)}
         onClose={() => setDeleteConfirmTarget(null)}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (deleteConfirmTarget) {
-            setUserList((prev) => prev.filter((u) => u.id !== deleteConfirmTarget.id));
-            showNotification(`User account "${deleteConfirmTarget.name}" deleted successfully.`);
+            const success = await deleteUser(deleteConfirmTarget.id);
+            if (success) {
+              showNotification(`User account "${deleteConfirmTarget.name}" deleted from database successfully.`);
+            } else {
+              showNotification(`Failed to delete user "${deleteConfirmTarget.name}".`);
+            }
           }
         }}
         title="Delete User Account"
