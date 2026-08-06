@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Laptop, Server, Network, Monitor, Cpu, Zap, Folder, Box, Tag, 
-  HardDrive, Smartphone, Shield, Headphones, Printer, Database, Cable, 
-  Plus, Trash2 
+  HardDrive, Smartphone, Shield, Headphones, Printer, Database, Cable 
 } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
-import { useAuth } from '../../context/AuthContext';
-import { ConfirmModal } from '../common/ConfirmModal';
 
 export const ICON_MAP = {
   Laptop,
@@ -47,22 +44,14 @@ export const ICON_COLOR_MAP = {
 };
 
 export const CategoryCard = ({ category }) => {
-  const { setSelectedCategoryFilter, setCurrentView, deleteCategory } = useInventory();
-  const { user } = useAuth();
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const { setSelectedCategoryFilter, setCurrentView } = useInventory();
 
-  const isAdmin = user?.role === 'admin';
   const IconComponent = ICON_MAP[category.icon] || Folder;
   const accentColor = category.color || ICON_COLOR_MAP[category.icon] || '#2563EB';
 
   const handleClick = () => {
     setSelectedCategoryFilter(category.name);
     setCurrentView('inventory');
-  };
-
-  const handleDelete = (e) => {
-    e.stopPropagation();
-    setShowConfirmDelete(true);
   };
 
   return (
@@ -78,17 +67,6 @@ export const CategoryCard = ({ category }) => {
           >
             <IconComponent className="w-6 h-6" />
           </div>
-
-          {/* Delete Button (Admin Only) */}
-          {isAdmin && (
-            <button
-              onClick={handleDelete}
-              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
-              title={`Delete category "${category.name}"`}
-            >
-              <Trash2 className="w-4 h-4 stroke-[2]" />
-            </button>
-          )}
         </div>
 
         <h3 className="text-lg font-bold text-slate-900 mb-1">{category.name}</h3>
@@ -101,31 +79,6 @@ export const CategoryCard = ({ category }) => {
           {category.productCount ? category.productCount.toLocaleString() : 0}
         </span>
       </div>
-
-      <ConfirmModal
-        isOpen={showConfirmDelete}
-        onClose={() => setShowConfirmDelete(false)}
-        onConfirm={() => {
-          deleteCategory(category.id || category.name);
-        }}
-        title="Delete Category"
-        message={`Are you sure you want to delete category "${category.name}"? Products under this category will be unassigned.`}
-        confirmText="Delete Category"
-      />
-    </div>
-  );
-};
-
-export const CreateCategoryCard = ({ onClick }) => {
-  return (
-    <div
-      onClick={onClick}
-      className="rounded-2xl p-6 border-2 border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/30 transition-all cursor-pointer flex flex-col items-center justify-center text-center min-h-[200px]"
-    >
-      <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-        <Plus className="w-6 h-6 stroke-[2.5]" />
-      </div>
-      <p className="text-sm font-bold text-slate-700">Create New Category</p>
     </div>
   );
 };
