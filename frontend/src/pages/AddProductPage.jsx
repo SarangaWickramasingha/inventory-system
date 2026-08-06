@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Header } from '../components/common/Header';
 import { Sidebar } from '../components/common/Sidebar';
 import { useInventory } from '../context/InventoryContext';
-import { UploadCloud, AlertCircle, ChevronRight } from 'lucide-react';
+import { UploadCloud, AlertCircle, ChevronRight, Trash2 } from 'lucide-react';
 
 export const AddProductPage = () => {
   const { products, categories, addProduct, setCurrentView } = useInventory();
