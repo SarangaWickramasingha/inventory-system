@@ -8,12 +8,11 @@ This comprehensive guide outlines a step-by-step presentation script and recordi
 
 - **Target Video Duration**: Exactly **10:00 Minutes** (2 minutes 30 seconds per presenter)
 - **Video Format**: High Definition 1080p Screen Recording with Clear Voice Narration
-- **Application URL**: `http://localhost:3000` (or `http://localhost:5173`)
 - **Team Roster & Presenter Roles**:
   - 🎙️ **Presenter 1 (Frontend & Navigation Lead)** [0:00 – 2:30]: Host Introduction, Public Landing Page, Blue-Underline Dynamic Navbar, Standalone Pages, and Glassmorphic Auth Modal Navigation.
   - 🎙️ **Presenter 2 (Staff Portal & Operations Lead)** [2:30 – 5:00]: Staff Registration Workflow, Pending Admin Approval Lockout, Active Staff Login, Inventory Search/Filters, and Stock IN/OUT Movements.
-  - 🎙️ **Presenter 3 (Admin Control & RBAC Lead)** [5:00 – 7:30]: Administrator Executive Portal, Pending Staff Approval Queue, User Role Configuration, DiceBear SVG Avatars, and Category Management.
-  - 🎙️ **Presenter 4 (Analytics, Data Import & Compliance Lead)** [7:30 – 10:00]: Recharts Valuation Analytics, Bulk CSV Drag-and-Drop Import, Staff Activity Audit Trail, Custom System Modals, and Final Wrap-Up.
+  - 🎙️ **Presenter 3 (Admin Control & RBAC Lead)** [5:00 – 7:30]: Administrator Executive Portal, Pending Staff Approval Queue, User Role Configuration, DiceBear SVG Avatars, and Predefined Category Hierarchy.
+  - 🎙️ **Presenter 4 (Analytics, Data Export & Compliance Lead)** [7:30 – 10:00]: Recharts Valuation Analytics, Reports Layout Navigation, Automated CSV/JSON Data Exports, Staff Activity Audit Trail, Custom System Modals, and Final Wrap-Up.
 
 ---
 
@@ -83,37 +82,39 @@ This comprehensive guide outlines a step-by-step presentation script and recordi
   > 
   > *When configuring user profiles, Admins can assign roles ('Admin' or 'Staff') and update user handles. Notice that email address fields remain strictly locked and read-only for security and account integrity."*
 
-- **Screen Action (6:30 – 7:30)**: Point out the dynamic DiceBear user avatars next to staff accounts. Navigate to **Category Management** (`CategoriesPage`), show IT hardware category cards and create a new category (e.g. *"Cloud Edge Infrastructure"*).
+- **Screen Action (6:30 – 7:30)**: Point out the dynamic DiceBear user avatars next to staff accounts. Navigate to **Category Management** (`CategoriesPage`), show the 6 standardized IT hardware category cards (Computers, Servers, Networking, Monitors, Peripherals, and Power), and click a card to filter inventory by category.
 
 - **Presenter 3 (6:30 – 7:30)**:
   > *"Notice also that every user is assigned an automatic, unique DiceBear SVG avatar generated from their profile initials.*
   > 
-  > *Under Category Management, Admins can organize stock across IT hardware groups — such as Computers, Servers, Networking, Monitors, Peripherals, and Power. Here I'll add a new category, which immediately integrates into our global search filters.*
+  > *Under Category Management, our stock is organized across 6 standardized IT hardware categories: Computers & Laptops, Servers & Storage, Networking & Telecom, Monitors & Displays, Peripherals & Components, and Power & Infrastructure. Clicking any category instantly filters our inventory view.*
   > 
-  > *Now Presenter 4 will present our financial valuation analytics, bulk CSV importer, and audit compliance logs."*
+  > *Now Presenter 4 will present our financial valuation analytics, automated exports, and audit compliance logs."*
 
 ---
 
-### ⏱️ Segment 4: Financial Analytics, Bulk Data & Audit Trails (7:30 – 10:00)
-**Presenter**: Presenter 4 (Analytics, Data Import & Compliance Lead)  
-**Screen Action (7:30 – 8:15)**: Navigate to **Dashboard** and **Reports Page** (`ReportsPage`). Highlight Metric Cards (Total Products, Low Stock Count, Out of Stock Count, Cost-Basis Valuation) and Recharts charts.
+### ⏱️ Segment 4: Financial Analytics, Automated Exports & Audit Trails (7:30 – 10:00)
+**Presenter**: Presenter 4 (Analytics, Data Export & Compliance Lead)  
+**Screen Action (7:30 – 8:15)**: Navigate to **Dashboard** and **Reports Page** (`ReportsPage`). Highlight Metric Cards (Total Products, Low Stock Count, Out of Stock Count, Cost-Basis Valuation) and top Recharts charts.
 
 - **Presenter 4 (7:30 – 8:15)**:
   > *"Thank you, Presenter 3! StockFlow delivers executive-grade business intelligence. On our Executive Dashboard and Reports page, Administrators gain real-time visibility into total cost-basis inventory valuation, market sales margins, and projected gross profit.*
   > 
   > *Our interactive Recharts graphs display category distribution and stock volume breakdown across all hardware assets."*
 
-- **Screen Action (8:15 – 9:00)**: Open **Bulk CSV Product Import** modal from Dashboard. Drag-and-drop a sample CSV file (`sample_products.csv`), show header validation, and click **Import Products**.
+- **Screen Action (8:15 – 9:00)**: Show the Reports layout with stock movement charts at top, followed by the section tab bar (`Comprehensive Valuation Table` / `Stock Movement Timeline`). Click **"Export CSV"** and **"Export JSON"** in the top toolbar to trigger automated data exports.
 
 - **Presenter 4 (8:15 – 9:00)**:
-  > *"To streamline catalog population, StockFlow includes a Bulk Product CSV Importer. I'll drag and drop a standard inventory CSV file — the system automatically parses headers (SKU, name, category, quantity, buying price, selling price), validates rows, and imports dozens of hardware items in under a second."*
+  > *"Notice our refined reports layout: financial analytics and stock movement charts are prominently positioned at the top, with sub-navigation tabs right below for deep-dive valuation tables and movement timelines.*
+  > 
+  > *Administrators can export complete valuation reports directly to formatted CSV files or raw JSON payloads with a single click."*
 
 - **Screen Action (9:00 – 9:30)**: Navigate to **Staff Activity Audit Trail** (`StaffActivityPage`). Show logged events with timestamps, action badges, and user avatars. Trigger a custom confirmation modal on **Settings Page**.
 
 - **Presenter 4 (9:00 – 9:30)**:
   > *"For compliance and governance, every stock transaction, product addition, and user approval is recorded in our Staff Activity Audit Log with exact timestamps and staff avatars.*
   > 
-  > *Furthermore, we replaced browser alert popups with modern Custom System Modals for seamless UX feedback and threshold configuration."*
+  > *Furthermore, we replaced native browser alert popups with modern Custom System Modals for seamless UX feedback and threshold configuration."*
 
 - **Screen Action (9:30 – 10:00)**: Navigate back to Main Dashboard view. Final concluding remarks.
 
@@ -130,5 +131,5 @@ This comprehensive guide outlines a step-by-step presentation script and recordi
 | :--- | :--- | :--- | :--- |
 | **Segment 1 (0:00 – 2:30)** | Presenter 1 | Introduction & Public Site | Landing Page, Blue Underline Navbar, Standalone Pages (Features, About, Contact), Glassmorphism Modal Return |
 | **Segment 2 (2:30 – 5:00)** | Presenter 2 | Staff Operations | Staff Registration, Pending Admin Approval Lockout, Inventory Catalog Search, Stock IN/OUT Movements |
-| **Segment 3 (5:00 – 7:30)** | Presenter 3 | Admin & Security (RBAC) | Admin Executive Control Panel, Pending Staff Queue Approval, Lockable Email Validation, DiceBear Avatars, Categories |
-| **Segment 4 (7:30 – 10:00)** | Presenter 4 | Analytics, Bulk Data & Wrap-Up | Recharts Financial Valuation, Bulk CSV Drag-and-Drop Import, Staff Activity Audit Trail, Custom System Modals, Conclusion |
+| **Segment 3 (5:00 – 7:30)** | Presenter 3 | Admin & Security (RBAC) | Admin Executive Control Panel, Pending Staff Queue Approval, Lockable Email Validation, DiceBear Avatars, 6 Predefined Category Cards |
+| **Segment 4 (7:30 – 10:00)** | Presenter 4 | Analytics, Automated Exports & Wrap-Up | Recharts Financial Valuation, Reports Layout & Sub-Navigation Tabs, Automated CSV/JSON Export, Staff Activity Audit Trail, Custom System Modals, Conclusion |Wrap-Up | Recharts Financial Valuation, Bulk CSV Drag-and-Drop Import, Staff Activity Audit Trail, Custom System Modals, Conclusion |
