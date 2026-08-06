@@ -12,7 +12,7 @@ import { updatePasswordApi } from '../services/userService';
 
 export const SettingsPage = () => {
   const { profile, updateProfile, setCurrentView, showToast } = useInventory();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const currentRole = user?.role || (profile.role?.toLowerCase().includes('admin') ? 'admin' : 'staff');
   const isAdmin = currentRole === 'admin';
@@ -232,7 +232,10 @@ export const SettingsPage = () => {
             </div>
 
             <button
-              onClick={() => setCurrentView('landing')}
+              onClick={() => {
+                logout();
+                setCurrentView('landing');
+              }}
               className="px-4 py-2.5 bg-white border border-rose-300 text-rose-700 hover:bg-rose-100 font-extrabold text-xs rounded-xl shadow-2xs transition-colors flex items-center gap-2 whitespace-nowrap self-start sm:self-auto"
             >
               <LogOut className="w-4 h-4" /> Log Out Active Session

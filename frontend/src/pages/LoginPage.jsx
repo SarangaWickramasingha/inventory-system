@@ -57,13 +57,8 @@ export const LoginPage = () => {
     setIsLoading(false);
 
     if (result && result.success) {
-      const authenticatedUser = {
-        ...(result.user || {}),
-        role: formData.role
-      };
-      setUser(authenticatedUser);
-
-      setSuccess(`Sign in successful as ${formData.role === 'admin' ? 'Administrator' : 'Staff'}! Redirecting...`);
+      const userRole = result.user?.role || formData.role;
+      setSuccess(`Sign in successful as ${userRole === 'admin' ? 'Administrator' : 'Staff'}! Redirecting...`);
       setTimeout(() => {
         setCurrentView('dashboard');
       }, 800);

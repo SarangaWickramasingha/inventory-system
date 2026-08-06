@@ -83,4 +83,112 @@ class CategoryController
         ]);
         exit;
     }
+
+    public function create(): void
+    {
+        $payload = $this->authMiddleware->handle();
+        if (!$payload) {
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+
+        $name = trim($input['name'] ?? '');
+        $description = trim($input['description'] ?? '');
+        $icon = trim($input['icon'] ?? 'Folder');
+        $color = trim($input['color'] ?? '#2563EB');
+
+        if (empty($name)) {
+            header('Content-Type: application/json');
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Category name is required.',
+                'data' => null
+            ]);
+            exit;
+        }
+
+        // Check if category name already exists
+        $checkStmt = $this->db->prepare("SELECT id FROM categories WHERE LOWER(name) = LOWER(:name) LIMIT 1");
+        $checkStmt->execute(['name' => $name]);
+        if ($checkStmt->fetch()) {
+            header('Content-Type: application/json');
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Category with this name already exists in the database.',
+                'data' => null
+            ]);
+            exit;
+        }
+
+        // Insert new category
+        $insertStmt = $this->db->prepare("
+            INSERT INTO categories (name, description, icon, color)
+            VALUES (:name, :description, :icon, :color)
+        ");
+        $insertStmt->execute([
+            'name' => $name,
+            'description' => $description,
+            'icon' => !empty($icon) ? $icon : 'Folder',
+            'color' => !empty($color) ? $color : '#2563EB',
+        ]);
+
+        $catId = (int)$this->db->lastInsertId();
+
+        $newCategory = [
+            'id' => $catId,
+            'name' => $name,
+            'description' => $description,
+            'productCount' => 0,
+            'icon' => !empty($icon) ? $icon : 'Folder',
+            'color' => !empty($color) ? $color : '#2563EB',
+            'bgColor' => '#EFF6FF'
+        ];
+
+        header('Content-Type: application/json');
+        http_response_code(201);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Category created successfully in database.',
+            'data' => [
+                'category' => $newCategory
+            ]
+        ]);
+        exit;
+    }
+
+    public function delete(int $id): void
+    {
+        $payload = $this->authMiddleware->handle();
+        if (!$payload) {
+            return;
+        }
+
+        if ($id <= 0) {
+            header('Content-Type: application/json');
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid category ID provided.'
+            ]);
+            exit;
+        }
+
+        // 1. Unassign products under this category so they are safe
+        $unassignStmt = $this->db->prepare("UPDATE products SET category_id = NULL WHERE category_id = :id");
+        $unassignStmt->execute(['id' => $id]);
+
+        // 2. Delete category record from database
+        $stmt = $this->db->prepare("DELETE FROM categories WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'message' => 'Category deleted from database successfully.'
+        ]);
+        exit;
+    }
 }

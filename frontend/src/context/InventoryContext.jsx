@@ -20,7 +20,11 @@ import {
   updateProduct as updateProductApi,
   deleteProduct as deleteProductApi
 } from '../services/productService';
-import { getCategories as fetchCategoriesFromAPI } from '../services/categoryService';
+import { 
+  getCategories as fetchCategoriesFromAPI,
+  createCategory as createCategoryApi,
+  deleteCategoryApi
+} from '../services/categoryService';
 import { getMe, updateProfileApi, updatePasswordApi } from '../services/userService';
 import { getStockLogs, createStockLog } from '../services/stockService';
 
@@ -211,7 +215,7 @@ export const InventoryProvider = ({ children }) => {
           name: u.full_name || u.name || u.username,
           username: u.username,
           email: u.email,
-          role: (u.role || 'admin').toUpperCase(),
+          role: (u.role || 'staff').toUpperCase(),
           status: u.status,
           avatar: getDiceBearAvatar(u.full_name || u.name || u.username)
         };
@@ -384,22 +388,50 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-  const addCategory = (categoryData) => {
-    const newCat = {
-      id: `cat-${Date.now()}`,
-      name: categoryData.name,
-      description: categoryData.description || 'Custom category hierarchy.',
-      productCount: 0,
-      icon: categoryData.icon || 'Folder',
-      color: categoryData.color || '#2563EB',
-      bgColor: '#EFF6FF'
-    };
-    setCategories(prev => [...prev, newCat]);
-    showToast(`Category "${newCat.name}" created!`);
+  const addCategory = async (categoryData) => {
+    try {
+      const res = await createCategoryApi(categoryData);
+      if (res && res.success && res.data?.category) {
+        setCategories(prev => [...prev, res.data.category]);
+        await loadCategories();
+        showToast(`Category "${categoryData.name}" created successfully!`);
+        return res;
+      } else {
+        showToast(res?.message || 'Failed to create category in database.', 'error');
+        return res;
+      }
+    } catch (err) {
+      console.warn('Backend category API error, using fallback:', err);
+      const fallbackCat = {
+        id: `cat-${Date.now()}`,
+        name: categoryData.name,
+        description: categoryData.description || 'Custom category hierarchy.',
+        productCount: 0,
+        icon: categoryData.icon || 'Folder',
+        color: categoryData.color || '#2563EB',
+        bgColor: '#EFF6FF'
+      };
+      setCategories(prev => [...prev, fallbackCat]);
+      showToast(`Category "${fallbackCat.name}" created!`);
+    }
   };
 
-  const deleteCategory = (categoryId) => {
+  const deleteCategory = async (categoryId) => {
     const target = categories.find(c => c.id === categoryId || c.name === categoryId);
+    const targetId = target?.id || categoryId;
+    try {
+      if (typeof targetId === 'number' || !isNaN(Number(targetId))) {
+        const res = await deleteCategoryApi(Number(targetId));
+        if (res && res.success) {
+          await loadCategories();
+          await loadProducts();
+          showToast(`Category "${target?.name || 'Category'}" deleted from database!`, 'warning');
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Error deleting category from backend API:', err);
+    }
     setCategories(prev => prev.filter(c => c.id !== categoryId && c.name !== categoryId));
     showToast(`Category "${target?.name || 'Category'}" deleted!`, 'warning');
   };

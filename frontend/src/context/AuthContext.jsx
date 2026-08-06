@@ -76,14 +76,29 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     setError(null);
 
+    // Reset previous user session state
+    setToken(null);
+    setUser(null);
+
     try {
       const response = await fetchAPI('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role: requestedRole }),
       });
 
       if (response && response.success && response.data) {
         const { token: authToken, user: userData } = response.data;
+
+        const actualRole = (userData.role || '').toLowerCase();
+        const reqRole = (requestedRole || '').toLowerCase();
+
+        if (reqRole && actualRole && actualRole !== reqRole) {
+          const registeredRoleName = actualRole === 'admin' ? 'Administrator' : 'Staff';
+          const roleMsg = `This account is registered as a ${registeredRoleName}. Please select the ${registeredRoleName} role to sign in.`;
+          setError(roleMsg);
+          setIsLoading(false);
+          return { success: false, message: roleMsg };
+        }
 
         if (userData.status === 'pending') {
           const pendingMsg = 'Your staff account is pending Admin approval. Please wait for an administrator to approve your account.';
@@ -104,7 +119,7 @@ export const AuthProvider = ({ children }) => {
           name: userData.full_name || userData.username,
           username: userData.username,
           email: userData.email,
-          role: userData.role || requestedRole,
+          role: actualRole || reqRole,
           status: userData.status || 'active',
         };
 
