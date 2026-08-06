@@ -1,17 +1,49 @@
 import React, { useState } from 'react';
-import { Laptop, Server, Network, Monitor, Cpu, Zap, Folder, Plus, Trash2 } from 'lucide-react';
+import { 
+  Laptop, Server, Network, Monitor, Cpu, Zap, Folder, Box, Tag, 
+  HardDrive, Smartphone, Shield, Headphones, Printer, Database, Cable, 
+  Plus, Trash2 
+} from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
 import { useAuth } from '../../context/AuthContext';
 import { ConfirmModal } from '../common/ConfirmModal';
 
-const ICON_MAP = {
-  Laptop: Laptop,
-  Server: Server,
-  Network: Network,
-  Monitor: Monitor,
-  Cpu: Cpu,
-  Zap: Zap,
-  Folder: Folder
+export const ICON_MAP = {
+  Laptop,
+  Server,
+  Network,
+  Monitor,
+  Cpu,
+  Zap,
+  Folder,
+  Box,
+  Tag,
+  HardDrive,
+  Smartphone,
+  Shield,
+  Headphones,
+  Printer,
+  Database,
+  Cable
+};
+
+export const ICON_COLOR_MAP = {
+  Laptop: '#3B82F6',     // Blue
+  Server: '#8B5CF6',     // Purple
+  Network: '#10B981',    // Emerald
+  Monitor: '#EC4899',    // Pink
+  Cpu: '#D97706',        // Amber
+  Zap: '#6366F1',        // Indigo
+  Folder: '#2563EB',     // Royal Blue
+  Box: '#64748B',        // Slate
+  Tag: '#0D9488',        // Teal
+  HardDrive: '#06B6D4',  // Cyan
+  Smartphone: '#7C3AED', // Violet
+  Shield: '#059669',     // Green
+  Headphones: '#4F46E5', // Deep Indigo
+  Printer: '#F59E0B',    // Amber
+  Database: '#0284C7',   // Sky Blue
+  Cable: '#EA580C',      // Orange
 };
 
 export const CategoryCard = ({ category }) => {
@@ -21,6 +53,7 @@ export const CategoryCard = ({ category }) => {
 
   const isAdmin = user?.role === 'admin';
   const IconComponent = ICON_MAP[category.icon] || Folder;
+  const accentColor = category.color || ICON_COLOR_MAP[category.icon] || '#2563EB';
 
   const handleClick = () => {
     setSelectedCategoryFilter(category.name);
@@ -41,7 +74,7 @@ export const CategoryCard = ({ category }) => {
         <div className="flex items-center justify-between mb-4">
           <div
             className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm"
-            style={{ backgroundColor: category.color || '#2563EB' }}
+            style={{ backgroundColor: accentColor }}
           >
             <IconComponent className="w-6 h-6" />
           </div>

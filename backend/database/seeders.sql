@@ -26,14 +26,18 @@ ON DUPLICATE KEY UPDATE
     full_name = VALUES(full_name);
 
 -- 2. Insert IT Hardware Categories
-INSERT INTO categories (id, name, description) VALUES
-(1, 'Computers & Laptops', 'Enterprise laptops, desktop workstations, developer rigs, and mini PCs.'),
-(2, 'Servers & Storage', 'Rackmount servers, NAS storage arrays, enterprise NVMe SSDs, and SAN hardware.'),
-(3, 'Networking & Telecom', 'Managed Gigabit switches, enterprise routers, Wi-Fi 6 APs, and patch panels.'),
-(4, 'Monitors & Displays', '4K UltraHD workstations, dual monitor arms, and conference room displays.'),
-(5, 'Peripherals & Components', 'Mechanical keyboards, ergonomic mice, USB-C docks, webcams, GPUs.'),
-(6, 'Power & Infrastructure', 'Smart UPS battery backups, PDU power strips, server racks, cooling units.')
-ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description);
+INSERT INTO categories (id, name, description, icon, color) VALUES
+(1, 'Computers & Laptops', 'Enterprise laptops, desktop workstations, developer rigs, and mini PCs.', 'Laptop', '#3B82F6'),
+(2, 'Servers & Storage', 'Rackmount servers, NAS storage arrays, enterprise NVMe SSDs, and SAN hardware.', 'Server', '#8B5CF6'),
+(3, 'Networking & Telecom', 'Managed Gigabit switches, enterprise routers, Wi-Fi 6 APs, and patch panels.', 'Network', '#10B981'),
+(4, 'Monitors & Displays', '4K UltraHD workstations, dual monitor arms, and conference room displays.', 'Monitor', '#EC4899'),
+(5, 'Peripherals & Components', 'Mechanical keyboards, ergonomic mice, USB-C docks, webcams, GPUs.', 'Cpu', '#D97706'),
+(6, 'Power & Infrastructure', 'Smart UPS battery backups, PDU power strips, server racks, cooling units.', 'Zap', '#6366F1')
+ON DUPLICATE KEY UPDATE 
+    name = VALUES(name), 
+    description = VALUES(description),
+    icon = VALUES(icon),
+    color = VALUES(color);
 
 -- 3. Insert IT Hardware Products with Generated Image URLs
 INSERT INTO products (id, sku, name, category_id, price, cost_price, quantity, min_stock_alert, unit, description, image_url, status) VALUES
