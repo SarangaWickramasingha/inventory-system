@@ -3,9 +3,12 @@ import { Box, Lock, Mail, User, ShieldCheck, Eye, EyeOff, ArrowRight, CheckCircl
 import { useInventory } from '../context/InventoryContext';
 import { useAuth } from '../context/AuthContext';
 import { LandingPage } from './LandingPage';
+import { FeaturesPage } from './FeaturesPage';
+import { AboutPage } from './AboutPage';
+import { ContactPage } from './ContactPage';
 
 export const LoginPage = () => {
-  const { setCurrentView } = useInventory();
+  const { setCurrentView, previousView, closeAuthModal } = useInventory();
   const { login, setUser } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +20,19 @@ export const LoginPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const renderBackground = () => {
+    switch (previousView) {
+      case 'features':
+        return <FeaturesPage />;
+      case 'about':
+        return <AboutPage />;
+      case 'contact':
+        return <ContactPage />;
+      default:
+        return <LandingPage />;
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -56,38 +72,29 @@ export const LoginPage = () => {
     }
   };
 
-  const handleQuickDemo = async (role) => {
-    setIsLoading(true);
-    setError('');
-    const email = role === 'admin' ? 'admin@stockflow.com' : 'john.doe@stockflow.com';
-    const password = role === 'admin' ? 'admin123' : 'staff123';
-    const result = await login(email, password, role);
-    setIsLoading(false);
-    if (result && result.success) {
-      setCurrentView('dashboard');
-    } else {
-      setError(result?.message || 'Quick demo login failed.');
-    }
-  };
-
   return (
     <div className="relative min-h-screen">
-      {/* 1. Actual Landing Page Visible in Background */}
+      {/* 1. Actual Background Page Visible Behind Overlay */}
       <div className="pointer-events-none select-none opacity-85 filter brightness-[0.6]">
-        <LandingPage />
+        {renderBackground()}
       </div>
 
       {/* 2. Glassy Backdrop Overlay */}
-      <div className="fixed inset-0 bg-slate-950/65 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div
+        className="fixed inset-0 bg-slate-950/65 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) closeAuthModal();
+        }}
+      >
         
         {/* Floating Glassmorphism Login Panel */}
         <div className="w-full max-w-md my-auto bg-white/10 backdrop-blur-2xl py-8 px-6 shadow-2xl rounded-3xl border border-white/20 sm:px-10 text-white relative">
           
-          {/* Close button to return to Landing Page */}
+          {/* Close button to return to previous page */}
           <button
-            onClick={() => setCurrentView('landing')}
+            onClick={closeAuthModal}
             className="absolute top-4 right-4 p-2 text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-            title="Close and return to Landing Page"
+            title="Close and return to previous page"
           >
             <X className="w-4 h-4" />
           </button>
@@ -238,29 +245,6 @@ export const LoginPage = () => {
               )}
             </button>
           </form>
-
-          {/* Quick Demo Logins Section */}
-          <div className="mt-6 pt-6 border-t border-white/15">
-            <p className="text-center text-[10px] font-extrabold text-slate-300 uppercase tracking-wider mb-3">
-              Quick Demo Access
-            </p>
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('admin')}
-                className="py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl border border-white/15 transition-all"
-              >
-                Demo Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('staff')}
-                className="py-2 px-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs font-bold rounded-xl border border-blue-400/30 transition-all"
-              >
-                Demo Staff
-              </button>
-            </div>
-          </div>
 
           {/* Link to Staff Registration Page */}
           <div className="mt-6 pt-6 border-t border-white/15 text-center">

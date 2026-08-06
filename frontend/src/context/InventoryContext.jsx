@@ -85,6 +85,29 @@ export const InventoryProvider = ({ children }) => {
   };
 
   const [currentView, setCurrentViewState] = useState(getInitialViewFromUrl);
+  const [previousView, setPreviousView] = useState('landing');
+
+  // Sync state with browser URL path and history
+  const setCurrentView = (view) => {
+    setCurrentViewState(prev => {
+      if (view === 'login' || view === 'register') {
+        if (prev !== 'login' && prev !== 'register') {
+          setPreviousView(prev);
+        }
+      }
+      return view;
+    });
+
+    const targetPath = viewToPathMap[view] || '/';
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({ view }, '', targetPath);
+    }
+  };
+
+  const closeAuthModal = () => {
+    const target = previousView && previousView !== 'login' && previousView !== 'register' ? previousView : 'landing';
+    setCurrentView(target);
+  };
 
   const [authMode, setAuthMode] = useState('login');
   const [editingProductId, setEditingProductId] = useState(null);
@@ -164,15 +187,6 @@ export const InventoryProvider = ({ children }) => {
 
   // Toast Notification state
   const [toast, setToast] = useState(null);
-
-  // Sync state with browser URL path and history
-  const setCurrentView = (view) => {
-    setCurrentViewState(view);
-    const targetPath = viewToPathMap[view] || '/';
-    if (window.location.pathname !== targetPath) {
-      window.history.pushState({ view }, '', targetPath);
-    }
-  };
 
   // Fetch categories dynamically from backend MySQL database
   const loadCategories = async () => {
@@ -514,6 +528,8 @@ export const InventoryProvider = ({ children }) => {
       updateThresholdSettings,
       currentView,
       setCurrentView,
+      previousView,
+      closeAuthModal,
       authMode,
       setAuthMode,
       navigateToAuth,
