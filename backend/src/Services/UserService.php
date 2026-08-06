@@ -79,8 +79,8 @@ class UserService
 
     public function updateUserStatus(int $id, string $status): bool
     {
-        if (!in_array($status, ['active', 'inactive'], true)) {
-            throw new InvalidArgumentException("Status must be 'active' or 'inactive'.");
+        if (!in_array($status, ['active', 'inactive', 'pending'], true)) {
+            throw new InvalidArgumentException("Status must be 'active', 'inactive', or 'pending'.");
         }
 
         $user = $this->userRepo->findById($id);

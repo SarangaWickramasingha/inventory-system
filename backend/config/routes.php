@@ -8,6 +8,7 @@
 return [
     // Auth Routes (Manuja)
     'POST /api/auth/login' => 'AuthController@login',
+    'POST /api/auth/register' => 'AuthController@register',
     'GET /api/auth/me' => 'AuthController@me',
     'PUT /api/auth/profile' => 'AuthController@updateProfile',
     'PUT /api/auth/password' => 'AuthController@updatePassword',
@@ -15,6 +16,8 @@ return [
     // User Management Routes (Manuja)
     'GET /api/users' => 'UserController@index',
     'POST /api/users' => 'UserController@create',
+    'PUT /api/users/{id}/status' => 'UserController@updateStatus',
+    'DELETE /api/users/{id}' => 'UserController@delete',
 
     // Product Core & Information Display Routes (Ashan)
     'GET /api/products' => 'ProductController@index',

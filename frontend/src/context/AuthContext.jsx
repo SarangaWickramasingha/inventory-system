@@ -1,22 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { fetchAPI } from '../services/api';
 
 /**
  * AuthContext Provider
- * Pure PHP HMAC Token Storage, Persistent Session, Pending Approval Workflow & RBAC Manager
+ * Pure PHP REST API & MySQL Persistence for Auth, Staff Approvals, and User Management
  */
 const AuthContext = createContext(null);
-
-const DEFAULT_USER_DATABASE = [
-  { id: 1, name: 'Saranga Wickramasingha', username: 'saranga_admin', email: 'saranga@stockflow.com', role: 'admin', status: 'active', avatarColor: 'bg-blue-600' },
-  { id: 2, name: 'Manuja Jayasinghe', username: 'manuja_dev', email: 'manuja@stockflow.com', role: 'admin', status: 'active', avatarColor: 'bg-indigo-600' },
-  { id: 3, name: 'Ashan Silva', username: 'ashan_staff', email: 'ashan@stockflow.com', role: 'staff', status: 'active', avatarColor: 'bg-emerald-600' },
-  { id: 4, name: 'Tharindu Fernando', username: 'tharindu_staff', email: 'tharindu@stockflow.com', role: 'staff', status: 'active', avatarColor: 'bg-amber-600' },
-  { id: 5, name: 'Dileepa Perera', username: 'dileepa_staff', email: 'dileepa@stockflow.com', role: 'staff', status: 'inactive', avatarColor: 'bg-slate-500' },
-  { id: 6, name: 'Sashika Ratnayake', username: 'sashika_staff', email: 'sashika@stockflow.com', role: 'staff', status: 'active', avatarColor: 'bg-purple-600' },
-  { id: 7, name: 'Pemila Rodrigo', username: 'pemila_staff', email: 'pemila@stockflow.com', role: 'staff', status: 'active', avatarColor: 'bg-rose-600' },
-  { id: 8, name: 'Kasun Perera', username: 'kasun_pending', email: 'kasun.p@stockflow.com', role: 'staff', status: 'pending', avatarColor: 'bg-amber-500' },
-];
 
 export const AuthProvider = ({ children }) => {
   const [token, setTokenState] = useState(() => localStorage.getItem('stockflow_token') || null);
@@ -32,25 +21,9 @@ export const AuthProvider = ({ children }) => {
     return null;
   });
 
-  // User database state including pending approval queue
-  const [userList, setUserList] = useState(() => {
-    const stored = localStorage.getItem('stockflow_user_database');
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        return DEFAULT_USER_DATABASE;
-      }
-    }
-    return DEFAULT_USER_DATABASE;
-  });
-
+  const [userList, setUserList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    localStorage.setItem('stockflow_user_database', JSON.stringify(userList));
-  }, [userList]);
 
   const setToken = (newToken) => {
     if (newToken) {
@@ -70,19 +43,38 @@ export const AuthProvider = ({ children }) => {
     setUserState(newUser);
   };
 
-  // Check login with pending status check
+  // Fetch users directly from MySQL DB via PHP REST API
+  const loadUsers = useCallback(async () => {
+    try {
+      const response = await fetchAPI('/users');
+      if (response && response.success && Array.isArray(response.data)) {
+        const formatted = response.data.map((u) => ({
+          id: u.id,
+          name: u.full_name || u.username,
+          username: u.username,
+          email: u.email,
+          role: u.role,
+          status: u.status,
+          lastLogin: u.last_login || 'Never',
+          avatarColor: u.role === 'admin' ? 'bg-blue-600' : 'bg-emerald-600',
+        }));
+        setUserList(formatted);
+      }
+    } catch (err) {
+      console.warn('Could not fetch user list from backend API.', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      loadUsers();
+    }
+  }, [token, loadUsers]);
+
+  // Login handler - authenticates directly against MySQL DB via PHP REST API
   const login = async (email, password, requestedRole = 'admin') => {
     setIsLoading(true);
     setError(null);
-
-    // 1. Check local user database for pending approval status
-    const existingLocalUser = userList.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (existingLocalUser && existingLocalUser.status === 'pending') {
-      const pendingMsg = 'Your staff account is pending Admin approval. Please wait for an administrator to approve your account before signing in.';
-      setError(pendingMsg);
-      setIsLoading(false);
-      return { success: false, pendingApproval: true, message: pendingMsg };
-    }
 
     try {
       const response = await fetchAPI('/auth/login', {
@@ -98,6 +90,13 @@ export const AuthProvider = ({ children }) => {
           setError(pendingMsg);
           setIsLoading(false);
           return { success: false, pendingApproval: true, message: pendingMsg };
+        }
+
+        if (userData.status === 'inactive') {
+          const inactiveMsg = 'Your staff account is inactive. Please contact an administrator.';
+          setError(inactiveMsg);
+          setIsLoading(false);
+          return { success: false, message: inactiveMsg };
         }
 
         const formattedUser = {
@@ -120,26 +119,6 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: errMsg };
       }
     } catch (err) {
-      // Fallback for Quick Demo / Offline mode
-      const isDemo = email.includes('admin@stockflow.com') || email.includes('john.doe@stockflow.com') || email.includes('demo') || password === 'admin123' || password === 'staff123';
-      
-      if (isDemo) {
-        const fallbackRole = email.includes('admin') || requestedRole === 'admin' ? 'admin' : 'staff';
-        const fallbackUser = {
-          id: fallbackRole === 'admin' ? 1 : 2,
-          name: fallbackRole === 'admin' ? 'Saranga Wickramasingha (Admin)' : 'John Doe (Staff)',
-          username: fallbackRole === 'admin' ? 'admin' : 'johndoe',
-          email: email,
-          role: fallbackRole,
-          status: 'active',
-        };
-        const demoToken = `demo_token_${Date.now()}`;
-        setToken(demoToken);
-        setUser(fallbackUser);
-        setIsLoading(false);
-        return { success: true, user: fallbackUser, isDemo: true };
-      }
-
       const errMsg = 'Backend API server unavailable.';
       setError(errMsg);
       setIsLoading(false);
@@ -147,28 +126,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register handler - sets account status to 'pending'
+  // Register handler - saves directly to MySQL DB via PHP REST API
   const register = async (formData) => {
     setIsLoading(true);
     setError(null);
 
     const generatedUsername = formData.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '_');
-    const newUserRecord = {
-      id: Date.now(),
-      name: formData.fullName,
-      username: generatedUsername,
-      email: formData.email,
-      role: formData.role || 'staff',
-      status: 'pending', // Pending Admin approval!
-      lastLogin: 'Never',
-      avatarColor: 'bg-amber-500',
-    };
-
-    // Save locally to user list
-    setUserList((prev) => [newUserRecord, ...prev.filter((u) => u.email !== formData.email)]);
 
     try {
-      await fetchAPI('/auth/register', {
+      const response = await fetchAPI('/auth/register', {
         method: 'POST',
         body: JSON.stringify({
           username: generatedUsername,
@@ -176,34 +142,84 @@ export const AuthProvider = ({ children }) => {
           password: formData.password,
           full_name: formData.fullName,
           role: 'staff',
-          status: 'pending'
+          status: 'pending',
         }),
       });
+
+      if (response && response.success === false) {
+        const errMsg = response.message || 'Staff registration failed.';
+        setError(errMsg);
+        setIsLoading(false);
+        return { success: false, message: errMsg };
+      }
+
+      if (token) {
+        await loadUsers();
+      }
+
+      setIsLoading(false);
+      return {
+        success: true,
+        pendingApproval: true,
+        user: response?.data?.user,
+        message: response?.message || 'Registration submitted successfully! Your staff account is currently pending Admin approval.',
+      };
     } catch (err) {
-      console.warn('Backend API registration offline, registered in local session database.', err);
+      const errMsg = 'Backend API server error during registration.';
+      setError(errMsg);
+      setIsLoading(false);
+      return { success: false, message: errMsg };
     }
-
-    setIsLoading(false);
-    return {
-      success: true,
-      pendingApproval: true,
-      user: newUserRecord,
-      message: 'Registration submitted successfully! Your staff account is currently pending Admin approval.'
-    };
   };
 
-  // Admin approves a pending staff member
-  const approveStaffUser = (id) => {
-    setUserList((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, status: 'active' } : u))
-    );
+  // Admin approves a pending staff member in MySQL DB
+  const approveStaffUser = async (id) => {
+    try {
+      const response = await fetchAPI(`/users/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: 'active' }),
+      });
+      if (response && response.success) {
+        await loadUsers();
+        return true;
+      }
+    } catch (err) {
+      console.error('Failed to approve user in database.', err);
+    }
+    return false;
   };
 
-  // Admin updates username and name for pre-approved/selected user
-  const updateUserInfo = (id, updatedFields) => {
-    setUserList((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, ...updatedFields } : u))
-    );
+  // Admin updates user status in MySQL DB
+  const toggleUserStatus = async (id, newStatus) => {
+    try {
+      const response = await fetchAPI(`/users/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (response && response.success) {
+        await loadUsers();
+        return true;
+      }
+    } catch (err) {
+      console.error('Failed to update user status in database.', err);
+    }
+    return false;
+  };
+
+  // Admin deletes user in MySQL DB
+  const deleteUser = async (id) => {
+    try {
+      const response = await fetchAPI(`/users/${id}`, {
+        method: 'DELETE',
+      });
+      if (response && response.success) {
+        await loadUsers();
+        return true;
+      }
+    } catch (err) {
+      console.error('Failed to delete user from database.', err);
+    }
+    return false;
   };
 
   // Logout handler
@@ -224,6 +240,7 @@ export const AuthProvider = ({ children }) => {
         token,
         userList,
         setUserList,
+        loadUsers,
         isAuthenticated,
         isAdmin,
         isStaff,
@@ -234,7 +251,8 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         approveStaffUser,
-        updateUserInfo,
+        toggleUserStatus,
+        deleteUser,
         logout,
       }}
     >
