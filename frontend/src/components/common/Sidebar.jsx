@@ -43,7 +43,9 @@ export const Sidebar = () => {
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id || 
-              (item.id === 'inventory' && (currentView === 'add-product' || currentView === 'edit-product'));
+              (item.id === 'inventory' && (currentView === 'add-product' || currentView === 'edit-product')) ||
+              (item.id === 'staff-activity' && (currentView === 'activity' || currentView === 'staff-activity')) ||
+              (item.id === 'users' && (currentView === 'admin-users' || currentView === 'users'));
 
             return (
               <button

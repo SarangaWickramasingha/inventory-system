@@ -85,6 +85,7 @@ export const InventoryProvider = ({ children }) => {
   };
 
   const [currentView, setCurrentViewState] = useState(getInitialViewFromUrl);
+
   const [authMode, setAuthMode] = useState('login');
   const [editingProductId, setEditingProductId] = useState(null);
 
