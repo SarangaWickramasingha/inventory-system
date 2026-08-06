@@ -29,8 +29,14 @@ return [
 
     // Category Routes
     'GET /api/categories' => 'CategoryController@index',
+    'GET /api/category' => 'CategoryController@index',
     'POST /api/categories' => 'CategoryController@create',
+    'POST /api/category' => 'CategoryController@create',
+    'POST /api/categories/create' => 'CategoryController@create',
+    'POST /api/categories/add' => 'CategoryController@create',
+    'POST /api/category/add' => 'CategoryController@create',
     'DELETE /api/categories/{id}' => 'CategoryController@delete',
+    'DELETE /api/category/{id}' => 'CategoryController@delete',
 
     // Staff Activity & Stock Log Routes (Sashika)
     'GET /api/stock-logs' => 'StaffActivityController@getStaffLogs',
