@@ -1,8 +1,8 @@
 import React from 'react';
-import { Layers, BarChart2, Shapes, Bell, Play, Zap, ShieldCheck, Activity, CheckCircle2, ArrowRight, Box } from 'lucide-react';
+import { Layers, BarChart2, Shapes, Bell, Zap, ShieldCheck, Activity, CheckCircle2, ArrowRight, Box } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
 
-export const Hero = ({ onOpenDemo }) => {
+export const Hero = () => {
   const { setCurrentView } = useInventory();
 
   return (
@@ -26,12 +26,6 @@ export const Hero = ({ onOpenDemo }) => {
               className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-base rounded-xl shadow-lg transition-all"
             >
               Sign Up as Staff
-            </button>
-            <button
-              onClick={onOpenDemo}
-              className="px-6 py-3.5 bg-white text-slate-900 hover:bg-slate-100 font-bold text-base rounded-xl shadow-md transition-all flex items-center gap-2"
-            >
-              <Play className="w-4 h-4 fill-slate-900" /> Watch Demo
             </button>
           </div>
         </div>

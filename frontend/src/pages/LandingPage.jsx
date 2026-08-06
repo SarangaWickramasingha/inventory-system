@@ -1,20 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { LandingNavbar } from '../components/landing/LandingNavbar';
 import { Hero, FeatureSection, AboutSection } from '../components/landing/Hero';
-import { Modal } from '../components/common/Modal';
 import { useInventory } from '../context/InventoryContext';
-import { Box, Check } from 'lucide-react';
+import { Box } from 'lucide-react';
 
 export const LandingPage = () => {
-  const { setCurrentView, navigateToAuth } = useInventory();
-  const [showDemoModal, setShowDemoModal] = useState(false);
+  const { setCurrentView } = useInventory();
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
       <div>
         <LandingNavbar />
         <main>
-          <Hero onOpenDemo={() => setShowDemoModal(true)} />
+          <Hero />
           <FeatureSection />
           <AboutSection />
         </main>
@@ -89,33 +87,6 @@ export const LandingPage = () => {
           <p>Enterprise ERP Performance & Reliability</p>
         </div>
       </footer>
-
-      {/* Interactive Demo Video Modal */}
-      <Modal isOpen={showDemoModal} onClose={() => setShowDemoModal(false)} title="StockFlow Walkthrough Demo" maxWidth="max-w-3xl">
-        <div className="space-y-4">
-          <div className="aspect-video bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center relative">
-            <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1000&q=80" alt="Demo preview" className="w-full h-full object-cover opacity-40" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white">
-              <div className="w-16 h-16 rounded-full bg-blue-600/90 flex items-center justify-center mb-3 shadow-xl">
-                <Check className="w-8 h-8 text-white stroke-[3]" />
-              </div>
-              <h3 className="text-xl font-bold">Interactive ERP System Preview</h3>
-              <p className="text-xs text-slate-300 mt-1 max-w-md">Sign up as staff to access real-time product catalogs, category organization, stock tracking, and reporting!</p>
-            </div>
-          </div>
-          <div className="flex justify-end pt-2">
-            <button
-              onClick={() => {
-                setShowDemoModal(false);
-                navigateToAuth('register');
-              }}
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl"
-            >
-              Sign Up as Staff
-            </button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };
