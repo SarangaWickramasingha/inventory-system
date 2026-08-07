@@ -106,8 +106,7 @@ export const saveStoredProfile = (profile) => {
 const DEFAULT_THRESHOLDS = {
   defaultThreshold: 30,
   criticalThreshold: 5,
-  enableDashboardAlerts: true,
-  autoReorderFlag: false
+  enableDashboardAlerts: true
 };
 
 export const getStoredThresholdSettings = () => {

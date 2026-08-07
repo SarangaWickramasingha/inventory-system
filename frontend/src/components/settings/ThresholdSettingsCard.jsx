@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useInventory } from '../../context/InventoryContext';
-import { Sliders, Bell, AlertTriangle, ShieldCheck, Check } from 'lucide-react';
+import { Sliders, Bell, AlertTriangle, Check } from 'lucide-react';
 
 export const ThresholdSettingsCard = () => {
   const { thresholdSettings, updateThresholdSettings } = useInventory();
@@ -8,14 +8,12 @@ export const ThresholdSettingsCard = () => {
   const [defaultThreshold, setDefaultThreshold] = useState(thresholdSettings?.defaultThreshold ?? 30);
   const [criticalThreshold, setCriticalThreshold] = useState(thresholdSettings?.criticalThreshold ?? 5);
   const [enableDashboardAlerts, setEnableDashboardAlerts] = useState(thresholdSettings?.enableDashboardAlerts ?? true);
-  const [autoReorderFlag, setAutoReorderFlag] = useState(thresholdSettings?.autoReorderFlag ?? false);
 
   useEffect(() => {
     if (thresholdSettings) {
       setDefaultThreshold(thresholdSettings.defaultThreshold ?? 30);
       setCriticalThreshold(thresholdSettings.criticalThreshold ?? 5);
       setEnableDashboardAlerts(thresholdSettings.enableDashboardAlerts ?? true);
-      setAutoReorderFlag(thresholdSettings.autoReorderFlag ?? false);
     }
   }, [thresholdSettings]);
 
@@ -24,8 +22,7 @@ export const ThresholdSettingsCard = () => {
     updateThresholdSettings({
       defaultThreshold: Number(defaultThreshold) || 10,
       criticalThreshold: Number(criticalThreshold) || 5,
-      enableDashboardAlerts: Boolean(enableDashboardAlerts),
-      autoReorderFlag: Boolean(autoReorderFlag)
+      enableDashboardAlerts: Boolean(enableDashboardAlerts)
     });
   };
 
@@ -118,22 +115,6 @@ export const ThresholdSettingsCard = () => {
               type="checkbox"
               checked={enableDashboardAlerts}
               onChange={(e) => setEnableDashboardAlerts(e.target.checked)}
-              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
-            />
-          </label>
-
-          <label className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100/80 transition-colors">
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <div>
-                <div className="text-xs font-bold text-slate-800">Auto-Flag PO Reorder Queue</div>
-                <div className="text-[11px] text-slate-500">Automatically queue low stock items in supplier reorder tab</div>
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              checked={autoReorderFlag}
-              onChange={(e) => setAutoReorderFlag(e.target.checked)}
               className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
             />
           </label>
