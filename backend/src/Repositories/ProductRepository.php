@@ -200,7 +200,7 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function softDelete(int $id): bool
     {
-        $sql = "UPDATE products SET deleted_at = CURRENT_TIMESTAMP WHERE id = :id";
+        $sql = "DELETE FROM products WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute(['id' => $id]);
     }
