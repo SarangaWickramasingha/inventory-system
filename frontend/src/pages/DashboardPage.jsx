@@ -8,52 +8,46 @@ import { CategoryStockBarChart } from '../components/dashboard/CategoryStockBarC
 import { LowStockAlertPanel } from '../components/dashboard/LowStockAlertPanel';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { BulkImportModal } from '../components/dashboard/BulkImportModal';
+import { StaffTaskChecklist } from '../components/dashboard/StaffTaskChecklist';
 import { useInventory } from '../context/InventoryContext';
 import { useAuth } from '../context/AuthContext';
 import { exportToCSV } from '../utils/exportUtils';
-import { Download, Plus, Zap, UserCheck, Shield, ClipboardList, ArrowUpRight, AlertCircle, RefreshCw } from 'lucide-react';
+import { Download, Plus, Zap, UserCheck, Shield, ClipboardList, ArrowUpRight, AlertCircle, RefreshCw, Layers } from 'lucide-react';
 
 export const DashboardPage = () => {
   const { products, categories, activities, setCurrentView, setSelectedCategoryFilter } = useInventory();
   const { user, setUser } = useAuth();
   const [showBulkImportModal, setShowBulkImportModal] = useState(false);
 
-  // Active Role state: fallback to context role or local toggle
-  const currentRole = user?.role || 'admin';
-
-  // Toggle role helper (Admin <-> Staff) for interactive demonstration
-  const handleToggleRole = () => {
-    const nextRole = currentRole === 'admin' ? 'staff' : 'admin';
-    const nextName = nextRole === 'admin' ? 'Admin User' : 'Sarah Jenkins';
-    setUser({ ...user, role: nextRole, name: nextName });
-  };
+  // Active Role state: from authenticated user context
+  const currentRole = user?.role || 'staff';
 
   // KPI Computations
-  const totalProducts = products.length;
-  const lowStockCount = products.filter(p => p.status === 'Low Stock').length;
-  const outOfStockCount = products.filter(p => p.status === 'Out of Stock').length;
+  const totalProducts = (products || []).length;
+  const lowStockCount = (products || []).filter(p => p?.status === 'Low Stock' || p?.status === 'low_stock').length;
+  const outOfStockCount = (products || []).filter(p => p?.status === 'Out of Stock' || p?.status === 'out_of_stock').length;
   
   // Total Valuation calculation: sum of (buyingPrice * quantity)
-  const totalValuation = products.reduce(
-    (sum, p) => sum + (Number(p.buyingPrice || 0) * Number(p.quantity || 0)),
+  const totalValuation = (products || []).reduce(
+    (sum, p) => sum + (Number(p?.buyingPrice ?? p?.cost_price ?? p?.price ?? 0) * Number(p?.quantity || 0)),
     0
   );
 
   // Staff specific metrics
-  const activeItemsCount = products.filter(p => p.isActive !== false).length;
+  const activeItemsCount = (products || []).filter(p => p?.isActive !== false).length;
   const itemsToRestock = lowStockCount + outOfStockCount;
 
   // Export handler
   const handleExportReport = () => {
-    const reportData = products.map(p => ({
-      SKU: p.sku,
-      Name: p.name,
-      Category: p.category,
-      Quantity: p.quantity,
-      BuyingPrice: p.buyingPrice,
-      SellingPrice: p.sellingPrice,
-      TotalValuation: (p.quantity * p.buyingPrice).toFixed(2),
-      Status: p.status
+    const reportData = (products || []).map(p => ({
+      SKU: p?.sku || '',
+      Name: p?.name || '',
+      Category: p?.category || p?.category_name || '',
+      Quantity: p?.quantity || 0,
+      BuyingPrice: p?.buyingPrice ?? p?.cost_price ?? 0,
+      SellingPrice: p?.sellingPrice ?? p?.price ?? 0,
+      TotalValuation: ((p?.quantity || 0) * (p?.buyingPrice ?? p?.cost_price ?? p?.price ?? 0)).toFixed(2),
+      Status: p?.status || ''
     }));
     exportToCSV('stockflow_inventory_summary.csv', reportData);
   };
@@ -71,8 +65,8 @@ export const DashboardPage = () => {
             <div className="flex items-start gap-4">
               <div className={`p-3.5 rounded-2xl text-white shadow-md ${
                 currentRole === 'admin'
-                  ? 'bg-linear-to-br from-blue-600 to-indigo-700'
-                  : 'bg-linear-to-br from-emerald-600 to-teal-700'
+                  ? 'bg-gradient-to-br from-blue-600 to-indigo-700'
+                  : 'bg-gradient-to-br from-emerald-600 to-teal-700'
               }`}>
                 {currentRole === 'admin' ? (
                   <Shield className="w-7 h-7" />
@@ -97,43 +91,26 @@ export const DashboardPage = () => {
                 <p className="text-xs text-slate-500 font-medium mt-1">
                   {currentRole === 'admin'
                     ? 'Complete overview of system metrics, inventory valuation, stock warnings, and category distribution.'
-                    : 'Operational stock movements, urgent low-stock alerts, and fast inventory adjustments.'}
+                    : 'Operational stock movements, urgent low-stock alerts, daily task checklists, and fast inventory adjustments.'}
                 </p>
               </div>
             </div>
 
-            {/* Quick Actions & Role Switcher Toggle */}
+            {/* Quick Actions */}
             <div className="flex items-center gap-3 self-start md:self-center flex-wrap">
-              <button
-                onClick={handleToggleRole}
-                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all border border-slate-200 flex items-center gap-2"
-                title="Switch role mode between Admin and Staff"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
-                Switch to {currentRole === 'admin' ? 'Staff Mode' : 'Admin Mode'}
-              </button>
-
               {currentRole === 'admin' ? (
-                <>
-                  <button
-                    onClick={handleExportReport}
-                    className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center gap-2"
-                  >
-                    <Download className="w-4 h-4 text-slate-500" /> Export Valuation
-                  </button>
-                  <button
-                    onClick={() => setCurrentView('add-product')}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4 stroke-[3]" /> Add Product
-                  </button>
-                </>
+                <button
+                  onClick={handleExportReport}
+                  className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4 text-slate-500" /> Export Valuation
+                </button>
               ) : (
                 <button
-                  onClick={() => setCurrentView('inventory')}
+                  onClick={() => setCurrentView('add-product')}
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors flex items-center gap-2"
                 >
-                  <ClipboardList className="w-4 h-4" /> Open Stock Registry
+                  <Plus className="w-4 h-4 stroke-[3]" /> Add New Product
                 </button>
               )}
             </div>
@@ -156,7 +133,7 @@ export const DashboardPage = () => {
               />
               <MetricCard
                 title="INVENTORY VALUATION"
-                value={`$${totalValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                value={`Rs. ${totalValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 change="Total Cost Basis"
                 changeType="positive"
                 iconType="valuation"
@@ -166,8 +143,8 @@ export const DashboardPage = () => {
               <MetricCard
                 title="LOW STOCK ALERTS"
                 value={lowStockCount}
-                change="+3 needs reorder"
-                changeType="negative"
+                change={lowStockCount > 0 ? `${lowStockCount} needs reorder` : "Stock levels optimal"}
+                changeType={lowStockCount > 0 ? "negative" : "positive"}
                 iconType="low-stock"
                 onClick={() => {
                   setSelectedCategoryFilter('All Categories');
@@ -177,8 +154,8 @@ export const DashboardPage = () => {
               <MetricCard
                 title="OUT OF STOCK"
                 value={outOfStockCount}
-                change="Action required"
-                changeType="negative"
+                change={outOfStockCount > 0 ? "Action required" : "All items in stock"}
+                changeType={outOfStockCount > 0 ? "negative" : "positive"}
                 iconType="out-stock"
                 onClick={() => {
                   setSelectedCategoryFilter('All Categories');
@@ -200,10 +177,14 @@ export const DashboardPage = () => {
               <MetricCard
                 title="ITEMS TO RESTOCK"
                 value={itemsToRestock}
-                change="Urgent Queue"
-                changeType="negative"
+                change={itemsToRestock > 0 ? "Urgent Queue" : "No Reorders Needed"}
+                changeType={itemsToRestock > 0 ? "negative" : "positive"}
                 iconType="low-stock"
                 subtitle="Low & Out of stock items"
+                onClick={() => {
+                  setSelectedCategoryFilter('All Categories');
+                  setCurrentView('inventory');
+                }}
               />
               <MetricCard
                 title="CATEGORIES"
@@ -219,75 +200,131 @@ export const DashboardPage = () => {
                 change="Logged Entries"
                 changeType="positive"
                 iconType="activity"
+                onClick={() => setCurrentView('staff-activity')}
               />
             </div>
           )}
 
-          {/* Low-Stock Warning Alert Panel */}
-          <LowStockAlertPanel />
-
-          {/* Recharts Analytics & Stock Distribution Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left 2 Columns: Time Series Stock Chart & Bar Chart */}
-            <div className="lg:col-span-2 space-y-6">
-              <StockChart />
-              <CategoryStockBarChart />
-              <RecentActivity />
-            </div>
-
-            {/* Right 1 Column: Pie Distribution Chart & Quick Actions */}
+          {/* MAIN ROLE-DIFFERENTIATED DASHBOARD CONTENT */}
+          {currentRole === 'admin' ? (
+            /* ADMIN ROLE DASHBOARD LAYOUT */
             <div className="space-y-6">
-              <CategoryChart />
+              <LowStockAlertPanel />
 
-              {/* Bulk Import Banner */}
-              <div
-                onClick={() => setShowBulkImportModal(true)}
-                className="bg-linear-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg card-hover cursor-pointer relative overflow-hidden group"
-              >
-                <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-white/10 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xs">
-                  <Zap className="w-5 h-5 text-amber-300 fill-amber-300" />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left 2 Columns: Analytics & Stock Charts */}
+                <div className="lg:col-span-2 space-y-6">
+                  <StockChart />
+                  <CategoryStockBarChart />
+                  <RecentActivity />
                 </div>
-                <h4 className="text-lg font-extrabold mb-1">Bulk Product Import</h4>
-                <p className="text-xs text-blue-100 leading-relaxed mb-4">
-                  Easily import hundreds of inventory products from a CSV file into your system.
-                </p>
-                <span className="inline-flex items-center text-xs font-extrabold bg-white text-blue-700 px-4 py-2 rounded-xl shadow-sm group-hover:bg-blue-50 transition-colors">
-                  Upload CSV File <ArrowUpRight className="w-4 h-4 ml-1" />
-                </span>
-              </div>
 
-              {/* System Quick Links Card */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
-                <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">Quick Navigation</h4>
-                <div className="space-y-2 text-xs font-bold">
-                  <button
-                    onClick={() => setCurrentView('inventory')}
-                    className="w-full p-2.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 rounded-xl text-left transition-colors flex items-center justify-between"
+                {/* Right 1 Column: Distribution & Quick Imports */}
+                <div className="space-y-6">
+                  <CategoryChart />
+
+                  {/* Bulk Import Banner */}
+                  <div
+                    onClick={() => setShowBulkImportModal(true)}
+                    className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl border border-slate-800 card-hover cursor-pointer relative overflow-hidden group"
                   >
-                    <span>View Product Catalog</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-                  <button
-                    onClick={() => setCurrentView('categories')}
-                    className="w-full p-2.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 rounded-xl text-left transition-colors flex items-center justify-between"
-                  >
-                    <span>Manage Categories</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-                  {currentRole === 'admin' && (
-                    <button
-                      onClick={() => setCurrentView('reports')}
-                      className="w-full p-2.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 rounded-xl text-left transition-colors flex items-center justify-between"
-                    >
-                      <span>Analytics & Valuation Reports</span>
-                      <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
-                    </button>
-                  )}
+                    <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-blue-500/10 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
+                    <div className="w-10 h-10 bg-blue-600/30 border border-blue-400/30 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xs shadow-sm">
+                      <Zap className="w-5 h-5 text-amber-400 fill-amber-400" />
+                    </div>
+                    <h4 className="text-lg font-extrabold text-white mb-1.5 tracking-tight">Bulk Product Import</h4>
+                    <p className="text-xs text-slate-300 font-semibold leading-relaxed mb-4">
+                      Easily import hundreds of inventory products from a CSV file into your system.
+                    </p>
+                    <span className="inline-flex items-center text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl shadow-md transition-all gap-1.5">
+                      Upload CSV File <ArrowUpRight className="w-4 h-4" />
+                    </span>
+                  </div>
+
+                  {/* System Quick Links Card */}
+                  <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
+                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">Admin Quick Navigation</h4>
+                    <div className="space-y-2 text-xs font-bold">
+                      <button
+                        onClick={() => setCurrentView('inventory')}
+                        className="w-full p-2.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 rounded-xl text-left transition-colors flex items-center justify-between"
+                      >
+                        <span>View Product Catalog</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                      <button
+                        onClick={() => setCurrentView('categories')}
+                        className="w-full p-2.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 rounded-xl text-left transition-colors flex items-center justify-between"
+                      >
+                        <span>Manage Categories</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                      <button
+                        onClick={() => setCurrentView('reports')}
+                        className="w-full p-2.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 rounded-xl text-left transition-colors flex items-center justify-between"
+                      >
+                        <span>Analytics & Valuation Reports</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            /* STAFF ROLE OPERATIONAL DASHBOARD LAYOUT */
+            <div className="space-y-6">
+              {/* Daily Checklist & Urgent Restock Alerts */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                  <StaffTaskChecklist />
+                  <LowStockAlertPanel />
+                  <CategoryStockBarChart />
+                </div>
+
+                <div className="space-y-6">
+                  {/* Staff Operational Actions */}
+                  <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
+                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">Staff Quick Actions</h4>
+                    <div className="space-y-2 text-xs font-bold">
+                      <button
+                        onClick={() => setCurrentView('add-product')}
+                        className="w-full p-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-left transition-colors flex items-center justify-between border border-emerald-200/60"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Plus className="w-4 h-4 text-emerald-600" /> Add Single Product
+                        </span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+                      </button>
+
+                      <button
+                        onClick={() => setShowBulkImportModal(true)}
+                        className="w-full p-3 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-xl text-left transition-colors flex items-center justify-between border border-blue-200/60"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Zap className="w-4 h-4 text-blue-600" /> Bulk CSV Product Import
+                        </span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-blue-600" />
+                      </button>
+
+                      <button
+                        onClick={() => setCurrentView('inventory')}
+                        className="w-full p-3 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-left transition-colors flex items-center justify-between border border-slate-200"
+                      >
+                        <span className="flex items-center gap-2">
+                          <ClipboardList className="w-4 h-4 text-slate-500" /> Open Stock Registry
+                        </span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <CategoryChart />
+                  <RecentActivity />
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 

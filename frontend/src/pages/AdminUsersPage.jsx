@@ -2,90 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Header } from '../components/common/Header';
 import { Sidebar } from '../components/common/Sidebar';
 import { MetricCard } from '../components/dashboard/MetricCard';
-import { Users, Shield, UserCheck, UserX, Search, UserPlus, Filter, MoreVertical, Edit2, Trash2, CheckCircle, XCircle, X } from 'lucide-react';
-import { fetchAPI } from '../services/api';
+import { Users, Shield, UserCheck, UserX, Search, UserPlus, Filter, Trash2, CheckCircle, XCircle, X, Clock, Edit2, Check } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { getDiceBearAvatar } from '../utils/avatar';
+import { ConfirmModal } from '../components/common/ConfirmModal';
 
 export const AdminUsersPage = () => {
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: 'Saranga Wickramasingha',
-      username: 'saranga_admin',
-      email: 'saranga@stockflow.com',
-      role: 'admin',
-      status: 'active',
-      lastLogin: '2026-07-29 18:45',
-      avatarColor: 'bg-blue-600',
-    },
-    {
-      id: 2,
-      name: 'Manuja Jayasinghe',
-      username: 'manuja_dev',
-      email: 'manuja@stockflow.com',
-      role: 'admin',
-      status: 'active',
-      lastLogin: '2026-07-29 20:10',
-      avatarColor: 'bg-indigo-600',
-    },
-    {
-      id: 3,
-      name: 'Ashan Silva',
-      username: 'ashan_staff',
-      email: 'ashan@stockflow.com',
-      role: 'staff',
-      status: 'active',
-      lastLogin: '2026-07-29 14:20',
-      avatarColor: 'bg-emerald-600',
-    },
-    {
-      id: 4,
-      name: 'Tharindu Fernando',
-      username: 'tharindu_staff',
-      email: 'tharindu@stockflow.com',
-      role: 'staff',
-      status: 'active',
-      lastLogin: '2026-07-28 11:05',
-      avatarColor: 'bg-amber-600',
-    },
-    {
-      id: 5,
-      name: 'Dileepa Perera',
-      username: 'dileepa_staff',
-      email: 'dileepa@stockflow.com',
-      role: 'staff',
-      status: 'inactive',
-      lastLogin: '2026-07-20 09:30',
-      avatarColor: 'bg-slate-500',
-    },
-    {
-      id: 6,
-      name: 'Sashika Ratnayake',
-      username: 'sashika_staff',
-      email: 'sashika@stockflow.com',
-      role: 'staff',
-      status: 'active',
-      lastLogin: '2026-07-29 16:15',
-      avatarColor: 'bg-purple-600',
-    },
-    {
-      id: 7,
-      name: 'Pemila Rodrigo',
-      username: 'pemila_staff',
-      email: 'pemila@stockflow.com',
-      role: 'staff',
-      status: 'active',
-      lastLogin: '2026-07-29 19:00',
-      avatarColor: 'bg-rose-600',
-    },
-  ]);
+  const { userList, approveStaffUser, toggleUserStatus, deleteUser, loadUsers } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const [deleteConfirmTarget, setDeleteConfirmTarget] = useState(null);
 
-  const [newUser, setNewUser] = useState({
+  const [editFormData, setEditFormData] = useState({
     name: '',
     username: '',
     email: '',
@@ -94,125 +27,82 @@ export const AdminUsersPage = () => {
   });
 
   useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const response = await fetchAPI('/users');
-        if (response && response.success && Array.isArray(response.data)) {
-          const apiUsers = response.data.map((u) => ({
-            id: u.id,
-            name: u.full_name || u.username,
-            username: u.username,
-            email: u.email,
-            role: u.role,
-            status: u.status,
-            lastLogin: u.last_login || 'Never',
-            avatarColor: u.role === 'admin' ? 'bg-blue-600' : 'bg-emerald-600',
-          }));
-          setUsers(apiUsers);
-        }
-      } catch (err) {
-        console.warn('API unavailable, keeping mock user data for UI demo.', err);
-      }
-    };
     loadUsers();
-  }, []);
+  }, [loadUsers]);
 
   const showNotification = (msg) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(''), 3000);
+    setTimeout(() => setToastMessage(''), 3500);
   };
 
+  // Handle selecting a user from the pre-approved/registered dropdown list
+  const handleSelectUserFromDropdown = (e) => {
+    const targetId = Number(e.target.value);
+    setSelectedUserId(targetId);
+    const foundUser = userList.find((u) => u.id === targetId);
+
+    if (foundUser) {
+      setEditFormData({
+        name: foundUser.name,
+        username: foundUser.username,
+        email: foundUser.email,
+        role: foundUser.role,
+        status: foundUser.status === 'pending' ? 'active' : foundUser.status,
+      });
+    } else {
+      setEditFormData({ name: '', username: '', email: '', role: 'staff', status: 'active' });
+    }
+  };
+
+  // Toggle active/inactive status in MySQL Database
   const handleToggleStatus = async (id) => {
-    const targetUser = users.find((u) => u.id === id);
+    const targetUser = userList.find((u) => u.id === id);
     if (!targetUser) return;
+
     const newStatus = targetUser.status === 'active' ? 'inactive' : 'active';
-
-    try {
-      await fetchAPI(`/users/${id}/status`, {
-        method: 'PUT',
-        body: JSON.stringify({ status: newStatus }),
-      });
-    } catch (err) {
-      console.warn('API error during status update, updating locally.', err);
-    }
-
-    setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === id) {
-          showNotification(`User status for ${u.name} changed to ${newStatus.toUpperCase()}`);
-          return { ...u, status: newStatus };
-        }
-        return u;
-      })
-    );
-  };
-
-  const handleToggleRole = (id) => {
-    setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === id) {
-          const newRole = u.role === 'admin' ? 'staff' : 'admin';
-          showNotification(`Role for ${u.name} updated to ${newRole.toUpperCase()}`);
-          return { ...u, role: newRole };
-        }
-        return u;
-      })
-    );
-  };
-
-  const handleDeleteUser = async (id, name) => {
-    if (window.confirm(`Are you sure you want to remove user "${name}"?`)) {
-      try {
-        await fetchAPI(`/users/${id}`, {
-          method: 'DELETE',
-        });
-      } catch (err) {
-        console.warn('API error during user deletion, updating locally.', err);
-      }
-      setUsers((prev) => prev.filter((u) => u.id !== id));
-      showNotification(`User "${name}" deleted successfully.`);
+    const success = await toggleUserStatus(id, newStatus);
+    if (success) {
+      showNotification(`Status for ${targetUser.name} updated to ${newStatus.toUpperCase()} in database.`);
+    } else {
+      showNotification(`Failed to update status for ${targetUser.name}.`);
     }
   };
 
-  const handleCreateUser = async (e) => {
+  // Approve a pending staff member in MySQL Database
+  const handleApproveStaff = async (id, name) => {
+    const success = await approveStaffUser(id);
+    if (success) {
+      showNotification(`Staff account for "${name}" approved successfully! They can now sign in.`);
+    } else {
+      showNotification(`Failed to approve staff account for "${name}".`);
+    }
+  };
+
+  // Reject / Delete a user handler - triggers unified ConfirmModal
+  const handleDeleteUser = (id, name) => {
+    setDeleteConfirmTarget({ id, name });
+  };
+
+  // Submit modal to update User status for selected user in Database
+  const handleSaveSelectedUser = async (e) => {
     e.preventDefault();
-    if (!newUser.name || !newUser.email || !newUser.username) return;
+    if (!selectedUserId) return;
 
-    let createdId = Date.now();
-    try {
-      const response = await fetchAPI('/users', {
-        method: 'POST',
-        body: JSON.stringify({
-          full_name: newUser.name,
-          username: newUser.username,
-          email: newUser.email,
-          role: newUser.role,
-          status: newUser.status,
-          password: 'Password123!',
-        }),
-      });
-      if (response && response.success && response.data?.id) {
-        createdId = response.data.id;
-      }
-    } catch (err) {
-      console.warn('API error during user creation, adding locally.', err);
+    const targetStatus = editFormData.status === 'pending' ? 'active' : editFormData.status;
+    const success = await toggleUserStatus(selectedUserId, targetStatus);
+    if (success) {
+      showNotification(`User account updated successfully in database.`);
+      setShowAddModal(false);
+      setSelectedUserId('');
+      setEditFormData({ name: '', username: '', email: '', role: 'staff', status: 'active' });
     }
-
-    const created = {
-      id: createdId,
-      ...newUser,
-      lastLogin: 'Never',
-      avatarColor: newUser.role === 'admin' ? 'bg-blue-600' : 'bg-emerald-600',
-    };
-
-    setUsers((prev) => [created, ...prev]);
-    setShowAddModal(false);
-    setNewUser({ name: '', username: '', email: '', role: 'staff', status: 'active' });
-    showNotification(`New ${newUser.role.toUpperCase()} account created for ${newUser.name}`);
   };
 
-  // Filtered list
-  const filteredUsers = users.filter((u) => {
+  // Pending staff approval list
+  const pendingUsers = userList.filter((u) => u.status === 'pending');
+
+  // Filtered active & inactive users
+  const filteredUsers = userList.filter((u) => {
     const matchesSearch =
       u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -224,10 +114,13 @@ export const AdminUsersPage = () => {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const totalUsers = users.length;
-  const adminCount = users.filter((u) => u.role === 'admin').length;
-  const staffCount = users.filter((u) => u.role === 'staff' && u.status === 'active').length;
-  const inactiveCount = users.filter((u) => u.status === 'inactive').length;
+  // Approved users list available in the modal dropdown
+  const approvedDropdownList = userList.filter((u) => u.role === 'staff' || u.role === 'admin');
+
+  const totalUsers = userList.length;
+  const adminCount = userList.filter((u) => u.role === 'admin').length;
+  const activeStaffCount = userList.filter((u) => u.role === 'staff' && u.status === 'active').length;
+  const pendingCount = pendingUsers.length;
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -250,20 +143,33 @@ export const AdminUsersPage = () => {
             </div>
           )}
 
-          {/* Top Title & Actions Bar */}
+          {/* Top Title & Action Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">User & Staff Management</h1>
               <p className="text-sm text-slate-500 font-medium">
-                Admin control panel for managing user accounts, permissions, and status toggles.
+                Admin control panel for staff approvals, role permissions, user configuration, and status toggles.
               </p>
             </div>
 
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={() => {
+                setShowAddModal(true);
+                if (approvedDropdownList.length > 0) {
+                  const firstUser = approvedDropdownList[0];
+                  setSelectedUserId(firstUser.id);
+                  setEditFormData({
+                    name: firstUser.name,
+                    username: firstUser.username,
+                    email: firstUser.email,
+                    role: firstUser.role,
+                    status: firstUser.status === 'pending' ? 'active' : firstUser.status,
+                  });
+                }
+              }}
               className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-colors flex items-center gap-2"
             >
-              <UserPlus className="w-4 h-4 stroke-[2.5]" /> Add New User
+              <UserPlus className="w-4 h-4 stroke-[2.5]" /> Select & Configure User
             </button>
           </div>
 
@@ -274,7 +180,7 @@ export const AdminUsersPage = () => {
                 <Users className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Users</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Accounts</p>
                 <h3 className="text-2xl font-extrabold text-slate-900">{totalUsers}</h3>
               </div>
             </div>
@@ -295,20 +201,78 @@ export const AdminUsersPage = () => {
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Staff</p>
-                <h3 className="text-2xl font-extrabold text-slate-900">{staffCount}</h3>
+                <h3 className="text-2xl font-extrabold text-slate-900">{activeStaffCount}</h3>
               </div>
             </div>
 
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
-                <UserX className="w-6 h-6" />
+              <div className={`w-12 h-12 rounded-xl ${pendingCount > 0 ? 'bg-amber-100 text-amber-700 animate-pulse' : 'bg-slate-100 text-slate-500'} flex items-center justify-center font-bold`}>
+                <Clock className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Inactive Accounts</p>
-                <h3 className="text-2xl font-extrabold text-slate-900">{inactiveCount}</h3>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Approval</p>
+                <h3 className="text-2xl font-extrabold text-slate-900">{pendingCount}</h3>
               </div>
             </div>
           </div>
+
+          {/* Pending Staff Approvals Queue Section */}
+          {pendingCount > 0 && (
+            <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-6 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-amber-500 text-white rounded-xl flex items-center justify-center font-bold shadow-xs">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">
+                      Pending Staff Registrations ({pendingCount})
+                    </h3>
+                    <p className="text-xs text-slate-600 font-medium">
+                      The following registered staff members are waiting for Admin approval to access the system.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {pendingUsers.map((pUser) => (
+                  <div key={pUser.id} className="bg-white p-4 rounded-xl border border-amber-200 shadow-2xs flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={getDiceBearAvatar(pUser.name)}
+                        alt={pUser.name}
+                        className="w-10 h-10 rounded-full object-cover border border-amber-300 shadow-xs bg-slate-100"
+                      />
+                      <div>
+                        <p className="font-bold text-slate-900 text-sm">{pUser.name}</p>
+                        <p className="text-xs text-slate-500">{pUser.email}</p>
+                        <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-2 py-0.5 rounded mt-1">
+                          Role: {pUser.role.toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleApproveStaff(pUser.id, pUser.name)}
+                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
+                      >
+                        <Check className="w-3.5 h-3.5" /> Approve Staff
+                      </button>
+                      <button
+                        onClick={() => handleDeleteUser(pUser.id, pUser.name)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                        title="Reject & Remove"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Search & Filter Toolbar */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-4">
@@ -347,13 +311,14 @@ export const AdminUsersPage = () => {
                 >
                   <option value="all">All Status</option>
                   <option value="active">Active</option>
+                  <option value="pending">Pending Approval</option>
                   <option value="inactive">Inactive</option>
                 </select>
               </div>
             </div>
           </div>
 
-          {/* User Table */}
+          {/* Main Users Table */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -362,8 +327,7 @@ export const AdminUsersPage = () => {
                     <th className="py-4 px-6">User Account</th>
                     <th className="py-4 px-6">Email Address</th>
                     <th className="py-4 px-6">Role</th>
-                    <th className="py-4 px-6">Status</th>
-                    <th className="py-4 px-6">Last Login</th>
+                    <th className="py-4 px-6">Approval Status</th>
                     <th className="py-4 px-6 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -373,9 +337,11 @@ export const AdminUsersPage = () => {
                       <tr key={user.id} className="hover:bg-slate-50/60 transition-colors">
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full ${user.avatarColor} text-white font-extrabold flex items-center justify-center shadow-xs text-sm`}>
-                              {user.name.split(' ').map((n) => n[0]).join('')}
-                            </div>
+                            <img
+                              src={getDiceBearAvatar(user.name)}
+                              alt={user.name}
+                              className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-xs bg-slate-100"
+                            />
                             <div>
                               <p className="font-bold text-slate-900">{user.name}</p>
                               <p className="text-xs text-slate-400">@{user.username}</p>
@@ -385,9 +351,7 @@ export const AdminUsersPage = () => {
                         <td className="py-4 px-6 font-medium text-slate-600">{user.email}</td>
                         <td className="py-4 px-6">
                           <span
-                            onClick={() => handleToggleRole(user.id)}
-                            title="Click to toggle role"
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold cursor-pointer transition-transform hover:scale-105 ${
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold ${
                               user.role === 'admin'
                                 ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
                                 : 'bg-blue-50 text-blue-700 border border-blue-200'
@@ -398,33 +362,55 @@ export const AdminUsersPage = () => {
                           </span>
                         </td>
                         <td className="py-4 px-6">
-                          <span
-                            onClick={() => handleToggleStatus(user.id)}
-                            title="Click to toggle active status"
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold cursor-pointer transition-transform hover:scale-105 ${
-                              user.status === 'active'
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-rose-50 text-rose-700 border border-rose-200'
-                            }`}
-                          >
-                            <span className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
-                            {user.status.toUpperCase()}
-                          </span>
+                          {user.status === 'pending' ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-50 text-amber-700 border border-amber-200">
+                              <Clock className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                              PENDING APPROVAL
+                            </span>
+                          ) : (
+                            <span
+                              onClick={() => handleToggleStatus(user.id)}
+                              title="Click to toggle status"
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold cursor-pointer transition-transform hover:scale-105 ${
+                                user.status === 'active'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : 'bg-rose-50 text-rose-700 border border-rose-200'
+                              }`}
+                            >
+                              <span className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                              {user.status.toUpperCase()}
+                            </span>
+                          )}
                         </td>
-                        <td className="py-4 px-6 text-xs text-slate-500 font-medium">{user.lastLogin}</td>
                         <td className="py-4 px-6 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleToggleStatus(user.id)}
-                              className={`p-2 rounded-lg border transition-colors ${
-                                user.status === 'active'
-                                  ? 'border-rose-200 hover:bg-rose-50 text-rose-600'
-                                  : 'border-emerald-200 hover:bg-emerald-50 text-emerald-600'
-                              }`}
-                              title={user.status === 'active' ? 'Deactivate User' : 'Activate User'}
-                            >
-                              {user.status === 'active' ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
-                            </button>
+                            {user.status === 'pending' ? (
+                              <button
+                                onClick={() => handleApproveStaff(user.id, user.name)}
+                                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-xs"
+                              >
+                                Approve
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setShowAddModal(true);
+                                  setSelectedUserId(user.id);
+                                  setEditFormData({
+                                    name: user.name,
+                                    username: user.username,
+                                    email: user.email,
+                                    role: user.role,
+                                    status: user.status,
+                                  });
+                                }}
+                                className="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition-colors"
+                                title="Edit User Name & Full Name"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                            )}
+
                             <button
                               onClick={() => handleDeleteUser(user.id, user.name)}
                               className="p-2 rounded-lg border border-slate-200 hover:bg-rose-50 hover:border-rose-200 text-slate-400 hover:text-rose-600 transition-colors"
@@ -438,7 +424,7 @@ export const AdminUsersPage = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="6" className="py-8 text-center text-slate-400 font-medium">
+                      <td colSpan="5" className="py-8 text-center text-slate-400 font-medium">
                         No user accounts match your search or filter criteria.
                       </td>
                     </tr>
@@ -450,12 +436,12 @@ export const AdminUsersPage = () => {
         </main>
       </div>
 
-      {/* Add New User Modal */}
+      {/* Dropdown Select & Configure User Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-fade-in">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-              <h3 className="text-lg font-extrabold text-slate-900">Add New System User</h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-fade-in space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-lg font-extrabold text-slate-900">Select & Configure User Account</h3>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
@@ -464,78 +450,89 @@ export const AdminUsersPage = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateUser} className="space-y-4">
+            <form onSubmit={handleSaveSelectedUser} className="space-y-4 text-xs">
+              {/* 1. Dropdown List of Pre-Approved / Registered Users */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Full Name
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Select Registered / Pre-Approved User *
                 </label>
-                <input
-                  type="text"
+                <select
+                  value={selectedUserId}
+                  onChange={handleSelectUserFromDropdown}
                   required
-                  placeholder="e.g. Kasun Fernando"
-                  value={newUser.name}
-                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                />
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                  <option value="" disabled>-- Select a Staff or Admin User --</option>
+                  {approvedDropdownList.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} ({u.email}) [{u.role.toUpperCase()}] {u.status === 'pending' ? '• Pending Approval' : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. kasun_staff"
-                  value={newUser.username}
-                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                />
-              </div>
+              {selectedUserId && (
+                <>
+                  {/* Read-Only Email Badge */}
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-blue-900 uppercase">Registered Email</span>
+                      <p className="text-xs font-semibold text-blue-700">{editFormData.email}</p>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-blue-600 text-white rounded-md">
+                      {editFormData.role}
+                    </span>
+                  </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="kasun@stockflow.com"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                />
-              </div>
+                  {/* Admin Edits Full Name */}
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Kasun Perera"
+                      value={editFormData.name}
+                      onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    />
+                  </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Role
-                  </label>
-                  <select
-                    value={newUser.role}
-                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  >
-                    <option value="staff">Staff</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
+                  {/* Admin Edits Username */}
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      User Name (Username) *
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-slate-400">@</span>
+                      <input
+                        type="text"
+                        required
+                        placeholder="kasun_staff"
+                        value={editFormData.username}
+                        onChange={(e) => setEditFormData({ ...editFormData, username: e.target.value.replace(/[^a-zA-Z0-9_]/g, '') })}
+                        className="w-full pl-8 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      />
+                    </div>
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={newUser.status}
-                    onChange={(e) => setNewUser({ ...newUser, status: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
+                  {/* Status Toggle */}
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Account Status
+                    </label>
+                    <select
+                      value={editFormData.status}
+                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    >
+                      <option value="active">Active (Approved)</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                </>
+              )}
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                 <button
@@ -547,18 +544,37 @@ export const AdminUsersPage = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-colors"
+                  disabled={!selectedUserId}
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-sm rounded-xl shadow-md transition-colors"
                 >
-                  Create User Account
+                  Save Account Changes
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Unified System Confirm Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deleteConfirmTarget)}
+        onClose={() => setDeleteConfirmTarget(null)}
+        onConfirm={async () => {
+          if (deleteConfirmTarget) {
+            const success = await deleteUser(deleteConfirmTarget.id);
+            if (success) {
+              showNotification(`User account "${deleteConfirmTarget.name}" deleted from database successfully.`);
+            } else {
+              showNotification(`Failed to delete user "${deleteConfirmTarget.name}".`);
+            }
+          }
+        }}
+        title="Delete User Account"
+        message={`Are you sure you want to delete user account "${deleteConfirmTarget?.name}"?`}
+        confirmText="Delete Account"
+      />
     </div>
   );
 };
 
 export default AdminUsersPage;
-

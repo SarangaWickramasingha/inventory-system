@@ -1,18 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useInventory } from '../../context/InventoryContext';
 import { Sliders, Bell, AlertTriangle, ShieldCheck, Check } from 'lucide-react';
 
 export const ThresholdSettingsCard = () => {
-  const { showToast } = useInventory();
-  const [defaultThreshold, setDefaultThreshold] = useState('30');
-  const [criticalThreshold, setCriticalThreshold] = useState('5');
-  const [enableEmailAlerts, setEnableEmailAlerts] = useState(true);
-  const [enableDashboardAlerts, setEnableDashboardAlerts] = useState(true);
-  const [autoReorderFlag, setAutoReorderFlag] = useState(false);
+  const { thresholdSettings, updateThresholdSettings } = useInventory();
+
+  const [defaultThreshold, setDefaultThreshold] = useState(thresholdSettings?.defaultThreshold ?? 30);
+  const [criticalThreshold, setCriticalThreshold] = useState(thresholdSettings?.criticalThreshold ?? 5);
+  const [enableDashboardAlerts, setEnableDashboardAlerts] = useState(thresholdSettings?.enableDashboardAlerts ?? true);
+  const [autoReorderFlag, setAutoReorderFlag] = useState(thresholdSettings?.autoReorderFlag ?? false);
+
+  useEffect(() => {
+    if (thresholdSettings) {
+      setDefaultThreshold(thresholdSettings.defaultThreshold ?? 30);
+      setCriticalThreshold(thresholdSettings.criticalThreshold ?? 5);
+      setEnableDashboardAlerts(thresholdSettings.enableDashboardAlerts ?? true);
+      setAutoReorderFlag(thresholdSettings.autoReorderFlag ?? false);
+    }
+  }, [thresholdSettings]);
 
   const handleSaveThresholds = (e) => {
     e.preventDefault();
-    showToast('Low-stock threshold settings updated successfully!');
+    updateThresholdSettings({
+      defaultThreshold: Number(defaultThreshold) || 10,
+      criticalThreshold: Number(criticalThreshold) || 5,
+      enableDashboardAlerts: Boolean(enableDashboardAlerts),
+      autoReorderFlag: Boolean(autoReorderFlag)
+    });
   };
 
   return (
@@ -50,9 +64,9 @@ export const ThresholdSettingsCard = () => {
                 max="1000"
                 value={defaultThreshold}
                 onChange={(e) => setDefaultThreshold(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:bg-white focus:border-blue-600 focus:outline-none"
+                className="w-full pl-4 pr-14 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:bg-white focus:border-blue-600 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400 pointer-events-none select-none">
                 units
               </span>
             </div>
@@ -74,9 +88,9 @@ export const ThresholdSettingsCard = () => {
                 max="100"
                 value={criticalThreshold}
                 onChange={(e) => setCriticalThreshold(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:bg-white focus:border-blue-600 focus:outline-none"
+                className="w-full pl-4 pr-14 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:bg-white focus:border-blue-600 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400 pointer-events-none select-none">
                 units
               </span>
             </div>

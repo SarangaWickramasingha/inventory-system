@@ -1,6 +1,7 @@
 import React from 'react';
 import { useInventory } from '../../context/InventoryContext';
 import { ActionBadge } from '../common/Badge';
+import { getDiceBearAvatar } from '../../utils/avatar';
 
 export const RecentActivity = () => {
   const { activities, setCurrentView } = useInventory();
@@ -28,7 +29,14 @@ export const RecentActivity = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-sm">
-            {activities.slice(0, 5).map((act) => (
+            {(activities || []).length === 0 ? (
+              <tr>
+                <td colSpan="4" className="py-6 text-center text-xs text-slate-400 font-medium">
+                  No recent activity logged.
+                </td>
+              </tr>
+            ) : (
+              (activities || []).slice(0, 5).map((act) => (
               <tr key={act.id} className="hover:bg-slate-50/70 transition-colors">
                 <td className="py-3.5 pl-2 font-semibold text-slate-800 max-w-xs truncate">
                   {act.productName}
@@ -38,13 +46,11 @@ export const RecentActivity = () => {
                 </td>
                 <td className="py-3.5">
                   <div className="flex items-center gap-2">
-                    {act.userAvatar ? (
-                      <img src={act.userAvatar} alt={act.user} className="w-6 h-6 rounded-full object-cover border border-slate-200" />
-                    ) : (
-                      <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">
-                        {act.userInitials}
-                      </div>
-                    )}
+                    <img
+                      src={getDiceBearAvatar(act.user || 'Staff User')}
+                      alt={act.user}
+                      className="w-6 h-6 rounded-full object-cover border border-slate-200 bg-slate-100"
+                    />
                     <span className="text-xs font-semibold text-slate-700">{act.user}</span>
                   </div>
                 </td>
@@ -52,7 +58,7 @@ export const RecentActivity = () => {
                   {act.time}
                 </td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
       </div>

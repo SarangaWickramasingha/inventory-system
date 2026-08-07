@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Header } from '../components/common/Header';
 import { Sidebar } from '../components/common/Sidebar';
 import { useInventory } from '../context/InventoryContext';
-import { UploadCloud, AlertCircle, ChevronRight } from 'lucide-react';
+import { UploadCloud, AlertCircle, ChevronRight, Trash2 } from 'lucide-react';
 
 export const AddProductPage = () => {
   const { products, categories, addProduct, setCurrentView } = useInventory();
@@ -94,22 +94,54 @@ export const AddProductPage = () => {
                     reader.readAsDataURL(e.dataTransfer.files[0]);
                   }
                 }}
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
-                  isDragOver ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-blue-400 bg-slate-50/30'
+                className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer shadow-2xs ${
+                  isDragOver ? 'border-blue-600 bg-blue-50/80 ring-4 ring-blue-100' : 'border-blue-400 hover:border-blue-600 bg-slate-50/80 hover:bg-blue-50/30'
                 }`}
               >
                 {imageUrl ? (
                   <div className="flex flex-col items-center">
-                    <img src={imageUrl} alt="Preview" className="w-28 h-28 object-cover rounded-xl border border-slate-200 shadow-sm mb-3" />
-                    <p className="text-xs font-semibold text-slate-600">Click or drag image to replace</p>
+                    <div className="relative mb-3">
+                      <img src={imageUrl} alt="Preview" className="w-32 h-32 object-cover rounded-2xl border-2 border-slate-200 shadow-md" />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setImageUrl('');
+                        }}
+                        className="absolute -top-2.5 -right-2.5 bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-full shadow-lg transition-all transform hover:scale-110 flex items-center justify-center"
+                        title="Delete Photo"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <label
+                        htmlFor="product-image-file"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+                      >
+                        Replace Image
+                      </label>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setImageUrl('');
+                        }}
+                        className="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete Photo
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <label className="cursor-pointer flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-                      <UploadCloud className="w-6 h-6 stroke-[2]" />
+                    <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mb-3 shadow-md shadow-blue-500/20">
+                      <UploadCloud className="w-6 h-6 stroke-[2.5]" />
                     </div>
-                    <p className="text-sm font-bold text-slate-800">Click to upload or drag and drop</p>
-                    <p className="text-xs text-slate-400 mt-1">SVG, PNG, JPG or GIF (MAX. 800×400px)</p>
+                    <p className="text-sm font-extrabold text-slate-900">Click to upload or drag and drop image</p>
+                    <p className="text-xs font-semibold text-slate-600 mt-1">SVG, PNG, JPG or GIF (MAX. 800×400px)</p>
                   </label>
                 )}
                 <input
@@ -217,14 +249,14 @@ export const AddProductPage = () => {
                     type="number"
                     min="0"
                     value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
+                    onChange={(e) => setQuantity(Math.max(0, Number(e.target.value) || 0))}
                     className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
-                    Buying Price ($)
+                    Buying Price (LKR / Rs.)
                   </label>
                   <input
                     type="number"
@@ -238,7 +270,7 @@ export const AddProductPage = () => {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
-                    Selling Price ($)
+                    Selling Price (LKR / Rs.)
                   </label>
                   <input
                     type="number"

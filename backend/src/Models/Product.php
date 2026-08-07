@@ -21,6 +21,7 @@ class Product implements JsonSerializable
     private int $minStockAlert;
     private string $unit;
     private ?string $description;
+    private ?string $imageUrl;
     private string $status;
     private ?string $deletedAt;
     private ?string $createdAt;
@@ -38,6 +39,7 @@ class Product implements JsonSerializable
         int $minStockAlert = 5,
         string $unit = 'pcs',
         ?string $description = null,
+        ?string $imageUrl = null,
         string $status = 'in_stock',
         ?string $deletedAt = null,
         ?string $createdAt = null,
@@ -50,10 +52,11 @@ class Product implements JsonSerializable
         $this->categoryName = $categoryName;
         $this->price = $price;
         $this->costPrice = $costPrice;
-        $this->quantity = $quantity;
+        $this->quantity = max(0, $quantity);
         $this->minStockAlert = $minStockAlert;
         $this->unit = $unit;
         $this->description = $description;
+        $this->imageUrl = $imageUrl;
         $this->status = $status;
         $this->deletedAt = $deletedAt;
         $this->createdAt = $createdAt;
@@ -70,10 +73,11 @@ class Product implements JsonSerializable
             $data['category_name'] ?? $data['categoryName'] ?? null,
             isset($data['price']) ? (float)$data['price'] : 0.00,
             isset($data['cost_price']) ? (float)$data['cost_price'] : (isset($data['costPrice']) ? (float)$data['costPrice'] : 0.00),
-            isset($data['quantity']) ? (int)$data['quantity'] : 0,
+            isset($data['quantity']) ? max(0, (int)$data['quantity']) : 0,
             isset($data['min_stock_alert']) ? (int)$data['min_stock_alert'] : (isset($data['minStockAlert']) ? (int)$data['minStockAlert'] : 5),
             $data['unit'] ?? 'pcs',
             $data['description'] ?? null,
+            $data['image_url'] ?? $data['imageUrl'] ?? null,
             $data['status'] ?? 'in_stock',
             $data['deleted_at'] ?? $data['deletedAt'] ?? null,
             $data['created_at'] ?? $data['createdAt'] ?? null,
@@ -190,7 +194,7 @@ class Product implements JsonSerializable
 
     public function setQuantity(int $quantity): void
     {
-        $this->quantity = $quantity;
+        $this->quantity = max(0, $quantity);
         $this->updateStatusBasedOnQuantity();
     }
 
@@ -276,6 +280,7 @@ class Product implements JsonSerializable
             'min_stock_alert' => $this->minStockAlert,
             'unit' => $this->unit,
             'description' => $this->description,
+            'image_url' => $this->imageUrl,
             'status' => $this->status,
             'deleted_at' => $this->deletedAt,
             'created_at' => $this->createdAt,

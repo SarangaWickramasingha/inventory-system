@@ -9,9 +9,24 @@ import {
   getStoredNotifications,
   saveStoredNotifications,
   getStoredProfile,
-  saveStoredProfile
+  saveStoredProfile,
+  getStoredThresholdSettings,
+  saveStoredThresholdSettings
 } from '../utils/storage';
-import { getProducts as fetchProductsFromAPI } from '../services/productService';
+import { getDiceBearAvatar } from '../utils/avatar';
+import { 
+  getProducts as fetchProductsFromAPI,
+  createProduct as createProductApi,
+  updateProduct as updateProductApi,
+  deleteProduct as deleteProductApi
+} from '../services/productService';
+import { 
+  getCategories as fetchCategoriesFromAPI,
+  createCategory as createCategoryApi,
+  deleteCategoryApi
+} from '../services/categoryService';
+import { getMe, updateProfileApi, updatePasswordApi } from '../services/userService';
+import { getStockLogs, createStockLog } from '../services/stockService';
 
 const InventoryContext = createContext();
 
@@ -21,11 +36,18 @@ export const InventoryProvider = ({ children }) => {
   const [activities, setActivities] = useState(getStoredActivities);
   const [notifications, setNotifications] = useState(getStoredNotifications);
   const [profile, setProfile] = useState(getStoredProfile);
+  const [thresholdSettings, setThresholdSettings] = useState(getStoredThresholdSettings);
 
   // URL path mapping dictionary
   const viewToPathMap = {
     'landing': '/',
     'login': '/login',
+    'register': '/register',
+    'features': '/features',
+    'about': '/about',
+    'contact': '/contact',
+    'privacy': '/privacy',
+    'terms': '/terms',
     'dashboard': '/dashboard',
     'inventory': '/inventory',
     'categories': '/categories',
@@ -42,6 +64,12 @@ export const InventoryProvider = ({ children }) => {
   const pathToViewMap = {
     '/': 'landing',
     '/login': 'login',
+    '/register': 'register',
+    '/features': 'features',
+    '/about': 'about',
+    '/contact': 'contact',
+    '/privacy': 'privacy',
+    '/terms': 'terms',
     '/dashboard': 'dashboard',
     '/inventory': 'inventory',
     '/categories': 'categories',
@@ -61,7 +89,37 @@ export const InventoryProvider = ({ children }) => {
   };
 
   const [currentView, setCurrentViewState] = useState(getInitialViewFromUrl);
+  const [previousView, setPreviousView] = useState('landing');
+
+  // Sync state with browser URL path and history
+  const setCurrentView = (view) => {
+    setCurrentViewState(prev => {
+      if (view === 'login' || view === 'register') {
+        if (prev !== 'login' && prev !== 'register') {
+          setPreviousView(prev);
+        }
+      }
+      return view;
+    });
+
+    const targetPath = viewToPathMap[view] || '/';
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({ view }, '', targetPath);
+    }
+  };
+
+  const closeAuthModal = () => {
+    const target = previousView && previousView !== 'login' && previousView !== 'register' ? previousView : 'landing';
+    setCurrentView(target);
+  };
+
+  const [authMode, setAuthMode] = useState('login');
   const [editingProductId, setEditingProductId] = useState(null);
+
+  const navigateToAuth = (mode = 'login') => {
+    setAuthMode(mode);
+    setCurrentView('login');
+  };
   const [viewingProductId, setViewingProductId] = useState(null);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All Categories');
   
@@ -81,7 +139,7 @@ export const InventoryProvider = ({ children }) => {
     if (!item) return null;
     const priceVal = Number(item.sellingPrice ?? item.price ?? 0);
     const costVal = Number(item.buyingPrice ?? item.cost_price ?? 0);
-    const qtyVal = Number(item.quantity ?? 0);
+    const qtyVal = Math.max(0, Number(item.quantity ?? 0));
     const alertVal = Number(item.reorderPoint ?? item.min_stock_alert ?? 5);
     const categoryVal = item.category || item.category_name || 'Uncategorized';
 
@@ -102,7 +160,8 @@ export const InventoryProvider = ({ children }) => {
       unit: item.unit || 'pcs',
       description: item.description || '',
       status: item.status === 'in_stock' ? 'In Stock' : item.status === 'low_stock' ? 'Low Stock' : item.status === 'out_of_stock' ? 'Out of Stock' : (item.status || 'In Stock'),
-      image: item.image || item.image_url || 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&q=80',
+      image: item.image_url || item.image || 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&q=80',
+      image_url: item.image_url || item.image || 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&q=80',
       additionalImages: item.additionalImages || []
     };
   };
@@ -133,12 +192,50 @@ export const InventoryProvider = ({ children }) => {
   // Toast Notification state
   const [toast, setToast] = useState(null);
 
-  // Sync state with browser URL path and history
-  const setCurrentView = (view) => {
-    setCurrentViewState(view);
-    const targetPath = viewToPathMap[view] || '/';
-    if (window.location.pathname !== targetPath) {
-      window.history.pushState({ view }, '', targetPath);
+  // Fetch categories dynamically from backend MySQL database
+  const loadCategories = async () => {
+    try {
+      const response = await fetchCategoriesFromAPI();
+      if (response && response.success && Array.isArray(response.data?.items)) {
+        setCategories(response.data.items);
+      }
+    } catch (err) {
+      console.warn('Backend categories API unavailable:', err);
+    }
+  };
+
+  // Fetch authenticated user profile dynamically from backend MySQL database
+  const loadProfile = async () => {
+    try {
+      const res = await getMe();
+      if (res && res.success && res.data?.user) {
+        const u = res.data.user;
+        const normalizedProfile = {
+          id: u.id,
+          name: u.full_name || u.name || u.username,
+          username: u.username,
+          email: u.email,
+          role: (u.role || 'staff').toUpperCase(),
+          status: u.status,
+          avatar: getDiceBearAvatar(u.full_name || u.name || u.username)
+        };
+        setProfile(normalizedProfile);
+        saveStoredProfile(normalizedProfile);
+      }
+    } catch (err) {
+      console.warn('Backend user profile API unavailable:', err);
+    }
+  };
+
+  // Fetch stock movement audit logs dynamically from backend MySQL database
+  const loadStockLogs = async () => {
+    try {
+      const res = await getStockLogs();
+      if (res && res.success && Array.isArray(res.data?.logs)) {
+        setStockLogs(res.data.logs);
+      }
+    } catch (err) {
+      console.warn('Backend stock logs API unavailable:', err);
     }
   };
 
@@ -150,6 +247,10 @@ export const InventoryProvider = ({ children }) => {
     };
 
     window.addEventListener('popstate', handlePopState);
+    loadProducts();
+    loadCategories();
+    loadProfile();
+    loadStockLogs();
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
@@ -186,98 +287,153 @@ export const InventoryProvider = ({ children }) => {
       id: `act-${Date.now()}`,
       productName,
       action,
-      user: profile.name || 'Alex Mercer',
-      userInitials: (profile.name || 'Alex Mercer').split(' ').map(n => n[0]).join(''),
-      userAvatar: profile.avatar,
+      user: profile.name || 'Saranga Wickramasingha',
+      userInitials: (profile.name || 'Saranga Wickramasingha').split(' ').map(n => n[0]).join(''),
+      userAvatar: getDiceBearAvatar(profile.name || 'Saranga Wickramasingha'),
       time: 'Just now',
       timestamp: new Date().toISOString()
     };
     setActivities(prev => [newLog, ...prev.slice(0, 19)]);
   };
 
-  const addProduct = (productData) => {
-    // Determine status automatically based on quantity
-    let status = 'In Stock';
-    const qty = Number(productData.quantity || 0);
-    const reorder = Number(productData.reorderPoint || 30);
-    if (qty === 0) status = 'Out of Stock';
-    else if (qty <= reorder) status = 'Low Stock';
+  const addProduct = async (productData) => {
+    const matchedCategory = (categories || []).find(c => (c.name || '').toLowerCase() === (productData.category || '').toLowerCase());
+    const category_id = matchedCategory ? matchedCategory.id : null;
 
-    const newProd = {
-      id: `prod-${Date.now()}`,
-      ...productData,
-      quantity: qty,
-      buyingPrice: Number(productData.buyingPrice || 0),
-      sellingPrice: Number(productData.sellingPrice || 0),
-      status,
-      isActive: productData.isActive !== false,
-      trackInventory: productData.trackInventory !== false,
-      image: productData.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80',
-      additionalImages: productData.additionalImages || []
+    const payload = {
+      sku: productData.sku,
+      name: productData.name,
+      category_id: category_id,
+      price: Number(productData.sellingPrice ?? productData.price ?? 0),
+      cost_price: Number(productData.buyingPrice ?? productData.cost_price ?? 0),
+      quantity: Number(productData.quantity || 0),
+      min_stock_alert: Number(productData.reorderPoint ?? productData.min_stock_alert ?? 5),
+      unit: productData.unit || 'pcs',
+      description: productData.description || '',
+      image_url: productData.image || productData.image_url || ''
     };
 
-    setProducts(prev => [newProd, ...prev]);
-    addActivityLog(newProd.name, 'Added');
-    showToast(`Product "${newProd.name}" added successfully!`);
-
-    // Update category count
-    setCategories(prev => prev.map(cat => {
-      if (cat.name.toLowerCase() === newProd.category.toLowerCase()) {
-        return { ...cat, productCount: cat.productCount + 1 };
+    try {
+      const res = await createProductApi(payload);
+      if (res && res.success) {
+        addActivityLog(productData.name, 'Added');
+        showToast(`Product "${productData.name}" added successfully!`);
+        await loadProducts();
+        await loadCategories();
+        setCurrentView('inventory');
+        return res;
+      } else {
+        showToast(res?.message || 'Failed to create product in database', 'error');
       }
-      return cat;
-    }));
-
-    setCurrentView('inventory');
-  };
-
-  const updateProduct = (id, updatedData) => {
-    setProducts(prev => prev.map(prod => {
-      if (prod.id === id) {
-        const qty = updatedData.quantity !== undefined ? Number(updatedData.quantity) : prod.quantity;
-        const reorder = updatedData.reorderPoint !== undefined ? Number(updatedData.reorderPoint) : (prod.reorderPoint || 30);
-        let status = 'In Stock';
-        if (qty === 0) status = 'Out of Stock';
-        else if (qty <= reorder) status = 'Low Stock';
-
-        const updated = {
-          ...prod,
-          ...updatedData,
-          quantity: qty,
-          buyingPrice: updatedData.buyingPrice !== undefined ? Number(updatedData.buyingPrice) : prod.buyingPrice,
-          sellingPrice: updatedData.sellingPrice !== undefined ? Number(updatedData.sellingPrice) : prod.sellingPrice,
-          status
-        };
-        addActivityLog(updated.name, 'Updated');
-        return updated;
-      }
-      return prod;
-    }));
-    showToast('Product details updated successfully!');
-    setCurrentView('inventory');
-  };
-
-  const deleteProduct = (id) => {
-    const target = products.find(p => p.id === id);
-    if (target) {
-      setProducts(prev => prev.filter(p => p.id !== id));
-      addActivityLog(target.name, 'Removed');
-      showToast(`Product "${target.name}" removed`, 'warning');
+    } catch (err) {
+      console.warn('API error, adding locally:', err);
+      const newProd = normalizeProduct({ id: Date.now(), ...payload, category: productData.category });
+      setProducts(prev => [newProd, ...prev]);
+      addActivityLog(productData.name, 'Added');
+      showToast(`Product "${productData.name}" added!`);
+      setCurrentView('inventory');
     }
   };
 
-  const addCategory = (categoryData) => {
-    const newCat = {
-      id: `cat-${Date.now()}`,
-      name: categoryData.name,
-      description: categoryData.description || 'Custom category hierarchy.',
-      productCount: 0,
-      icon: categoryData.icon || 'Folder',
-      color: categoryData.color || '#2563EB',
-      bgColor: '#EFF6FF'
+  const updateProduct = async (id, updatedData) => {
+    const matchedCategory = (categories || []).find(c => (c.name || '').toLowerCase() === (updatedData.category || '').toLowerCase());
+    const category_id = matchedCategory ? matchedCategory.id : null;
+
+    const payload = {
+      ...updatedData,
+      category_id: category_id || updatedData.category_id,
+      price: updatedData.sellingPrice !== undefined ? Number(updatedData.sellingPrice) : updatedData.price,
+      cost_price: updatedData.buyingPrice !== undefined ? Number(updatedData.buyingPrice) : updatedData.cost_price,
+      min_stock_alert: updatedData.reorderPoint !== undefined ? Number(updatedData.reorderPoint) : updatedData.min_stock_alert,
+      image_url: updatedData.image || updatedData.image_url
     };
-    setCategories(prev => [...prev, newCat]);
-    showToast(`Category "${newCat.name}" created!`);
+
+    try {
+      const res = await updateProductApi(id, payload);
+      if (res && res.success) {
+        addActivityLog(updatedData.name || 'Product', 'Updated');
+        showToast('Product updated successfully!');
+        await loadProducts();
+        await loadCategories();
+        setCurrentView('inventory');
+        return res;
+      } else {
+        showToast(res?.message || 'Failed to update product in database', 'error');
+      }
+    } catch (err) {
+      console.warn('API error, updating locally:', err);
+      setProducts(prev => prev.map(p => p.id === id ? normalizeProduct({ ...p, ...payload }) : p));
+      showToast('Product updated!');
+      setCurrentView('inventory');
+    }
+  };
+
+  const deleteProduct = async (id) => {
+    const target = products.find(p => p.id === id);
+    try {
+      const res = await deleteProductApi(id);
+      if (res && res.success) {
+        addActivityLog(target?.name || 'Item', 'Removed');
+        showToast(`Product "${target?.name || 'Item'}" removed`, 'warning');
+        await loadProducts();
+        await loadCategories();
+      } else {
+        showToast(res?.message || 'Failed to delete product', 'error');
+      }
+    } catch (err) {
+      console.warn('API error, deleting locally:', err);
+      setProducts(prev => prev.filter(p => p.id !== id));
+      addActivityLog(target?.name || 'Item', 'Removed');
+      showToast(`Product "${target?.name || 'Item'}" removed`, 'warning');
+    }
+  };
+
+  const addCategory = async (categoryData) => {
+    try {
+      const res = await createCategoryApi(categoryData);
+      if (res && res.success && res.data?.category) {
+        setCategories(prev => [...prev, res.data.category]);
+        await loadCategories();
+        showToast(`Category "${categoryData.name}" created successfully!`);
+        return res;
+      } else {
+        showToast(res?.message || 'Failed to create category in database.', 'error');
+        return res;
+      }
+    } catch (err) {
+      console.warn('Backend category API error, using fallback:', err);
+      const fallbackCat = {
+        id: `cat-${Date.now()}`,
+        name: categoryData.name,
+        description: categoryData.description || 'Custom category hierarchy.',
+        productCount: 0,
+        icon: categoryData.icon || 'Folder',
+        color: categoryData.color || '#2563EB',
+        bgColor: '#EFF6FF'
+      };
+      setCategories(prev => [...prev, fallbackCat]);
+      showToast(`Category "${fallbackCat.name}" created!`);
+    }
+  };
+
+  const deleteCategory = async (categoryId) => {
+    const target = categories.find(c => c.id === categoryId || c.name === categoryId);
+    const targetId = target?.id || categoryId;
+    try {
+      if (typeof targetId === 'number' || !isNaN(Number(targetId))) {
+        const res = await deleteCategoryApi(Number(targetId));
+        if (res && res.success) {
+          await loadCategories();
+          await loadProducts();
+          showToast(`Category "${target?.name || 'Category'}" deleted from database!`, 'warning');
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Error deleting category from backend API:', err);
+    }
+    setCategories(prev => prev.filter(c => c.id !== categoryId && c.name !== categoryId));
+    showToast(`Category "${target?.name || 'Category'}" deleted!`, 'warning');
   };
 
   const bulkImportProducts = (importedList) => {
@@ -292,9 +448,21 @@ export const InventoryProvider = ({ children }) => {
     setCurrentView('edit-product');
   };
 
-  const updateProfile = (newProfile) => {
-    setProfile(prev => ({ ...prev, ...newProfile }));
-    showToast('Profile settings updated successfully!');
+  const updateProfile = async (newProfile) => {
+    try {
+      const res = await updateProfileApi(newProfile);
+      if (res && res.success) {
+        await loadProfile();
+        showToast('Profile settings updated successfully!');
+        return res;
+      } else {
+        showToast(res?.message || 'Failed to update profile in database', 'error');
+      }
+    } catch (err) {
+      console.warn('API profile error, saving locally:', err);
+      setProfile(prev => ({ ...prev, ...newProfile }));
+      showToast('Profile settings updated!');
+    }
   };
 
   const [stockLogs, setStockLogs] = useState([]);
@@ -322,58 +490,59 @@ export const InventoryProvider = ({ children }) => {
       newQty = amount;
     }
 
-    const reorderPoint = Number(targetProduct.reorderPoint || 30);
-    let status = 'In Stock';
-    if (newQty === 0) status = 'Out of Stock';
-    else if (newQty <= reorderPoint) status = 'Low Stock';
+    newQty = Math.max(0, newQty);
 
-    // Update Product State
-    setProducts(prev => prev.map(prod => {
-      if (prod.id === productId) {
-        return { ...prod, quantity: newQty, status };
+    try {
+      try {
+        await createStockLog({
+          product_id: productId,
+          type: type,
+          quantity: amount,
+          notes: notes || `Stock ${type} adjustment for ${targetProduct.name}`
+        });
+      } catch (logErr) {
+        console.warn('Could not post stock log entry:', logErr);
       }
-      return prod;
-    }));
 
-    // Generate Stock Log Record
-    const qtyChangeStr = type === 'IN' ? `+${amount}` : type === 'OUT' ? `-${amount}` : `Set to ${amount}`;
-    const newLog = {
-      id: `log-${Date.now()}`,
-      productId: targetProduct.id,
-      productName: targetProduct.name,
-      sku: targetProduct.sku,
-      category: targetProduct.category,
-      type, // 'IN', 'OUT', 'ADJUSTMENT'
-      quantityChanged: qtyChangeStr,
-      previousQuantity: prevQty,
-      newQuantity: newQty,
-      notes: notes || (type === 'IN' ? 'Stock received' : type === 'OUT' ? 'Stock dispatched' : 'Stock level adjusted'),
-      user: profile.name || 'Alex Mercer',
-      userRole: profile.role || 'Staff',
-      userInitials: (profile.name || 'Alex Mercer').split(' ').map(n => n[0]).join(''),
-      userAvatar: profile.avatar,
-      time: 'Just now',
-      timestamp: new Date().toISOString()
-    };
+      const res = await updateProductApi(productId, {
+        quantity: newQty
+      });
 
-    setStockLogs(prev => [newLog, ...prev]);
+      if (res && res.success) {
+        await loadProducts();
+        await loadStockLogs();
 
-    // Also sync to general activity feed
-    addActivityLog(targetProduct.name, type === 'IN' ? 'Restocked' : type === 'OUT' ? 'Dispatched' : 'Adjusted');
+        const msg = type === 'IN'
+          ? `Stock IN logged for "${targetProduct.name}" (+${amount} pcs). New total: ${newQty}`
+          : type === 'OUT'
+          ? `Stock OUT logged for "${targetProduct.name}" (-${amount} pcs). New total: ${newQty}`
+          : `Stock level for "${targetProduct.name}" adjusted to ${newQty} pcs.`;
 
-    const msg = type === 'IN'
-      ? `Stock IN logged for "${targetProduct.name}" (+${amount} pcs). New total: ${newQty}`
-      : type === 'OUT'
-      ? `Stock OUT logged for "${targetProduct.name}" (-${amount} pcs). New total: ${newQty}`
-      : `Stock level for "${targetProduct.name}" adjusted to ${newQty} pcs.`;
+        showToast(msg, type === 'OUT' && newQty === 0 ? 'warning' : 'success');
+        addActivityLog(targetProduct.name, type === 'IN' ? 'Restocked' : type === 'OUT' ? 'Dispatched' : 'Adjusted');
 
-    showToast(msg, type === 'OUT' && newQty === 0 ? 'warning' : 'success');
-
-    return { success: true, newQty };
+        return { success: true, newQty };
+      } else {
+        showToast(res?.message || 'Failed to update stock quantity', 'error');
+        return { success: false, message: res?.message || 'Failed to update stock in database' };
+      }
+    } catch (err) {
+      console.warn('API adjustment error, updating locally:', err);
+      setProducts(prev => prev.map(p => p.id === productId ? { ...p, quantity: newQty } : p));
+      showToast(`Stock updated to ${newQty} pcs`);
+      return { success: true, newQty };
+    }
   };
 
   const markNotificationRead = (id) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const updateThresholdSettings = (newSettings) => {
+    const updated = { ...thresholdSettings, ...newSettings };
+    setThresholdSettings(updated);
+    saveStoredThresholdSettings(updated);
+    showToast('Low-stock threshold settings updated successfully!');
   };
 
   return (
@@ -387,8 +556,15 @@ export const InventoryProvider = ({ children }) => {
       stockLogs,
       notifications,
       profile,
+      thresholdSettings,
+      updateThresholdSettings,
       currentView,
       setCurrentView,
+      previousView,
+      closeAuthModal,
+      authMode,
+      setAuthMode,
+      navigateToAuth,
       editingProductId,
       setEditingProductId,
       viewingProductId,
@@ -404,6 +580,7 @@ export const InventoryProvider = ({ children }) => {
       deleteProduct,
       adjustStock,
       addCategory,
+      deleteCategory,
       bulkImportProducts,
       navigateToEdit,
       updateProfile,

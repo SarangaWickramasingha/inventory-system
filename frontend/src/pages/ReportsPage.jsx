@@ -6,7 +6,6 @@ import { StockMovementChart } from '../components/reports/StockMovementChart';
 import { CategoryChart } from '../components/dashboard/CategoryChart';
 import { ValuationTable } from '../components/reports/ValuationTable';
 import { StockMovementTimeline } from '../components/reports/StockMovementTimeline';
-import { LowStockAlerts } from '../components/reports/LowStockAlerts';
 import { useInventory } from '../context/InventoryContext';
 import { exportToCSV } from '../utils/exportUtils';
 import { Download, FileText, Printer, FileSpreadsheet, RefreshCw, BarChart2, Layers } from 'lucide-react';
@@ -80,9 +79,6 @@ export const ReportsPage = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="flex items-center gap-2">
-                <span className="p-2 bg-blue-100 text-blue-700 rounded-xl font-bold text-xs uppercase tracking-wider print:hidden">
-                  Page 10
-                </span>
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                   Reports & Analytics Center
                 </h1>
@@ -169,12 +165,6 @@ export const ReportsPage = () => {
               <StockMovementTimeline />
             </div>
           )}
-
-          {/* Low Stock Alerts Section */}
-          <div className="space-y-4">
-            <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Replenishment & Warning Queue</h3>
-            <LowStockAlerts />
-          </div>
         </main>
       </div>
     </div>

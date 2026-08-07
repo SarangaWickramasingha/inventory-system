@@ -3,19 +3,21 @@ import { Eye, Edit3, Trash2, ChevronLeft, ChevronRight, Sliders } from 'lucide-r
 import { useInventory } from '../../context/InventoryContext';
 import { StatusBadge } from '../common/Badge';
 import { StockAdjustModal } from './StockAdjustModal';
+import { ConfirmModal } from '../common/ConfirmModal';
 
-const getProductStatus = (prod) => {
+const getProductStatus = (prod, defaultThreshold = 30) => {
   const qty = Number(prod.quantity ?? 0);
-  const reorder = Number(prod.reorderPoint ?? 30);
+  const reorder = Number(prod.reorderPoint ?? prod.min_stock_alert ?? defaultThreshold);
   if (qty === 0) return 'Out of Stock';
   if (qty <= reorder) return 'Low Stock';
-  return prod.status || 'In Stock';
+  return 'In Stock';
 };
 
 export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdjust }) => {
-  const { deleteProduct } = useInventory();
+  const { deleteProduct, thresholdSettings } = useInventory();
   const [currentPage, setCurrentPage] = useState(1);
   const [adjustingProduct, setAdjustingProduct] = useState(null);
+  const [deletingProduct, setDeletingProduct] = useState(null);
   const itemsPerPage = 6;
 
   const totalPages = Math.ceil(products.length / itemsPerPage) || 1;
@@ -69,13 +71,13 @@ export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdj
                     {prod.quantity ?? 0}
                   </td>
                   <td className="py-3 px-4 text-right font-medium text-slate-600">
-                    ${Number(prod.buyingPrice ?? prod.cost_price ?? 0).toFixed(2)}
+                    Rs. {Number(prod.buyingPrice ?? prod.cost_price ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="py-3 px-4 text-right font-bold text-slate-900">
-                    ${Number(prod.sellingPrice ?? prod.price ?? 0).toFixed(2)}
+                    Rs. {Number(prod.sellingPrice ?? prod.price ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <StatusBadge status={getProductStatus(prod)} />
+                    <StatusBadge status={getProductStatus(prod, thresholdSettings?.defaultThreshold)} />
                   </td>
                   <td className="py-3 px-4 text-center">
                     <div className="flex items-center justify-center gap-1 text-slate-400">
@@ -101,11 +103,7 @@ export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdj
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (window.confirm(`Are you sure you want to delete "${prod.name}"?`)) {
-                            deleteProduct(prod.id);
-                          }
-                        }}
+                        onClick={() => setDeletingProduct(prod)}
                         className="p-1.5 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                         title="Delete Product"
                       >
@@ -166,6 +164,20 @@ export const ProductTable = ({ products, onSelectView, onSelectEdit, onSelectAdj
         isOpen={Boolean(adjustingProduct)}
         onClose={() => setAdjustingProduct(null)}
         product={adjustingProduct}
+      />
+
+      {/* Unified System Product Delete Confirm Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deletingProduct)}
+        onClose={() => setDeletingProduct(null)}
+        onConfirm={() => {
+          if (deletingProduct) {
+            deleteProduct(deletingProduct.id);
+          }
+        }}
+        title="Delete Product"
+        message={`Are you sure you want to delete product "${deletingProduct?.name}"?`}
+        confirmText="Delete Product"
       />
     </div>
   );

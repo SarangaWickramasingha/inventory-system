@@ -23,6 +23,7 @@ import { Header } from '../components/common/Header';
 import { Sidebar } from '../components/common/Sidebar';
 import { StockAdjustModal } from '../components/inventory/StockAdjustModal';
 import { useInventory } from '../context/InventoryContext';
+import { getDiceBearAvatar } from '../utils/avatar';
 
 /**
  * StaffActivityPage Component (Page 9: Staff & Admin Activity Portal)
@@ -47,7 +48,7 @@ export const StaffActivityPage = () => {
           previousQuantity: act.previousQuantity || 0,
           newQuantity: act.newQuantity || 0,
           notes: act.notes || `${act.action} product record`,
-          user: act.user || 'Alex Mercer',
+          user: act.user || 'Saranga Wickramasingha',
           userRole: act.userRole || 'Staff',
           userAvatar: act.userAvatar || profile.avatar,
           userInitials: act.userInitials || 'AM',
@@ -394,17 +395,11 @@ export const StaffActivityPage = () => {
                           {/* User */}
                           <td className="py-4 px-6 whitespace-nowrap">
                             <div className="flex items-center gap-2.5">
-                              {log.userAvatar ? (
-                                <img
-                                  src={log.userAvatar}
-                                  alt={log.user}
-                                  className="w-7 h-7 rounded-full object-cover border border-slate-200"
-                                />
-                              ) : (
-                                <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-extrabold text-xs flex items-center justify-center">
-                                  {log.userInitials || 'SM'}
-                                </div>
-                              )}
+                              <img
+                                src={getDiceBearAvatar(log.user || 'Staff User')}
+                                alt={log.user}
+                                className="w-7 h-7 rounded-full object-cover border border-slate-200 bg-slate-100"
+                              />
                               <div>
                                 <p className="font-bold text-slate-800 leading-tight">{log.user}</p>
                                 <span className="text-[10px] font-medium text-slate-400">{log.userRole || 'Staff'}</span>

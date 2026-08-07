@@ -52,11 +52,11 @@ export const ProductViewModal = ({ productId, isOpen, onClose }) => {
               </div>
               <div>
                 <span className="text-xs text-slate-400 font-semibold uppercase">Buying Price</span>
-                <p className="font-bold text-slate-700">${Number(product.buyingPrice ?? product.cost_price ?? 0).toFixed(2)}</p>
+                <p className="font-bold text-slate-700">Rs. {Number(product.buyingPrice ?? product.cost_price ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div>
                 <span className="text-xs text-slate-400 font-semibold uppercase">Selling Price</span>
-                <p className="font-bold text-blue-600">${Number(product.sellingPrice ?? product.price ?? 0).toFixed(2)}</p>
+                <p className="font-bold text-blue-600">Rs. {Number(product.sellingPrice ?? product.price ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div>
                 <span className="text-xs text-slate-400 font-semibold uppercase">Current Stock</span>

@@ -15,6 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+// Serve static assets (uploaded images, files) directly if requested file exists on disk
+$requestedPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$fileOnDisk = __DIR__ . $requestedPath;
+if ($requestedPath !== '/' && file_exists($fileOnDisk) && !is_dir($fileOnDisk)) {
+    return false;
+}
+
 // 2. PSR-4 Autoloader Implementation
 spl_autoload_register(function ($class) {
     $prefix = 'StockFlow\\Backend\\';
@@ -91,6 +98,7 @@ $roleMiddleware = new RoleMiddleware();
 
 $controllers = [
     'ProductController' => new ProductController($productRepo, $authMiddleware),
+    'CategoryController' => new \StockFlow\Backend\Controllers\CategoryController($db, $authMiddleware),
     'UserController' => new UserController($userService, $authMiddleware, $roleMiddleware),
     'AuthController' => new AuthController($authService, $userService, $authMiddleware),
     'DashboardController' => new DashboardController($db, $authMiddleware),

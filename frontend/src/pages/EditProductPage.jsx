@@ -3,6 +3,7 @@ import { Header } from '../components/common/Header';
 import { Sidebar } from '../components/common/Sidebar';
 import { useInventory } from '../context/InventoryContext';
 import { Trash2, Save, Plus, ChevronRight } from 'lucide-react';
+import { ConfirmModal } from '../components/common/ConfirmModal';
 
 export const EditProductPage = () => {
   const { products, categories, editingProductId, updateProduct, deleteProduct, setCurrentView } = useInventory();
@@ -22,6 +23,7 @@ export const EditProductPage = () => {
   const [additionalImages, setAdditionalImages] = useState([]);
   const [isActive, setIsActive] = useState(true);
   const [trackInventory, setTrackInventory] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (product) {
@@ -72,10 +74,7 @@ export const EditProductPage = () => {
   };
 
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete SKU "${sku}"?`)) {
-      deleteProduct(product.id);
-      setCurrentView('inventory');
-    }
+    setShowDeleteConfirm(true);
   };
 
   const handleAddGalleryImage = () => {
@@ -204,7 +203,7 @@ export const EditProductPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
-                      Regular Price ($)
+                      Selling Price (LKR / Rs.)
                     </label>
                     <input
                       type="number"
@@ -217,7 +216,7 @@ export const EditProductPage = () => {
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
-                      Cost Price ($)
+                      Buying Price (LKR / Rs.)
                     </label>
                     <input
                       type="number"
@@ -260,8 +259,9 @@ export const EditProductPage = () => {
                     </label>
                     <input
                       type="number"
+                      min="0"
                       value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
+                      onChange={(e) => setQuantity(Math.max(0, Number(e.target.value) || 0))}
                       className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white"
                     />
                   </div>
@@ -281,8 +281,56 @@ export const EditProductPage = () => {
                   <span className="block text-xs font-bold text-slate-700 uppercase mb-2">
                     Primary Image
                   </span>
-                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 flex items-center justify-center bg-slate-50/50">
-                    <img src={image} alt="Primary" className="w-full h-48 object-contain rounded-lg" />
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center bg-slate-50/50 relative">
+                    {image ? (
+                      <div className="flex flex-col items-center w-full">
+                        <div className="relative w-full mb-3 flex items-center justify-center">
+                          <img src={image} alt="Primary" className="w-full h-48 object-contain rounded-lg" />
+                          <button
+                            type="button"
+                            onClick={() => setImage('')}
+                            className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-full shadow-lg transition-all transform hover:scale-110 flex items-center justify-center"
+                            title="Delete Photo"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newUrl = prompt('Enter new image URL:', image);
+                              if (newUrl !== null) setImage(newUrl);
+                            }}
+                            className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition-colors"
+                          >
+                            Replace Image URL
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setImage('')}
+                            className="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Delete Photo
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-6 text-center">
+                        <p className="text-xs font-bold text-slate-500 mb-3">No primary image selected</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newUrl = prompt('Enter image URL:');
+                            if (newUrl) setImage(newUrl);
+                          }}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
+                        >
+                          Add Image URL
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -355,6 +403,19 @@ export const EditProductPage = () => {
           </div>
         </main>
       </div>
+
+      {/* Unified System Delete Confirm Modal */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          deleteProduct(product.id);
+          setCurrentView('inventory');
+        }}
+        title="Delete Product SKU"
+        message={`Are you sure you want to delete SKU "${sku}" (${name})?`}
+        confirmText="Delete Product"
+      />
     </div>
   );
 };

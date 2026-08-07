@@ -3,77 +3,48 @@ import { useInventory } from '../../context/InventoryContext';
 import { ArrowUpRight, ArrowDownRight, RefreshCcw, History, Filter, User, Calendar } from 'lucide-react';
 
 export const StockMovementTimeline = () => {
-  const { activities } = useInventory();
+  const { stockLogs, activities } = useInventory();
   const [movementFilter, setMovementFilter] = useState('ALL'); // 'ALL', 'IN', 'OUT', 'ADJUSTMENT'
 
-  // Synthetic enhancement of activities if list is short
-  const sampleMovements = [
-    {
-      id: 'mov-1',
-      type: 'IN',
-      productName: 'Ergonomic Executive Chair',
-      sku: 'SKU-5042',
-      qtyChange: '+45 units',
-      user: 'Sarah Jenkins',
-      role: 'Inventory Specialist',
-      time: '10 minutes ago',
-      date: '2026-07-31 20:15',
-      note: 'Supplier PO #9401 Restock'
-    },
-    {
-      id: 'mov-2',
-      type: 'OUT',
-      productName: 'Ultra-Wide Curved Monitor 34"',
-      sku: 'SKU-1002',
-      qtyChange: '-5 units',
-      user: 'Alex Mercer',
-      role: 'Store Admin',
-      time: '1 hour ago',
-      date: '2026-07-31 19:20',
-      note: 'Sales Order SO-883 Fulfillment'
-    },
-    {
-      id: 'mov-3',
-      type: 'ADJUSTMENT',
-      productName: 'Mechanical RGB Keyboard',
-      sku: 'SKU-3011',
-      qtyChange: '-2 units',
-      user: 'System Audit',
-      role: 'Automated Inspector',
-      time: '3 hours ago',
-      date: '2026-07-31 17:00',
-      note: 'Damaged item audit write-off'
-    },
-    {
-      id: 'mov-4',
-      type: 'IN',
-      productName: 'Wireless Noise-Canceling Headphones',
-      sku: 'SKU-1001',
-      qtyChange: '+100 units',
-      user: 'Michael Chang',
-      role: 'Warehouse Staff',
-      time: 'Yesterday',
-      date: '2026-07-30 14:10',
-      note: 'Bulk shipment check-in'
+  // Map real backend MySQL stock_logs array
+  const backendLogs = (stockLogs || []).map((l) => {
+    const rawVal = Math.abs(Number(l.rawQuantityChanged ?? l.quantityChanged ?? l.quantity_changed ?? l.quantity ?? 0));
+    const logType = (l.type || 'IN').toUpperCase();
+    
+    let qtyDisplay = `${rawVal} units`;
+    if (logType === 'IN') {
+      qtyDisplay = `+${rawVal} units`;
+    } else if (logType === 'OUT') {
+      qtyDisplay = `-${rawVal} units`;
+    } else {
+      qtyDisplay = `Adjusted (${l.previousQuantity ?? 0} → ${l.newQuantity ?? rawVal})`;
     }
-  ];
 
-  // Combine real activity logs with audit entries
-  const allLogs = [
-    ...activities.map((act, i) => ({
-      id: act.id || `act-${i}`,
-      type: act.action === 'Added' ? 'IN' : act.action === 'Removed' ? 'OUT' : 'ADJUSTMENT',
-      productName: act.productName || 'Inventory Item',
-      sku: `SKU-${1000 + (i % 20)}`,
-      qtyChange: act.action === 'Added' ? '+25 units' : act.action === 'Removed' ? '-10 units' : 'Updated',
-      user: act.user || 'System User',
-      role: 'Staff Member',
-      time: act.time || 'Recently',
-      date: new Date().toLocaleDateString(),
-      note: `Action performed: ${act.action}`
-    })),
-    ...sampleMovements
-  ];
+    return {
+      id: l.id ? `backend-${l.id}` : Math.random().toString(),
+      type: logType,
+      productName: l.productName || l.product_name || 'Inventory Item',
+      sku: l.sku || 'N/A',
+      qtyChange: qtyDisplay,
+      user: l.user || l.user_name || 'System Administrator',
+      role: l.userRole ? (l.userRole || '').toUpperCase() : 'STAFF',
+      time: l.createdAt || l.created_at || 'Recently',
+      note: l.notes || `Stock ${logType} movement recorded`
+    };
+  });
+
+  // Fallback to activities if backend logs are empty
+  const allLogs = backendLogs.length > 0 ? backendLogs : activities.map((act, i) => ({
+    id: act.id || `act-${i}`,
+    type: act.action === 'Added' ? 'IN' : act.action === 'Removed' ? 'OUT' : 'ADJUSTMENT',
+    productName: act.productName || 'Inventory Item',
+    sku: `SKU-${1000 + (i % 20)}`,
+    qtyChange: act.action === 'Added' ? '+25 units' : act.action === 'Removed' ? '-10 units' : 'Updated',
+    user: act.user || 'System Administrator',
+    role: 'ADMIN',
+    time: act.time || 'Recently',
+    note: `Action performed: ${act.action}`
+  }));
 
   const filteredLogs = allLogs.filter(log => {
     if (movementFilter === 'ALL') return true;
