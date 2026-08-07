@@ -143,8 +143,8 @@ class ProductRepository implements ProductRepositoryInterface
     public function save(Product $product): bool
     {
         $sql = "
-            INSERT INTO products (sku, name, category_id, price, cost_price, quantity, min_stock_alert, unit, description, status)
-            VALUES (:sku, :name, :category_id, :price, :cost_price, :quantity, :min_stock_alert, :unit, :description, :status)
+            INSERT INTO products (sku, name, category_id, price, cost_price, quantity, min_stock_alert, unit, description, image_url, status)
+            VALUES (:sku, :name, :category_id, :price, :cost_price, :quantity, :min_stock_alert, :unit, :description, :image_url, :status)
         ";
 
         $stmt = $this->db->prepare($sql);
@@ -158,6 +158,7 @@ class ProductRepository implements ProductRepositoryInterface
             'min_stock_alert' => $product->getMinStockAlert(),
             'unit' => $product->getUnit(),
             'description' => $product->getDescription(),
+            'image_url' => $product->getImageUrl(),
             'status' => $product->getStatus(),
         ]);
     }
@@ -175,6 +176,7 @@ class ProductRepository implements ProductRepositoryInterface
                 min_stock_alert = :min_stock_alert,
                 unit = :unit,
                 description = :description,
+                image_url = :image_url,
                 status = :status
             WHERE id = :id AND deleted_at IS NULL
         ";
@@ -191,6 +193,7 @@ class ProductRepository implements ProductRepositoryInterface
             'min_stock_alert' => $product->getMinStockAlert(),
             'unit' => $product->getUnit(),
             'description' => $product->getDescription(),
+            'image_url' => $product->getImageUrl(),
             'status' => $product->getStatus(),
         ]);
     }
