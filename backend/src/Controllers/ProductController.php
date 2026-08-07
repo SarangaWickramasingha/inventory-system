@@ -107,6 +107,7 @@ class ProductController
         if (isset($data['sellingPrice']) && !isset($data['price'])) $data['price'] = $data['sellingPrice'];
         if (isset($data['buyingPrice']) && !isset($data['cost_price'])) $data['cost_price'] = $data['buyingPrice'];
         if (isset($data['reorderPoint']) && !isset($data['min_stock_alert'])) $data['min_stock_alert'] = $data['reorderPoint'];
+        if (isset($data['image']) && !isset($data['image_url'])) $data['image_url'] = $data['image'];
 
         $qty = max(0, (int)($data['quantity'] ?? 0));
         $alert = (int)($data['min_stock_alert'] ?? 5);
@@ -152,6 +153,7 @@ class ProductController
         if (isset($data['sellingPrice']) && !isset($data['price'])) $data['price'] = $data['sellingPrice'];
         if (isset($data['buyingPrice']) && !isset($data['cost_price'])) $data['cost_price'] = $data['buyingPrice'];
         if (isset($data['reorderPoint']) && !isset($data['min_stock_alert'])) $data['min_stock_alert'] = $data['reorderPoint'];
+        if (isset($data['image']) && !isset($data['image_url'])) $data['image_url'] = $data['image'];
 
         $mergedData = array_merge($existing->toArray(), $data, ['id' => $id]);
 

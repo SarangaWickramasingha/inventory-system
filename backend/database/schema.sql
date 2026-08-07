@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS products (
     min_stock_alert INT NOT NULL DEFAULT 5,
     unit VARCHAR(20) DEFAULT 'pcs',
     description TEXT NULL,
-    image_url VARCHAR(255) NULL,
+    image_url LONGTEXT NULL,
     status ENUM('in_stock', 'low_stock', 'out_of_stock') DEFAULT 'in_stock',
     deleted_at TIMESTAMP NULL DEFAULT NULL, -- Soft Delete
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

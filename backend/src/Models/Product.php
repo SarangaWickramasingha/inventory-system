@@ -141,6 +141,11 @@ class Product implements JsonSerializable
         return $this->description;
     }
 
+    public function getImageUrl(): ?string
+    {
+        return $this->imageUrl;
+    }
+
     public function getStatus(): string
     {
         return $this->status;
@@ -212,6 +217,11 @@ class Product implements JsonSerializable
     public function setDescription(?string $description): void
     {
         $this->description = $description;
+    }
+
+    public function setImageUrl(?string $imageUrl): void
+    {
+        $this->imageUrl = $imageUrl;
     }
 
     public function setStatus(string $status): void

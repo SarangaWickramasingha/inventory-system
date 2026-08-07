@@ -8,7 +8,7 @@ export const AddProductPage = () => {
   const { products, categories, addProduct, setCurrentView } = useInventory();
 
   const [name, setName] = useState('');
-  const [sku, setSku] = useState('FUR-CH-001'); // Default prepopulated matching Screenshot 2 for demonstrative error callout
+  const [sku, setSku] = useState('');
   const [category, setCategory] = useState('Furniture');
   const [supplier, setSupplier] = useState('');
   const [quantity, setQuantity] = useState(0);
