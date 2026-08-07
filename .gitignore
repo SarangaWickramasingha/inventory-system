@@ -1,3 +1,7 @@
 node_modules
 dist
 project_ui/
+.env
+.env.*
+!.env.example
+.env.local
