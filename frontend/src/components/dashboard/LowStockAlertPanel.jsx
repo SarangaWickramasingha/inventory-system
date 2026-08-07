@@ -3,17 +3,35 @@ import { AlertTriangle, AlertCircle, ArrowRight, RefreshCw, CheckCircle2, Shield
 import { useInventory } from '../../context/InventoryContext';
 
 export const LowStockAlertPanel = () => {
-  const { products, setCurrentView, setSelectedCategoryFilter, setEditingProductId } = useInventory();
+  const { products, thresholdSettings, setCurrentView, setSelectedCategoryFilter, setEditingProductId } = useInventory();
   const [filter, setFilter] = useState('all'); // 'all', 'low', 'out'
 
+  const defaultLimit = Number(thresholdSettings?.defaultThreshold) || 30;
+  const criticalLimit = Number(thresholdSettings?.criticalThreshold) || 5;
+  const enableAlerts = thresholdSettings?.enableDashboardAlerts !== false;
+
+  if (!enableAlerts) {
+    return null;
+  }
+
   // Filter low stock and out of stock items
-  const lowStockItems = products.filter(p => p.status === 'Low Stock');
-  const outOfStockItems = products.filter(p => p.status === 'Out of Stock');
+  const lowStockItems = (products || []).filter(p => {
+    const qty = Number(p.quantity || 0);
+    const limit = p.min_stock_alert ?? p.reorderPoint ?? defaultLimit;
+    return qty > 0 && qty <= limit;
+  });
+
+  const outOfStockItems = (products || []).filter(p => Number(p.quantity || 0) <= 0);
   
-  const alertItems = products.filter(p => {
-    if (filter === 'low') return p.status === 'Low Stock';
-    if (filter === 'out') return p.status === 'Out of Stock';
-    return p.status === 'Low Stock' || p.status === 'Out of Stock' || (p.quantity <= (p.reorderPoint || 30));
+  const alertItems = (products || []).filter(p => {
+    const qty = Number(p.quantity || 0);
+    const limit = p.min_stock_alert ?? p.reorderPoint ?? defaultLimit;
+    const isOut = qty <= 0;
+    const isLow = qty > 0 && qty <= limit;
+
+    if (filter === 'low') return isLow;
+    if (filter === 'out') return isOut;
+    return isLow || isOut;
   });
 
   const handleRestock = (product) => {
@@ -42,7 +60,7 @@ export const LowStockAlertPanel = () => {
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Items requiring immediate inventory replenishment or supplier reorder.
+              Items at or below warning threshold ({defaultLimit} units) requiring replenishment.
             </p>
           </div>
         </div>
@@ -85,14 +103,16 @@ export const LowStockAlertPanel = () => {
             </div>
             <h4 className="text-sm font-bold text-slate-800">All Stock Levels Optimal</h4>
             <p className="text-xs text-slate-400 max-w-xs mt-1">
-              No products are currently under critical warning thresholds. Great job!
+              No products are currently under the configured threshold ({defaultLimit} units). Great job!
             </p>
           </div>
         ) : (
           alertItems.map((item) => {
-            const reorderPoint = item.reorderPoint || 30;
-            const percentage = Math.min(100, Math.round((item.quantity / (reorderPoint * 2)) * 100));
-            const isOut = item.quantity === 0 || item.status === 'Out of Stock';
+            const reorderPoint = item.min_stock_alert ?? item.reorderPoint ?? defaultLimit;
+            const qty = Number(item.quantity || 0);
+            const percentage = Math.min(100, Math.round((qty / (reorderPoint * 2)) * 100));
+            const isOut = qty <= 0;
+            const isCritical = qty > 0 && qty <= criticalLimit;
 
             return (
               <div
@@ -102,7 +122,7 @@ export const LowStockAlertPanel = () => {
                 {/* Product Info */}
                 <div className="flex items-center gap-3.5 min-w-0">
                   <img
-                    src={item.image}
+                    src={item.image || item.image_url}
                     alt={item.name}
                     className="w-10 h-10 rounded-xl object-cover border border-slate-200 shrink-0"
                   />
@@ -114,7 +134,7 @@ export const LowStockAlertPanel = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1">
-                      <span>Category: <strong className="text-slate-700 font-semibold">{item.category}</strong></span>
+                      <span>Category: <strong className="text-slate-700 font-semibold">{item.category || item.category_name}</strong></span>
                       <span>•</span>
                       <span>Reorder Level: <strong className="text-slate-700 font-semibold">{reorderPoint} units</strong></span>
                     </div>
@@ -125,15 +145,15 @@ export const LowStockAlertPanel = () => {
                 <div className="flex items-center gap-4 shrink-0">
                   <div className="text-right hidden sm:block w-32">
                     <div className="flex items-center justify-end gap-1.5 text-xs font-bold">
-                      <span className={isOut ? 'text-rose-600 font-extrabold' : 'text-amber-600 font-extrabold'}>
-                        {item.quantity} left
+                      <span className={isOut || isCritical ? 'text-rose-600 font-extrabold' : 'text-amber-600 font-extrabold'}>
+                        {qty} left
                       </span>
                     </div>
                     {/* Progress Bar */}
                     <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1.5">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
-                          isOut ? 'bg-rose-500' : 'bg-amber-500'
+                          isOut || isCritical ? 'bg-rose-500' : 'bg-amber-500'
                         }`}
                         style={{ width: `${Math.max(5, percentage)}%` }}
                       ></div>
@@ -145,6 +165,8 @@ export const LowStockAlertPanel = () => {
                     className={`inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-lg ${
                       isOut
                         ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                        : isCritical
+                        ? 'bg-rose-50 text-rose-700 border border-rose-300'
                         : 'bg-amber-100 text-amber-800 border border-amber-200'
                     }`}
                   >
@@ -153,7 +175,7 @@ export const LowStockAlertPanel = () => {
                     ) : (
                       <AlertTriangle className="w-3.5 h-3.5" />
                     )}
-                    {isOut ? 'Out of Stock' : 'Low Stock'}
+                    {isOut ? 'Out of Stock' : isCritical ? `Critical (≤ ${criticalLimit})` : 'Low Stock'}
                   </span>
 
                   {/* Quick Action */}

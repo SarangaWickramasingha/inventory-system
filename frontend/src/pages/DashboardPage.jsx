@@ -14,16 +14,28 @@ import { exportToCSV } from '../utils/exportUtils';
 import { Download, Plus, Zap, UserCheck, Shield, ClipboardList, ArrowUpRight, AlertCircle, RefreshCw, Layers } from 'lucide-react';
 
 export const DashboardPage = () => {
-  const { products, categories, activities, setCurrentView, setSelectedCategoryFilter } = useInventory();
-  const { user, setUser } = useAuth();
+  const { products, categories, activities, thresholdSettings, setCurrentView, setSelectedCategoryFilter } = useInventory();
+  const { user } = useAuth();
 
   // Active Role state: from authenticated user context
   const currentRole = user?.role || 'staff';
 
+  const defaultLimit = Number(thresholdSettings?.defaultThreshold) || 30;
+  const criticalLimit = Number(thresholdSettings?.criticalThreshold) || 5;
+  const enableAlerts = thresholdSettings?.enableDashboardAlerts !== false;
+
   // KPI Computations
   const totalProducts = (products || []).length;
-  const lowStockCount = (products || []).filter(p => p?.status === 'Low Stock' || p?.status === 'low_stock').length;
-  const outOfStockCount = (products || []).filter(p => p?.status === 'Out of Stock' || p?.status === 'out_of_stock').length;
+  const lowStockCount = (products || []).filter(p => {
+    const qty = Number(p?.quantity || 0);
+    const limit = p?.min_stock_alert ?? p?.reorderPoint ?? defaultLimit;
+    return qty > 0 && qty <= limit;
+  }).length;
+  const criticalCount = (products || []).filter(p => {
+    const qty = Number(p?.quantity || 0);
+    return qty > 0 && qty <= criticalLimit;
+  }).length;
+  const outOfStockCount = (products || []).filter(p => Number(p?.quantity || 0) <= 0).length;
   
   // Total Valuation calculation: sum of (buyingPrice * quantity)
   const totalValuation = (products || []).reduce(
@@ -113,6 +125,35 @@ export const DashboardPage = () => {
               )}
             </div>
           </div>
+
+          {/* Urgent Critical Warning Banner (Controlled by Dashboard Warning Banners Setting) */}
+          {enableAlerts && criticalCount > 0 && (
+            <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-rose-500 text-white rounded-xl shadow-xs">
+                  <AlertCircle className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-rose-900">
+                    Urgent Warning: {criticalCount} Item(s) At or Below Critical Level (≤ {criticalLimit} units)
+                  </h4>
+                  <p className="text-xs font-medium text-rose-700 mt-0.5">
+                    Stock dips detected under configured warning thresholds. Immediate replenishment required.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedCategoryFilter('All Categories');
+                  setCurrentView('inventory');
+                }}
+                className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors shrink-0 flex items-center gap-1.5"
+              >
+                <span>View Inventory</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
 
           {/* Role-Differentiated KPI Overview Cards */}
           {currentRole === 'admin' ? (
